@@ -1,0 +1,5 @@
+{
+    "require": {
+        "j5ik2o/event-store-adapter-php": "^1.0"
+    }
+}
