@@ -1,5 +1,52 @@
 {
+    "name": "akinoriakatsuka/event-store-adapter-php",
+    "description": "A example application for CQRS/Event Sourcing.",
+    "license": "MIT",
+    "type": "application",
+    "authors": [
+        {
+            "name": "Akinori Akatsuka",
+            "email": "akinoriakatsuka@gmail.com"
+        },
+        {
+            "name": "Junichi Kato",
+            "email": "j5ik2o@gmail.com"
+        }
+    ],
     "require": {
+        "php": ">= 8.1",
+        "aws/aws-sdk-php": "^3.283",
         "j5ik2o/event-store-adapter-php": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Akinoriakatsuka\\CqrsEsExamplePhp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Akinoriakatsuka\\CqrsEsExamplePhp\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "robinvdvleuten/ulid": "^5.0",
+        "phpunit/phpunit": "^10.0",
+        "friendsofphp/php-cs-fixer": "^3.35",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "phpstan/extension-installer": "^1.0"
+    },
+    "scripts": {
+        "test": "phpunit --testdox tests",
+        "cs": "php-cs-fixer fix --dry-run",
+        "cs:fix": "php-cs-fixer fix",
+        "fmt": "composer run cs:fix",
+        "lint": "composer run cs && composer run phpstan",
+        "phpstan": "phpstan analyse --memory-limit=512M"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
     }
 }
