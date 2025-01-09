@@ -1,5 +1,6 @@
 {
     "name": "akinoriakatsuka/event-store-adapter-php",
+    "description": "A example application for CQRS/Event Sourcing.",
     "license": "MIT",
     "type": "application",
     "authors": [
