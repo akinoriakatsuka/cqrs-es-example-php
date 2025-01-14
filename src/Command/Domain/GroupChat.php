@@ -20,6 +20,30 @@ class GroupChat implements Aggregate {
         $this->version = $version;
     }
 
+    /**
+     * @param GroupChatId $id
+     * @param string $name
+     * @return array{0: GroupChat, 1: GroupChatCreated}
+     */
+    public static function create(
+        GroupChatId $id,
+        int $sequenceNumber,
+        string $name,
+        int $version
+    ): array {
+        $aggregate = new GroupChat(
+            $id,
+            $sequenceNumber,
+            $name,
+            $version
+        );
+        $event = GroupChatEventFactory::ofCreated(
+            $id,
+            $name
+        );
+        return [$aggregate, $event];
+    }
+
     public function getName(): string {
         return $this->name;
     }
