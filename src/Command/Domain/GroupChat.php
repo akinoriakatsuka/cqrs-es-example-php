@@ -8,37 +8,57 @@ use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChatEventFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 
-class GroupChat implements Aggregate {
+class GroupChat implements Aggregate
+{
     private readonly GroupChatId $id;
+    private readonly GroupChatName $name;
+    private readonly Members $members;
+    private readonly Messages $messages;
     private readonly int $sequenceNumber;
-    private readonly string $name;
     private readonly int $version;
 
-    public function __construct(GroupChatId $id, int $sequenceNumber, string $name, int $version) {
+    public function __construct(
+        GroupChatId $id,
+        GroupChatName $name,
+        Members $members,
+        Messages $messages,
+        int $sequenceNumber,
+        int $version
+    ) {
         $this->id = $id;
-        $this->sequenceNumber = $sequenceNumber;
         $this->name = $name;
+        $this->members = $members;
+        $this->messages = $messages;
+        $this->sequenceNumber = $sequenceNumber;
         $this->version = $version;
     }
 
     /**
      * @param GroupChatId $id
-     * @param string $name
+     * @param GroupChatName $name
      * @return array{0: GroupChat, 1: GroupChatCreated}
      */
     public static function create(
         GroupChatId $id,
+        GroupChatName $name,
+        Members $members,
+        Messages $messages,
         int $sequenceNumber,
-        string $name,
         int $version
     ): array {
         $aggregate = new GroupChat(
             $id,
-            $sequenceNumber,
             $name,
+            $members,
+            $messages,
+            $sequenceNumber,
             $version
         );
         $event = GroupChatEventFactory::ofCreated(
@@ -48,19 +68,33 @@ class GroupChat implements Aggregate {
         return [$aggregate, $event];
     }
 
-    public function getName(): string {
+    public function getName(): GroupChatName
+    {
         return $this->name;
     }
 
-    public function getId(): AggregateId {
+    public function getId(): AggregateId
+    {
         return $this->id;
     }
 
-    public function getSequenceNumber(): int {
+    public function getMembers(): Members
+    {
+        return $this->members;
+    }
+
+    public function getMessages(): Messages
+    {
+        return $this->messages;
+    }
+
+    public function getSequenceNumber(): int
+    {
         return 0;
     }
 
-    public function getVersion(): int {
+    public function getVersion(): int
+    {
         return 0;
     }
 
@@ -70,15 +104,18 @@ class GroupChat implements Aggregate {
      * @param int $version
      * @return Aggregate
      */
-    public function withVersion(int $version): Aggregate {
+    public function withVersion(int $version): Aggregate
+    {
         return $this;
     }
 
-    public function equals(Aggregate $other): bool {
+    public function equals(Aggregate $other): bool
+    {
         return true;
     }
 
-    public function jsonSerialize(): mixed {
+    public function jsonSerialize(): mixed
+    {
         return [
             "id" => $this->id,
             "sequenceNumber" => $this->sequenceNumber,

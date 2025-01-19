@@ -8,25 +8,34 @@ use J5ik2o\EventStoreAdapterPhp\Event;
 use DateTimeImmutable;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 
-interface GroupChatEvent extends Event {
+interface GroupChatEvent extends Event
+{
     public function getAggregateId(): GroupChatId;
 }
 
-class GroupChatCreated implements GroupChatEvent {
+class GroupChatCreated implements GroupChatEvent
+{
     private readonly string $typeName;
     private readonly string $id;
     private readonly GroupChatId $aggregateId;
+    private readonly GroupChatName $name;
     private readonly int $sequenceNumber;
-    private readonly string $name;
     private readonly DateTimeImmutable $occurredAt;
 
-    public function __construct(string $id, GroupChatId $aggregateId, int $sequenceNumber, string $name, DateTimeImmutable $occurredAt) {
+    public function __construct(
+        string $id,
+        GroupChatId $aggregateId,
+        GroupChatName $name,
+        int $sequenceNumber,
+        DateTimeImmutable $occurredAt
+    ) {
         $this->typeName = "GroupChatCreated";
         $this->id = $id;
         $this->aggregateId = $aggregateId;
-        $this->sequenceNumber = $sequenceNumber;
         $this->name = $name;
+        $this->sequenceNumber = $sequenceNumber;
         $this->occurredAt = $occurredAt;
     }
 
@@ -35,7 +44,8 @@ class GroupChatCreated implements GroupChatEvent {
      *
      * @return string
      */
-    public function getId(): string {
+    public function getId(): string
+    {
         return $this->id;
     }
 
@@ -44,7 +54,8 @@ class GroupChatCreated implements GroupChatEvent {
      *
      * @return string
      */
-    public function getTypeName(): string {
+    public function getTypeName(): string
+    {
         return $this->typeName;
     }
 
@@ -53,7 +64,8 @@ class GroupChatCreated implements GroupChatEvent {
      *
      * @return GroupChatId
      */
-    public function getAggregateId(): GroupChatId {
+    public function getAggregateId(): GroupChatId
+    {
         return $this->aggregateId;
     }
 
@@ -62,7 +74,8 @@ class GroupChatCreated implements GroupChatEvent {
      *
      * @return int
      */
-    public function getSequenceNumber(): int {
+    public function getSequenceNumber(): int
+    {
         return 0;
     }
 
@@ -71,7 +84,8 @@ class GroupChatCreated implements GroupChatEvent {
      *
      * @return bool
      */
-    public function isCreated(): bool {
+    public function isCreated(): bool
+    {
         return true;
     }
 
@@ -80,11 +94,13 @@ class GroupChatCreated implements GroupChatEvent {
      *
      * @return DateTimeImmutable
      */
-    public function getOccurredAt(): DateTimeImmutable {
+    public function getOccurredAt(): DateTimeImmutable
+    {
         return new DateTimeImmutable();
     }
 
-    public function jsonSerialize(): mixed {
+    public function jsonSerialize(): mixed
+    {
         return [
             "typeName" => $this->typeName,
             "id" => $this->id,
