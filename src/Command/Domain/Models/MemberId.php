@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
+use Ulid\Ulid;
+
 class MemberId
 {
     private readonly string $value;
 
-    public function __construct(string $value)
+    public function __construct()
     {
-        $this->value = $value;
+        $value = Ulid::generate();
+        $this->value = (string) $value;
     }
 
     public function getValue(): string

@@ -14,29 +14,19 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 
 class GroupChatTest extends TestCase
 {
-    public function testCreateGroupChat(): void
+    public function testGroupChatAddMember(): void
     {
-        $id = new GroupChatId("aaa");
-        $name = new GroupChatName("bbb");
-        $members = new Members([]);
-        $messages = new Messages([]);
-        $sequenceNumber = 0;
-        $version = 0;
-        $groupChat = GroupChat::create(
-            $id,
+        // Given
+        $adminId = new UserAccountId();
+        $name = new GroupChatName("test");
+        [$groupChat, $createdEvent] = GroupChat::create(
             $name,
-            $members,
-            $messages,
-            $sequenceNumber,
-            $version
+            $adminId,
         );
 
-        $this->assertEquals($groupChat[0]->getId(), $id);
-        $this->assertEquals($groupChat[0]->getSequenceNumber(), $sequenceNumber);
-        $this->assertEquals($groupChat[0]->getName(), $name);
-        $this->assertEquals($groupChat[0]->getVersion(), $version);
+        // When
 
-        $this->assertTrue(strlen($groupChat[1]->getId()) === 17 + 26);
-        $this->assertEquals($groupChat[1]->getAggregateId(), $id);
+        // Then
+        $this->assertEquals($groupChat->getMembers()->getValues()[0]->getUserAccountId(), $adminId);
     }
 }

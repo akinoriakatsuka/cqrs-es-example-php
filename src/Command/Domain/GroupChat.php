@@ -11,9 +11,9 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChatEventFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 
 class GroupChat implements Aggregate
 {
@@ -41,18 +41,19 @@ class GroupChat implements Aggregate
     }
 
     /**
-     * @param GroupChatId $id
      * @param GroupChatName $name
+     * @param UserAccountId $executerId
      * @return array{0: GroupChat, 1: GroupChatCreated}
      */
     public static function create(
-        GroupChatId $id,
         GroupChatName $name,
-        Members $members,
-        Messages $messages,
-        int $sequenceNumber,
-        int $version
+        UserAccountId $executerId
     ): array {
+        $id = new GroupChatId();
+        $members = Members::create($executerId);
+        $messages = new Messages([]);
+        $sequenceNumber = 1;
+        $version = 1;
         $aggregate = new GroupChat(
             $id,
             $name,
