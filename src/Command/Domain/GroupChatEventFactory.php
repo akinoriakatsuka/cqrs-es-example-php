@@ -6,7 +6,6 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
 use Ulid\Ulid;
 use DateTimeImmutable;
-
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;

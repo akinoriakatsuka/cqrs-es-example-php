@@ -6,16 +6,11 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\Domain;
 
 use PHPUnit\Framework\TestCase;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 
-class GroupChatTest extends TestCase
-{
-    public function testGroupChatAddMember(): void
-    {
+class GroupChatTest extends TestCase {
+    public function testGroupChatAddMember(): void {
         // Given
         $adminId = new UserAccountId();
         $name = new GroupChatName("test");

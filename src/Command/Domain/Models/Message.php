@@ -2,8 +2,7 @@
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class Message
-{
+class Message {
     private readonly MessageId $id;
     private readonly string $text;
     private readonly UserAccountId $senderId;
@@ -18,23 +17,19 @@ class Message
         $this->senderId = $senderId;
     }
 
-    public function getId(): MessageId
-    {
+    public function getId(): MessageId {
         return $this->id;
     }
 
-    public function getText(): string
-    {
+    public function getText(): string {
         return $this->text;
     }
 
-    public function getSenderId(): UserAccountId
-    {
+    public function getSenderId(): UserAccountId {
         return $this->senderId;
     }
 
-    public function equals(Message $other): bool
-    {
+    public function equals(Message $other): bool {
         return $this->id->equals($other->getId())
             && $this->text === $other->getText()
             && $this->senderId->equals($other->getSenderId());

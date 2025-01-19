@@ -6,8 +6,6 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
-
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChatEventFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
@@ -15,8 +13,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 
-class GroupChat implements Aggregate
-{
+class GroupChat implements Aggregate {
     private readonly GroupChatId $id;
     private readonly GroupChatName $name;
     private readonly Members $members;
@@ -69,33 +66,27 @@ class GroupChat implements Aggregate
         return [$aggregate, $event];
     }
 
-    public function getName(): GroupChatName
-    {
+    public function getName(): GroupChatName {
         return $this->name;
     }
 
-    public function getId(): AggregateId
-    {
+    public function getId(): AggregateId {
         return $this->id;
     }
 
-    public function getMembers(): Members
-    {
+    public function getMembers(): Members {
         return $this->members;
     }
 
-    public function getMessages(): Messages
-    {
+    public function getMessages(): Messages {
         return $this->messages;
     }
 
-    public function getSequenceNumber(): int
-    {
+    public function getSequenceNumber(): int {
         return 0;
     }
 
-    public function getVersion(): int
-    {
+    public function getVersion(): int {
         return 0;
     }
 
@@ -105,18 +96,15 @@ class GroupChat implements Aggregate
      * @param int $version
      * @return Aggregate
      */
-    public function withVersion(int $version): Aggregate
-    {
+    public function withVersion(int $version): Aggregate {
         return $this;
     }
 
-    public function equals(Aggregate $other): bool
-    {
+    public function equals(Aggregate $other): bool {
         return true;
     }
 
-    public function jsonSerialize(): mixed
-    {
+    public function jsonSerialize(): mixed {
         return [
             "id" => $this->id,
             "sequenceNumber" => $this->sequenceNumber,
