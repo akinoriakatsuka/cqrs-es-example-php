@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 

@@ -7,6 +7,10 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChatEventFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+
 class GroupChat implements Aggregate {
     private readonly GroupChatId $id;
     private readonly int $sequenceNumber;

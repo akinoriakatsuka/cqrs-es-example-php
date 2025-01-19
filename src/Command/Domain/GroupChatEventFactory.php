@@ -7,6 +7,9 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 use Ulid\Ulid;
 use DateTimeImmutable;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+
 final class GroupChatEventFactory {
     public static function ofCreated(GroupChatId $id, string $name): GroupChatCreated {
         $eventId = "group-chat-event-" . Ulid::generate();

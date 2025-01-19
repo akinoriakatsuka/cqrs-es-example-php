@@ -6,7 +6,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\Domain;
 
 use PHPUnit\Framework\TestCase;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 
 class GroupChatTest extends TestCase {
     public function testCreateGroupChat(): void {

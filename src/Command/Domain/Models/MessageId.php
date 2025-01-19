@@ -1,6 +1,6 @@
 <?php
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 use Ulid\Ulid;
 

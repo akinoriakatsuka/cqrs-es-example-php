@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
-
-use J5ik2o\EventStoreAdapterPhp\Aggregate;
-use J5ik2o\EventStoreAdapterPhp\AggregateId;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 class Member
 {

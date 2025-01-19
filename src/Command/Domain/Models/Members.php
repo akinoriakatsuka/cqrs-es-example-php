@@ -1,14 +1,14 @@
 <?php
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class Messages
+class Members
 {
-    /** @var array<Message> */
+    /** @var array<Member> */
     private readonly array $values;
 
     /**
-     * @param array<Message> $values
+     * @param array<Member> $values
      */
     public function __construct(array $values)
     {
@@ -16,7 +16,7 @@ class Messages
     }
 
     /**
-     * @return array<Message>
+     * @return array<Member>
      */
     public function getValues(): array
     {
