@@ -4,14 +4,9 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
-use J5ik2o\EventStoreAdapterPhp\Event;
 use DateTimeImmutable;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-
-interface GroupChatEvent extends Event {
-    public function getAggregateId(): GroupChatId;
-}
 
 class GroupChatCreated implements GroupChatEvent {
     private readonly string $typeName;
