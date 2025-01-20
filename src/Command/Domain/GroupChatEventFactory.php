@@ -6,9 +6,13 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
 use Ulid\Ulid;
 use DateTimeImmutable;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 
 final class GroupChatEventFactory {
     public static function ofCreated(GroupChatId $id, GroupChatName $name): GroupChatCreated {
@@ -23,4 +27,28 @@ final class GroupChatEventFactory {
             $occurredAt
         );
     }
+
+    public static function ofMemberAdded(
+        GroupChatId     $id,
+        MemberId $memberId,
+        UserAccountId $userAccountId,
+        MemberRole $role,
+        UserAccountId $executorId
+    ): GroupChatMemberAdded {
+        $eventId = "group-chat-event-" . Ulid::generate();
+        $sequenceNumber = 1;
+        $occurredAt = new DateTimeImmutable('now');
+        return new GroupChatMemberAdded(
+            $eventId,
+            $id,
+            $memberId,
+            $userAccountId,
+            $role,
+            $executorId,
+            $sequenceNumber,
+            $occurredAt
+        );
+    }
+
+
 }

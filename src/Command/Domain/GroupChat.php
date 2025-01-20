@@ -7,19 +7,22 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 
-class GroupChat implements Aggregate {
-    private readonly GroupChatId $id;
-    private readonly GroupChatName $name;
-    private readonly Members $members;
-    private readonly Messages $messages;
-    private readonly int $sequenceNumber;
-    private readonly int $version;
+readonly class GroupChat implements Aggregate {
+    private GroupChatId $id;
+    private GroupChatName $name;
+    private Members $members;
+    private Messages $messages;
+    private int $sequenceNumber;
+    private int $version;
 
     public function __construct(
         GroupChatId $id,
@@ -39,15 +42,15 @@ class GroupChat implements Aggregate {
 
     /**
      * @param GroupChatName $name
-     * @param UserAccountId $executerId
+     * @param UserAccountId $executorId
      * @return array{0: GroupChat, 1: GroupChatCreated}
      */
     public static function create(
         GroupChatName $name,
-        UserAccountId $executerId
+        UserAccountId $executorId
     ): array {
         $id = new GroupChatId();
-        $members = Members::create($executerId);
+        $members = Members::create($executorId);
         $messages = new Messages([]);
         $sequenceNumber = 1;
         $version = 1;
@@ -64,6 +67,40 @@ class GroupChat implements Aggregate {
             $name
         );
         return [$aggregate, $event];
+    }
+
+    /**
+     * @param MemberId $memberId
+     * @param UserAccountId $userAccountId
+     * @param MemberRole $role
+     * @param UserAccountId $executorId
+     * @return array{0: GroupChat, 1: GroupChatMemberAdded}
+     */
+    public function addMember(
+        MemberId $memberId,
+        UserAccountId $userAccountId,
+        MemberRole $role,
+        UserAccountId $executorId
+    ): array {
+        // TODO: Error handling
+        $event = GroupChatEventFactory::ofMemberAdded(
+            $this->id,
+            $memberId,
+            $userAccountId,
+            $role,
+            $executorId
+        );
+        $newMembers = $this->getMembers()->addMember($userAccountId);
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $newMembers,
+            $this->messages,
+            $this->sequenceNumber,
+            $this->version + 1,
+        );
+
+        return [$newState, $event];
     }
 
     public function getName(): GroupChatName {
@@ -83,11 +120,11 @@ class GroupChat implements Aggregate {
     }
 
     public function getSequenceNumber(): int {
-        return 0;
+        return $this->sequenceNumber;
     }
 
     public function getVersion(): int {
-        return 0;
+        return $this->version;
     }
 
     /**

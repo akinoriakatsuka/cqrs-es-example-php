@@ -6,6 +6,8 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\Domain;
 
 use PHPUnit\Framework\TestCase;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 
@@ -18,10 +20,19 @@ class GroupChatTest extends TestCase {
             $name,
             $adminId,
         );
+        $memberId = new MemberId();
+        $userAccountId = new UserAccountId();
 
         // When
+        [$newGroupChat, $addedEvent] = $groupChat->addMember(
+            $memberId,
+            $userAccountId,
+            MemberRole::MEMBER_ROLE,
+            $adminId
+        );
 
         // Then
         $this->assertEquals($groupChat->getMembers()->getValues()[0]->getUserAccountId(), $adminId);
+        $this->assertEquals($groupChat->getVersion() + 1, $newGroupChat->getVersion());
     }
 }
