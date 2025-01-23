@@ -32,7 +32,8 @@ class GroupChatTest extends TestCase {
         );
 
         // Then
-        $this->assertEquals($groupChat->getMembers()->getValues()[0]->getUserAccountId(), $adminId);
+        $this->assertEquals($groupChat->getId(), $newGroupChat->getId());
+        $this->assertTrue($groupChat->getMembers()->findByUserAccountId($userAccountId)->isPresent());
         $this->assertEquals($groupChat->getVersion() + 1, $newGroupChat->getVersion());
     }
 }
