@@ -83,23 +83,23 @@ readonly class GroupChat implements Aggregate {
         UserAccountId $executorId
     ): array {
         // TODO: Error handling
-        $event = GroupChatEventFactory::ofMemberAdded(
-            $this->id,
-            $memberId,
-            $userAccountId,
-            $role,
-            $executorId
-        );
         $newMembers = $this->getMembers()->addMember($userAccountId);
         $newState = new GroupChat(
             $this->id,
             $this->name,
             $newMembers,
             $this->messages,
-            $this->sequenceNumber,
-            $this->version + 1,
+            $this->sequenceNumber + 1,
+            $this->version,
         );
-
+        $event = GroupChatEventFactory::ofMemberAdded(
+            $this->id,
+            $memberId,
+            $userAccountId,
+            $role,
+            $newState->getSequenceNumber(),
+            $executorId
+        );
         return [$newState, $event];
     }
 

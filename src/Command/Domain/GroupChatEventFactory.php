@@ -33,10 +33,10 @@ final class GroupChatEventFactory {
         MemberId $memberId,
         UserAccountId $userAccountId,
         MemberRole $role,
+        int $sequenceNumber,
         UserAccountId $executorId
     ): GroupChatMemberAdded {
         $eventId = "group-chat-event-" . Ulid::generate();
-        $sequenceNumber = 1;
         $occurredAt = new DateTimeImmutable('now');
         return new GroupChatMemberAdded(
             $eventId,
