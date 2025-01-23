@@ -2,9 +2,9 @@
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class Messages {
+readonly class Messages {
     /** @var array<Message> */
-    private readonly array $values;
+    private array $values;
 
     /**
      * @param array<Message> $values

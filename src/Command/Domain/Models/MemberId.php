@@ -6,8 +6,8 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 use Ulid\Ulid;
 
-class MemberId {
-    private readonly string $value;
+readonly class MemberId {
+    private string $value;
 
     public function __construct() {
         $value = Ulid::generate();

@@ -8,7 +8,7 @@ use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use Ulid\Ulid;
 
 class GroupChatId implements AggregateId {
-    public const TYPE_NAME = "GroupChatId";
+    public const string TYPE_NAME = "GroupChatId";
     private readonly string $value;
 
     public function __construct() {
