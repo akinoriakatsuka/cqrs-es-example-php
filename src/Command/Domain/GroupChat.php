@@ -6,8 +6,6 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
@@ -43,12 +41,12 @@ readonly class GroupChat implements Aggregate {
     /**
      * @param GroupChatName $name
      * @param UserAccountId $executorId
-     * @return array{0: GroupChat, 1: GroupChatCreated}
+     * @return GroupChatWithEventPair
      */
     public static function create(
         GroupChatName $name,
         UserAccountId $executorId
-    ): array {
+    ): GroupChatWithEventPair {
         $id = new GroupChatId();
         $members = Members::create($executorId);
         $messages = new Messages([]);
@@ -66,7 +64,7 @@ readonly class GroupChat implements Aggregate {
             $id,
             $name
         );
-        return [$aggregate, $event];
+        return new GroupChatWithEventPair($aggregate, $event);
     }
 
     /**
@@ -74,14 +72,14 @@ readonly class GroupChat implements Aggregate {
      * @param UserAccountId $userAccountId
      * @param MemberRole $role
      * @param UserAccountId $executorId
-     * @return array{0: GroupChat, 1: GroupChatMemberAdded}
+     * @return GroupChatWithEventPair
      */
     public function addMember(
         MemberId $memberId,
         UserAccountId $userAccountId,
         MemberRole $role,
         UserAccountId $executorId
-    ): array {
+    ): GroupChatWithEventPair {
         // TODO: Error handling
         $newMembers = $this->getMembers()->addMember($userAccountId);
         $newState = new GroupChat(
@@ -100,7 +98,7 @@ readonly class GroupChat implements Aggregate {
             $newState->getSequenceNumber(),
             $executorId
         );
-        return [$newState, $event];
+        return new GroupChatWithEventPair($newState, $event);
     }
 
     public function getName(): GroupChatName {

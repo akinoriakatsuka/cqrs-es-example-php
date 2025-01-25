@@ -16,15 +16,17 @@ class GroupChatTest extends TestCase {
         // Given
         $adminId = new UserAccountId();
         $name = new GroupChatName("test");
-        [$groupChat, $createdEvent] = GroupChat::create(
+        $groupChatWithEvent = GroupChat::create(
             $name,
             $adminId,
         );
+        $groupChat = $groupChatWithEvent->getGroupChat();
+
         $memberId = new MemberId();
         $userAccountId = new UserAccountId();
 
         // When
-        [$newGroupChat, $addedEvent] = $groupChat->addMember(
+        $groupChatWithEvent = $groupChat->addMember(
             $memberId,
             $userAccountId,
             MemberRole::MEMBER_ROLE,
@@ -32,6 +34,8 @@ class GroupChatTest extends TestCase {
         );
 
         // Then
+        $newGroupChat = $groupChatWithEvent->getGroupChat();
+        $addedEvent = $groupChatWithEvent->getEvent();
         $this->assertEquals($groupChat->getId(), $newGroupChat->getId());
         $this->assertNotEquals(
             null,
