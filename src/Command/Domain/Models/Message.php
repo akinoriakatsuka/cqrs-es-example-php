@@ -2,10 +2,10 @@
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class Message {
-    private readonly MessageId $id;
-    private readonly string $text;
-    private readonly UserAccountId $senderId;
+readonly class Message {
+    private MessageId $id;
+    private string $text;
+    private UserAccountId $senderId;
 
     public function __construct(
         MessageId $id,

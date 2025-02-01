@@ -2,9 +2,9 @@
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class Members {
+readonly class Members {
     /** @var array<Member> */
-    private readonly array $values;
+    private array $values;
 
     /**
      * @param array<Member> $values
@@ -20,8 +20,7 @@ class Members {
             $userAccountId,
             MemberRole::ADMIN_ROLE
         );
-        $members = new Members([$member]);
-        return $members;
+        return new Members([$member]);
     }
 
     /**
@@ -29,5 +28,34 @@ class Members {
      */
     public function getValues(): array {
         return $this->values;
+    }
+
+    /**
+     * @param UserAccountId $userAccountId
+     * @return Members
+     */
+    public function addMember(UserAccountId $userAccountId): Members {
+        $memberId = new MemberId();
+        $member = new Member(
+            $memberId,
+            $userAccountId,
+            MemberRole::MEMBER_ROLE
+        );
+        $values = $this->values;
+        $values[] = $member;
+        return new Members($values);
+    }
+
+    /**
+     * @param UserAccountId $userAccountId
+     * @return Member|null
+     */
+    public function findByUserAccountId(UserAccountId $userAccountId): Member|null {
+        foreach ($this->values as $member) {
+            if ($member->getUserAccountId()->equals($userAccountId)) {
+                return $member;
+            }
+        }
+        return null;
     }
 }

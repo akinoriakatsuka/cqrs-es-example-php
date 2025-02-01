@@ -2,8 +2,8 @@
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class GroupChatName {
-    private readonly string $value;
+readonly class GroupChatName {
+    private string $value;
 
     public function __construct(string $value) {
         $this->value = $value;

@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
-use J5ik2o\EventStoreAdapterPhp\Event;
 use DateTimeImmutable;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 
-interface GroupChatEvent extends Event {
-    public function getAggregateId(): GroupChatId;
-}
-
-class GroupChatCreated implements GroupChatEvent {
-    private readonly string $typeName;
-    private readonly string $id;
-    private readonly GroupChatId $aggregateId;
-    private readonly GroupChatName $name;
-    private readonly int $sequenceNumber;
-    private readonly DateTimeImmutable $occurredAt;
+readonly class GroupChatCreated implements GroupChatEvent {
+    private string $typeName;
+    private string $id;
+    private GroupChatId $aggregateId;
+    private GroupChatName $name;
+    private int $sequenceNumber;
+    private DateTimeImmutable $occurredAt;
 
     public function __construct(
         string $id,

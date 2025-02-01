@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-class Member {
-    private readonly MemberId $id;
-    private readonly UserAccountId $userAccountId;
-    private readonly MemberRole $role;
+readonly class Member {
+    private MemberId $id;
+    private UserAccountId $userAccountId;
+    private MemberRole $role;
 
     public function __construct(
         MemberId $id,

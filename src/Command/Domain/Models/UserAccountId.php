@@ -4,8 +4,8 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 use Ulid\Ulid;
 
-class UserAccountId {
-    private readonly string $value;
+readonly class UserAccountId {
+    private string $value;
 
     public function __construct() {
         $value = (string) Ulid::generate();
