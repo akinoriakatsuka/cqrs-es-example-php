@@ -47,7 +47,7 @@ readonly class GroupChatMemberAdded implements GroupChatEvent {
     }
 
     public function isCreated(): bool {
-        return true;
+        return false;
     }
 
     public function getOccurredAt(): DateTimeImmutable {

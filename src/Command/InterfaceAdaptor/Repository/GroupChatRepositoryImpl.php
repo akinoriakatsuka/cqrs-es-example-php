@@ -4,12 +4,11 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use J5ik2o\EventStoreAdapterPhp\EventStore;
 
-class GroupChatRepositoryImpl implements GroupChatRepository {
-    private readonly EventStore $eventStore;
+readonly class GroupChatRepositoryImpl implements GroupChatRepository {
+    private EventStore $eventStore;
 
     public function __construct(EventStore $eventStore) {
         $this->eventStore = $eventStore;
@@ -45,7 +44,10 @@ class GroupChatRepositoryImpl implements GroupChatRepository {
 
         $events = $this
                 ->eventStore
-                ->getEventsByIdSinceSequenceNumber($id, $latestSnapshot->getSequenceNumber());
+                ->getEventsByIdSinceSequenceNumber(
+                    $id,
+                    $latestSnapshot->getSequenceNumber()
+                );
         return GroupChat::replay($events, $latestSnapshot);
     }
 }
