@@ -47,7 +47,7 @@ readonly class GroupChatMemberAdded implements GroupChatEvent {
     }
 
     public function isCreated(): bool {
-        return true;
+        return false;
     }
 
     public function getOccurredAt(): DateTimeImmutable {
@@ -56,6 +56,14 @@ readonly class GroupChatMemberAdded implements GroupChatEvent {
 
     public function getAggregateId(): GroupChatId {
         return $this->aggregateId;
+    }
+
+    public function getMember(): Member {
+        return $this->member;
+    }
+
+    public function getExecutorId(): UserAccountId {
+        return $this->executorId;
     }
 
     public function jsonSerialize(): mixed {

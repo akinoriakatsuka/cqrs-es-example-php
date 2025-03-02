@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "72134302c5c8b8a17e7f4320bfc1bdb1",
+    "content-hash": "c7eaede5ce2b73f40bd052dcd204f692",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -484,16 +484,16 @@
         },
         {
             "name": "j5ik2o/event-store-adapter-php",
-            "version": "v1.0.14",
+            "version": "dev-fix/in-memory",
             "source": {
                 "type": "git",
                 "url": "https://github.com/j5ik2o/event-store-adapter-php.git",
-                "reference": "728018447de3637e8a8c0911538eca42e7556356"
+                "reference": "919404996cdfac36376086918cb1aaea7bbfe19e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/j5ik2o/event-store-adapter-php/zipball/728018447de3637e8a8c0911538eca42e7556356",
-                "reference": "728018447de3637e8a8c0911538eca42e7556356",
+                "url": "https://api.github.com/repos/j5ik2o/event-store-adapter-php/zipball/919404996cdfac36376086918cb1aaea7bbfe19e",
+                "reference": "919404996cdfac36376086918cb1aaea7bbfe19e",
                 "shasum": ""
             },
             "require": {
@@ -514,7 +514,31 @@
                     "J5ik2o\\EventStoreAdapterPhp\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "J5ik2o\\EventStoreAdapterPhp\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit --testdox tests"
+                ],
+                "cs": [
+                    "php-cs-fixer fix --dry-run"
+                ],
+                "cs:fix": [
+                    "php-cs-fixer fix"
+                ],
+                "fmt": [
+                    "composer run cs:fix"
+                ],
+                "lint": [
+                    "composer run cs && composer run phpstan"
+                ],
+                "phpstan": [
+                    "phpstan analyse --memory-limit=512M"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -526,10 +550,10 @@
             ],
             "description": "This library is designed to turn DynamoDB into an Event Store for CQRS/Event Sourcing.",
             "support": {
-                "issues": "https://github.com/j5ik2o/event-store-adapter-php/issues",
-                "source": "https://github.com/j5ik2o/event-store-adapter-php/tree/v1.0.14"
+                "source": "https://github.com/j5ik2o/event-store-adapter-php/tree/fix/in-memory",
+                "issues": "https://github.com/j5ik2o/event-store-adapter-php/issues"
             },
-            "time": "2025-01-08T13:24:15+00:00"
+            "time": "2025-01-28T01:06:09+00:00"
         },
         {
             "name": "mtdowling/jmespath.php",
@@ -5093,11 +5117,13 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "j5ik2o/event-store-adapter-php": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">= 8.1"
+        "php": ">= 8.2"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

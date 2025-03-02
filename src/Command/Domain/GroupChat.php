@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
@@ -65,6 +67,35 @@ readonly class GroupChat implements Aggregate {
             $name
         );
         return new GroupChatWithEventPair($aggregate, $event);
+    }
+
+    /**
+     * @param array<GroupChatEvent> $events
+     * @param GroupChat $latestSnapshot
+     * @return GroupChat
+     */
+    public static function replay(array $events, GroupChat $latestSnapshot): GroupChat {
+        $aggregate = $latestSnapshot;
+        foreach ($events as $event) {
+            $aggregate = $aggregate->applyEvent($event);
+        }
+        return $aggregate;
+    }
+
+    public function applyEvent(GroupChatEvent $event): GroupChat {
+        switch (true) {
+            case $event instanceof GroupChatMemberAdded:
+                $groupChat = $this;
+                $GroupChatWithEventPair = $groupChat->addMember(
+                    $event->getMember()->getId(),
+                    $event->getMember()->getUserAccountId(),
+                    $event->getMember()->getRole(),
+                    $event->getExecutorId()
+                );
+                return $GroupChatWithEventPair->getGroupChat();
+            default:
+                return $this;
+        }
     }
 
     /**
