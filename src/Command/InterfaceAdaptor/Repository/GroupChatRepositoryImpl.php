@@ -37,17 +37,19 @@ readonly class GroupChatRepositoryImpl implements GroupChatRepository {
      * @return GroupChat|null
      */
     public function findById(AggregateId $id): ?GroupChat {
+        /** @var ?GroupChat $latestSnapshot */
         $latestSnapshot = $this->eventStore->getLatestSnapshotById($id);
         if ($latestSnapshot === null) {
             return null;
         }
 
+        /** @var GroupChatEvent[] $events */
         $events = $this
-                ->eventStore
-                ->getEventsByIdSinceSequenceNumber(
-                    $id,
-                    $latestSnapshot->getSequenceNumber()
-                );
+            ->eventStore
+            ->getEventsByIdSinceSequenceNumber(
+                $id,
+                $latestSnapshot->getSequenceNumber()
+            );
         return GroupChat::replay($events, $latestSnapshot);
     }
 }
