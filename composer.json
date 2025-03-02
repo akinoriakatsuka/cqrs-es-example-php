@@ -13,10 +13,12 @@
             "email": "j5ik2o@gmail.com"
         }
     ],
-    "repository" : {
-        "type" : "vcs",
-        "url" : "https://github.com/j5ik2o/event-store-adapter-php"
-    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/j5ik2o/event-store-adapter-php"
+        }
+    ],
     "require": {
         "php": ">= 8.2",
         "aws/aws-sdk-php": "^3.283",
