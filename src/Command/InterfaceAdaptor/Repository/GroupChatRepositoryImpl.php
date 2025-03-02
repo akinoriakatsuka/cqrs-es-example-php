@@ -66,7 +66,7 @@ readonly class GroupChatRepositoryImpl implements GroupChatRepository {
             throw new RuntimeException($e->getMessage());
         }
 
-        // GroupChatEvent以外のイベントを除外
+        // GroupChatEvent以外のイベントが含まれている場合は例外を投げる
         $groupChatEvents = [];
         foreach ($events as $event) {
             if ($event instanceof GroupChatEvent) {
