@@ -58,6 +58,14 @@ readonly class GroupChatMemberAdded implements GroupChatEvent {
         return $this->aggregateId;
     }
 
+    public function getMember(): Member {
+        return $this->member;
+    }
+
+    public function getExecutorId(): UserAccountId {
+        return $this->executorId;
+    }
+
     public function jsonSerialize(): mixed {
         return [
             'id' => $this->id,
