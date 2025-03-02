@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
-namespace AkinoriAkatsuka\CqrsEsExamplePhp\Tests\Command\InterfaseAdaptor\Repository;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\InterfaseAdaptor\Repository;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepositoryImpl;
 use PHPUnit\Framework\TestCase;
@@ -13,6 +15,7 @@ use J5ik2o\EventStoreAdapterPhp\EventStoreFactory;
 
 class GroupChatRepositoryTest extends TestCase {
     public function testFindById(): void {
+        // Arrange
         $eventStore = EventStoreFactory::createInMemory();
         $repository = new GroupChatRepositoryImpl($eventStore);
         $adminId = new UserAccountId();
@@ -27,6 +30,25 @@ class GroupChatRepositoryTest extends TestCase {
             $this->fail($e->getMessage());
         }
         $this->assertNotNull($groupChat2);
-        $this->assertEquals($groupChat->getId(), $groupChat2->getId());
+
+        $groupChatWithEventPair2 = $groupChat2->addMember(
+            new MemberId(),
+            new UserAccountId(),
+            MemberRole::MEMBER_ROLE,
+            new UserAccountId()
+        );
+        $addMemberEvent = $groupChatWithEventPair2->getEvent();
+        $repository->storeEvent($addMemberEvent, $groupChat2->getVersion());
+
+        // Act
+        try {
+            $groupChat3 = $repository->findById($groupChat->getId());
+        } catch (\Exception $e) {
+            $this->fail($e->getMessage());
+        }
+        $this->assertNotNull($groupChat3);
+
+        // Assert
+        $this->assertEquals($groupChat->getId(), $groupChat3->getId());
     }
 }

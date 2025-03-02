@@ -34,13 +34,19 @@ readonly class GroupChatRepositoryImpl implements GroupChatRepository {
 
     /**
      * @param AggregateId $id
+     * @throws \RuntimeException
      * @return GroupChat|null
      */
     public function findById(AggregateId $id): ?GroupChat {
-        /** @var ?GroupChat $latestSnapshot */
         $latestSnapshot = $this->eventStore->getLatestSnapshotById($id);
         if ($latestSnapshot === null) {
             return null;
+        }
+
+        if ($latestSnapshot instanceof GroupChat) {
+            $latestGroupChatSnapshot = $latestSnapshot;
+        } else {
+            throw new \RuntimeException('Unexpected type');
         }
 
         /** @var GroupChatEvent[] $events */
@@ -50,6 +56,6 @@ readonly class GroupChatRepositoryImpl implements GroupChatRepository {
                 $id,
                 $latestSnapshot->getSequenceNumber()
             );
-        return GroupChat::replay($events, $latestSnapshot);
+        return GroupChat::replay($events, $latestGroupChatSnapshot);
     }
 }
