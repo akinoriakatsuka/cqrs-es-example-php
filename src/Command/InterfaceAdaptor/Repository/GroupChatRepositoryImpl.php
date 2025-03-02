@@ -6,6 +6,9 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use J5ik2o\EventStoreAdapterPhp\EventStore;
+use J5ik2o\EventStoreAdapterPhp\PersistenceException;
+use J5ik2o\EventStoreAdapterPhp\SerializationException;
+use RuntimeException;
 
 readonly class GroupChatRepositoryImpl implements GroupChatRepository {
     private EventStore $eventStore;
@@ -34,11 +37,15 @@ readonly class GroupChatRepositoryImpl implements GroupChatRepository {
 
     /**
      * @param AggregateId $id
-     * @throws \RuntimeException
-     * @return GroupChat|null
+     * @throws RuntimeException
+     * @return ?GroupChat
      */
     public function findById(AggregateId $id): ?GroupChat {
-        $latestSnapshot = $this->eventStore->getLatestSnapshotById($id);
+        try {
+            $latestSnapshot = $this->eventStore->getLatestSnapshotById($id);
+        } catch (PersistenceException|SerializationException $e) {
+            throw new RuntimeException($e->getMessage());
+        }
         if ($latestSnapshot === null) {
             return null;
         }
@@ -46,16 +53,29 @@ readonly class GroupChatRepositoryImpl implements GroupChatRepository {
         if ($latestSnapshot instanceof GroupChat) {
             $latestGroupChatSnapshot = $latestSnapshot;
         } else {
-            throw new \RuntimeException('Unexpected type');
+            throw new RuntimeException('Unexpected Aggregate type');
         }
 
-        /** @var GroupChatEvent[] $events */
-        $events = $this
-            ->eventStore
-            ->getEventsByIdSinceSequenceNumber(
-                $id,
-                $latestSnapshot->getSequenceNumber()
-            );
-        return GroupChat::replay($events, $latestGroupChatSnapshot);
+        try {
+            $events = $this->eventStore
+                ->getEventsByIdSinceSequenceNumber(
+                    $id,
+                    $latestSnapshot->getSequenceNumber()
+                );
+        } catch (PersistenceException|SerializationException $e) {
+            throw new RuntimeException($e->getMessage());
+        }
+
+        // GroupChatEvent以外のイベントを除外
+        $groupChatEvents = [];
+        foreach ($events as $event) {
+            if ($event instanceof GroupChatEvent) {
+                $groupChatEvents[] = $event;
+            } else {
+                throw new RuntimeException('Unexpected event type');
+            }
+        }
+
+        return GroupChat::replay($groupChatEvents, $latestGroupChatSnapshot);
     }
 }
