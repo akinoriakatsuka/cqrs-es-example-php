@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\InterfaseAdaptor\Repository;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\InterfaceAdaptor\Repository;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
