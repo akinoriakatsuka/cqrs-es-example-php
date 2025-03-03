@@ -59,6 +59,15 @@ readonly class GroupChatCreated implements GroupChatEvent {
     }
 
     /**
+     * Returns the name.
+     *
+     * @return GroupChatName
+     */
+    public function getName(): GroupChatName {
+        return $this->name;
+    }
+
+    /**
      * Returns the sequence number.
      *
      * @return int
