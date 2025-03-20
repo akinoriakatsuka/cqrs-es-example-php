@@ -24,6 +24,20 @@ class GroupChatCommandProcessor {
         return $groupChatWithEvent->getEvent();
     }
 
+    public function renameGroupChat(
+        GroupChatId $groupChatId,
+        GroupChatName $newName,
+        UserAccountId $executorId
+    ): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("GroupChat not found with ID: " . json_encode($groupChatId));
+        }
+        $groupChatWithEvent = $groupChat->rename($newName, $executorId);
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+        return $groupChatWithEvent->getEvent();
+    }
+
     /**
      * Delete a group chat
      *
