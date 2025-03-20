@@ -6,7 +6,6 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\Domain\Models;
 
 use PHPUnit\Framework\TestCase;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
-use J5ik2o\EventStoreAdapterPhp\AggregateId;
 
 class GroupChatIdTest extends TestCase {
     public function testGetTypeName(): void {
