@@ -43,7 +43,8 @@
         "phpstan/extension-installer": "^1.0"
     },
     "scripts": {
-        "test": "phpunit --testdox tests",
+        "test": "phpunit --testdox --color tests",
+        "test:coverage": "phpunit --testdox --color --coverage-text tests",
         "cs": "php-cs-fixer fix --dry-run",
         "cs:fix": "php-cs-fixer fix",
         "fmt": "composer run cs:fix",
