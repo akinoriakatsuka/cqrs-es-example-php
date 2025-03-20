@@ -8,6 +8,7 @@ use Ulid\Ulid;
 use DateTimeImmutable;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
@@ -50,5 +51,21 @@ final class GroupChatEventFactory {
         );
     }
 
-
+    public static function ofRenamed(
+        GroupChatId $id,
+        GroupChatName $name,
+        int $sequenceNumber,
+        UserAccountId $executorId
+    ): GroupChatRenamed {
+        $eventId = "group-chat-event-" . Ulid::generate();
+        $occurredAt = new DateTimeImmutable('now');
+        return new GroupChatRenamed(
+            $eventId,
+            $id,
+            $name,
+            $executorId,
+            $sequenceNumber,
+            $occurredAt
+        );
+    }
 }

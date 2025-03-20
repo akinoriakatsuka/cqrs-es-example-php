@@ -6,6 +6,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
@@ -93,6 +94,13 @@ readonly class GroupChat implements Aggregate {
                     $event->getExecutorId()
                 );
                 return $GroupChatWithEventPair->getGroupChat();
+            case $event instanceof GroupChatRenamed:
+                $groupChat = $this;
+                $GroupChatWithEventPair = $groupChat->rename(
+                    $event->getName(),
+                    $event->getExecutorId()
+                );
+                return $GroupChatWithEventPair->getGroupChat();
             default:
                 return $this;
         }
@@ -126,6 +134,33 @@ readonly class GroupChat implements Aggregate {
             $memberId,
             $userAccountId,
             $role,
+            $newState->getSequenceNumber(),
+            $executorId
+        );
+        return new GroupChatWithEventPair($newState, $event);
+    }
+
+    /**
+     * @param GroupChatName $name
+     * @param UserAccountId $executorId
+     * @return GroupChatWithEventPair
+     */
+    public function rename(
+        GroupChatName $name,
+        UserAccountId $executorId
+    ): GroupChatWithEventPair {
+        // TODO: Error handling
+        $newState = new GroupChat(
+            $this->id,
+            $name,
+            $this->members,
+            $this->messages,
+            $this->sequenceNumber + 1,
+            $this->version,
+        );
+        $event = GroupChatEventFactory::ofRenamed(
+            $this->id,
+            $name,
             $newState->getSequenceNumber(),
             $executorId
         );
