@@ -7,6 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 use Ulid\Ulid;
 use DateTimeImmutable;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
@@ -63,6 +64,22 @@ final class GroupChatEventFactory {
             $eventId,
             $id,
             $name,
+            $executorId,
+            $sequenceNumber,
+            $occurredAt
+        );
+    }
+
+    public static function ofDeleted(
+        GroupChatId $id,
+        int $sequenceNumber,
+        UserAccountId $executorId
+    ): GroupChatDeleted {
+        $eventId = "group-chat-event-" . Ulid::generate();
+        $occurredAt = new DateTimeImmutable('now');
+        return new GroupChatDeleted(
+            $eventId,
+            $id,
             $executorId,
             $sequenceNumber,
             $occurredAt

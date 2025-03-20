@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Errors\AlreadyDeletedException;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
@@ -24,6 +26,7 @@ readonly class GroupChat implements Aggregate {
     private Messages $messages;
     private int $sequenceNumber;
     private int $version;
+    private bool $isDeleted;
 
     public function __construct(
         GroupChatId $id,
@@ -31,7 +34,8 @@ readonly class GroupChat implements Aggregate {
         Members $members,
         Messages $messages,
         int $sequenceNumber,
-        int $version
+        int $version,
+        bool $isDeleted = false
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -39,6 +43,7 @@ readonly class GroupChat implements Aggregate {
         $this->messages = $messages;
         $this->sequenceNumber = $sequenceNumber;
         $this->version = $version;
+        $this->isDeleted = $isDeleted;
     }
 
     /**
@@ -61,7 +66,8 @@ readonly class GroupChat implements Aggregate {
             $members,
             $messages,
             $sequenceNumber,
-            $version
+            $version,
+            false
         );
         $event = GroupChatEventFactory::ofCreated(
             $id,
@@ -101,6 +107,16 @@ readonly class GroupChat implements Aggregate {
                     $event->getExecutorId()
                 );
                 return $GroupChatWithEventPair->getGroupChat();
+            case $event instanceof GroupChatDeleted:
+                return new GroupChat(
+                    $this->id,
+                    $this->name,
+                    $this->members,
+                    $this->messages,
+                    $event->getSequenceNumber(),
+                    $this->version,
+                    true
+                );
             default:
                 return $this;
         }
@@ -119,7 +135,9 @@ readonly class GroupChat implements Aggregate {
         MemberRole $role,
         UserAccountId $executorId
     ): GroupChatWithEventPair {
-        // TODO: Error handling
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot add member to a deleted group chat");
+        }
         $newMembers = $this->getMembers()->addMember($userAccountId);
         $newState = new GroupChat(
             $this->id,
@@ -205,12 +223,48 @@ readonly class GroupChat implements Aggregate {
         return true;
     }
 
+    /**
+     * Delete the group chat
+     *
+     * @param UserAccountId $executorId
+     * @return GroupChatWithEventPair
+     * @throws AlreadyDeletedException
+     */
+    public function delete(UserAccountId $executorId): GroupChatWithEventPair {
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Group chat is already deleted");
+        }
+
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $this->members,
+            $this->messages,
+            $this->sequenceNumber + 1,
+            $this->version,
+            true
+        );
+
+        $event = GroupChatEventFactory::ofDeleted(
+            $this->id,
+            $newState->getSequenceNumber(),
+            $executorId
+        );
+
+        return new GroupChatWithEventPair($newState, $event);
+    }
+
+    public function isDeleted(): bool {
+        return $this->isDeleted;
+    }
+
     public function jsonSerialize(): mixed {
         return [
             "id" => $this->id,
             "sequenceNumber" => $this->sequenceNumber,
             "name" => $this->name,
             "version" => $this->version,
+            "isDeleted" => $this->isDeleted,
         ];
     }
 }

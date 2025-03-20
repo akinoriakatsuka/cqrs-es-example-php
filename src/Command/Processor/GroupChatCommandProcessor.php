@@ -37,4 +37,27 @@ class GroupChatCommandProcessor {
         $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
         return $groupChatWithEvent->getEvent();
     }
+
+    /**
+     * Delete a group chat
+     *
+     * @param GroupChatId $groupChatId
+     * @param UserAccountId $executorId
+     * @return GroupChatEvent
+     * @throws \RuntimeException If group chat not found
+     */
+    public function deleteGroupChat(
+        GroupChatId $groupChatId,
+        UserAccountId $executorId
+    ): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("Group chat not found");
+        }
+
+        $groupChatWithEvent = $groupChat->delete($executorId);
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+
+        return $groupChatWithEvent->getEvent();
+    }
 }
