@@ -4,3 +4,9 @@ vendor/
 .php-cs-fixer.cache
 .phpunit.result.cache
 .phpunit.cache/
+.clinerules
+todo.md
+
+.vscode/
+.idea/
+.DS_Store
