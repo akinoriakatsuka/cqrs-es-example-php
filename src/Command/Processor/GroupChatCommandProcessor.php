@@ -6,6 +6,8 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
 
@@ -56,6 +58,29 @@ class GroupChatCommandProcessor {
         }
 
         $groupChatWithEvent = $groupChat->delete($executorId);
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+
+        return $groupChatWithEvent->getEvent();
+    }
+
+    public function addMember(
+        GroupChatId $groupChatId,
+        UserAccountId $userAccountId,
+        MemberRole $role,
+        UserAccountId $executorId
+    ): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("Group chat not found");
+        }
+
+        $memberId = new MemberId();
+        $groupChatWithEvent = $groupChat->addMember(
+            $memberId,
+            $userAccountId,
+            $role,
+            $executorId,
+        );
         $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 
         return $groupChatWithEvent->getEvent();
