@@ -5,7 +5,9 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Tests\Command\Processor;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepositoryImpl;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
@@ -53,7 +55,6 @@ class GroupChatCommandProcessorTest extends TestCase {
         $this->assertSame($executorId, $renameEvent->getExecutorId());
     }
 
-
     public function testDeleteGroupChat(): void {
         $eventStore = EventStoreFactory::createInMemory();
         $repository = new GroupChatRepositoryImpl($eventStore);
@@ -68,5 +69,37 @@ class GroupChatCommandProcessorTest extends TestCase {
         $result = $commandProcessor->deleteGroupChat($groupChatId, $executorId);
 
         $this->assertTrue($result instanceof GroupChatDeleted);
+    }
+
+    public function testAddMember(): void {
+        $eventStore = EventStoreFactory::createInMemory();
+        $repository = new GroupChatRepositoryImpl($eventStore);
+        $commandProcessor = new GroupChatCommandProcessor($repository);
+
+        $groupChatName = new GroupChatName("test");
+        $executorId = new UserAccountId();
+
+        $result = $commandProcessor->createGroupChat($groupChatName, $executorId);
+
+        $this->assertTrue($result->isCreated());
+        $this->assertInstanceOf(GroupChatCreated::class, $result);
+        $this->assertSame($groupChatName, $result->getName());
+
+        $groupChatId = $result->getAggregateId();
+        $memberUserAccountId = new UserAccountId();
+        $memberRole = MemberRole::MEMBER_ROLE;
+
+        $event = $commandProcessor->addMember(
+            $groupChatId,
+            $memberUserAccountId,
+            $memberRole,
+            $executorId
+        );
+
+        $actualGroupChatId = $event->getAggregateId();
+
+        $this->assertSame($groupChatId, $actualGroupChatId);
+        $this->assertInstanceOf(GroupChatMemberAdded::class, $event);
+        $this->assertSame($memberUserAccountId, $event->getMember()->getUserAccountId());
     }
 }
