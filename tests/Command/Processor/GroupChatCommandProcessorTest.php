@@ -6,10 +6,10 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepositoryImpl;
@@ -106,7 +106,7 @@ class GroupChatCommandProcessorTest extends TestCase {
         $this->assertSame($memberUserAccountId, $event->getMember()->getUserAccountId());
     }
 
-    public function testPostMessage():void {
+    public function testPostMessage(): void {
         // Arrange
         $eventStore = EventStoreFactory::createInMemory();
         $repository = new GroupChatRepositoryImpl($eventStore);
@@ -141,6 +141,7 @@ class GroupChatCommandProcessorTest extends TestCase {
         );
 
         // Assert
+        $this->assertInstanceOf(GroupChatMessagePosted::class, $event);
         $this->assertSame($message, $event->getMessage());
     }
 }

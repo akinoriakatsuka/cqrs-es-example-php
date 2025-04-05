@@ -3,69 +3,75 @@
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use DateTimeImmutable;
 
-class GroupChatMessagePosted implements GroupChatEvent
- {
+class GroupChatMessagePosted implements GroupChatEvent {
+    private string $id;
+    private GroupChatId $groupChatId;
+    private Message $message;
+    private UserAccountId $executorId;
+    private int $sequenceNumber;
+    private DateTimeImmutable $occurredAt;
 
-    public function __construct()
-    {
+    public function __construct(
+        string $id,
+        GroupChatId $groupChatId,
+        Message $message,
+        UserAccountId $executorId,
+        int $sequenceNumber,
+        DateTimeImmutable $occurredAt
+    ) {
+        $this->id = $id;
+        $this->groupChatId = $groupChatId;
+        $this->message = $message;
+        $this->executorId = $executorId;
+        $this->sequenceNumber = $sequenceNumber;
+        $this->occurredAt = $occurredAt;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getId(): string
-    {
-        // TODO: Implement getId() method.
+    public function getId(): string {
+        return $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getTypeName(): string
-    {
-        // TODO: Implement getTypeName() method.
+    public function getTypeName(): string {
+        return 'group-chat-message-posted';
     }
 
-    /**
-     * @return int
-     */
-    public function getSequenceNumber(): int
-    {
-        // TODO: Implement getSequenceNumber() method.
+    public function getSequenceNumber(): int {
+        return $this->sequenceNumber;
     }
 
-    /**
-     * @return bool
-     */
-    public function isCreated(): bool
-    {
-        // TODO: Implement isCreated() method.
+    public function isCreated(): bool {
+        return false;
     }
 
-    /**
-     * @return DateTimeImmutable
-     */
-    public function getOccurredAt(): DateTimeImmutable
-    {
-        // TODO: Implement getOccurredAt() method.
+    public function getOccurredAt(): DateTimeImmutable {
+        return $this->occurredAt;
     }
 
-    /**
-     * @return GroupChatId
-     */
-    public function getAggregateId(): GroupChatId
-    {
-        // TODO: Implement getAggregateId() method.
+    public function getAggregateId(): GroupChatId {
+        return $this->groupChatId;
     }
 
-    /**
-     * @return mixed
-     */
-    public function jsonSerialize(): mixed
-    {
-        // TODO: Implement jsonSerialize() method.
+    public function getMessage(): Message {
+        return $this->message;
+    }
+
+    public function getExecutorId(): UserAccountId {
+        return $this->executorId;
+    }
+
+    public function jsonSerialize(): mixed {
+        return [
+            'id' => $this->id,
+            'type' => $this->getTypeName(),
+            'groupChatId' => $this->groupChatId,
+            'message' => $this->message,
+            'executorId' => $this->executorId,
+            'sequenceNumber' => $this->sequenceNumber,
+            'occurredAt' => $this->occurredAt->format(DATE_ATOM),
+        ];
     }
 }

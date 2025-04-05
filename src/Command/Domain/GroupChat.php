@@ -120,6 +120,17 @@ readonly class GroupChat implements Aggregate {
                     $this->version,
                     true
                 );
+            case $event instanceof GroupChatMessagePosted:
+                $newMessages = new Messages(array_merge($this->messages->getValues(), [$event->getMessage()]));
+                return new GroupChat(
+                    $this->id,
+                    $this->name,
+                    $this->members,
+                    $newMessages,
+                    $event->getSequenceNumber(),
+                    $this->version,
+                    $this->isDeleted
+                );
             default:
                 return $this;
         }
@@ -265,11 +276,33 @@ readonly class GroupChat implements Aggregate {
      * @param UserAccountId  $memberUserAccountId
      * @return GroupChatWithEventPair
      */
-    public function postMessage(MessageId $messageId, Message $message, UserAccountId $memberUserAccountId) {
-        return new GroupChatWithEventPair(
-            $this,
-            new GroupChatMessagePosted()
+    public function postMessage(MessageId $messageId, Message $message, UserAccountId $memberUserAccountId): GroupChatWithEventPair {
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot post message to a deleted group chat");
+        }
+
+        // Add the message to the messages collection
+        $newMessages = new Messages(array_merge($this->messages->getValues(), [$message]));
+
+        // Create a new state with the updated messages
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $this->members,
+            $newMessages,
+            $this->sequenceNumber + 1,
+            $this->version
         );
+
+        // Create the event
+        $event = GroupChatEventFactory::ofMessagePosted(
+            $this->id,
+            $message,
+            $memberUserAccountId,
+            $newState->getSequenceNumber()
+        );
+
+        return new GroupChatWithEventPair($newState, $event);
     }
 
     public function isDeleted(): bool {
