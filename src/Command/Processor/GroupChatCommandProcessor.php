@@ -8,6 +8,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
 
@@ -80,6 +81,31 @@ class GroupChatCommandProcessor {
             $userAccountId,
             $role,
             $executorId,
+        );
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+
+        return $groupChatWithEvent->getEvent();
+    }
+
+    /**
+     * Post a message to a group chat
+     *
+     * @param GroupChatId $groupChatId
+     * @param Message $message
+     * @param UserAccountId $memberUserAccountId
+     * @return GroupChatEvent
+     * @throws \RuntimeException If group chat not found
+     */
+    public function postMessage(GroupChatId $groupChatId, Message $message, UserAccountId $memberUserAccountId): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("Group chat not found");
+        }
+
+        $groupChatWithEvent = $groupChat->postMessage(
+            $message->getId(),
+            $message,
+            $memberUserAccountId
         );
         $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 

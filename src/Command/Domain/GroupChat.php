@@ -8,7 +8,10 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Errors\AlreadyDeletedExcepti
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
@@ -116,6 +119,17 @@ readonly class GroupChat implements Aggregate {
                     $event->getSequenceNumber(),
                     $this->version,
                     true
+                );
+            case $event instanceof GroupChatMessagePosted:
+                $newMessages = new Messages(array_merge($this->messages->getValues(), [$event->getMessage()]));
+                return new GroupChat(
+                    $this->id,
+                    $this->name,
+                    $this->members,
+                    $newMessages,
+                    $event->getSequenceNumber(),
+                    $this->version,
+                    $this->isDeleted
                 );
             default:
                 return $this;
@@ -249,6 +263,43 @@ readonly class GroupChat implements Aggregate {
             $this->id,
             $newState->getSequenceNumber(),
             $executorId
+        );
+
+        return new GroupChatWithEventPair($newState, $event);
+    }
+
+    /**
+     * Post a message to the group chat
+     *
+     * @param MessageId $messageId
+     * @param Message        $message
+     * @param UserAccountId  $memberUserAccountId
+     * @return GroupChatWithEventPair
+     */
+    public function postMessage(MessageId $messageId, Message $message, UserAccountId $memberUserAccountId): GroupChatWithEventPair {
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot post message to a deleted group chat");
+        }
+
+        // Add the message to the messages collection
+        $newMessages = new Messages(array_merge($this->messages->getValues(), [$message]));
+
+        // Create a new state with the updated messages
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $this->members,
+            $newMessages,
+            $this->sequenceNumber + 1,
+            $this->version
+        );
+
+        // Create the event
+        $event = GroupChatEventFactory::ofMessagePosted(
+            $this->id,
+            $message,
+            $memberUserAccountId,
+            $newState->getSequenceNumber()
         );
 
         return new GroupChatWithEventPair($newState, $event);
