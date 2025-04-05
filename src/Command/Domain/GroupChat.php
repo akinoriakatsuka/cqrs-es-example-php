@@ -8,7 +8,10 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Errors\AlreadyDeletedExcepti
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
@@ -252,6 +255,21 @@ readonly class GroupChat implements Aggregate {
         );
 
         return new GroupChatWithEventPair($newState, $event);
+    }
+
+    /**
+     * Post a message to the group chat
+     *
+     * @param MessageId $messageId
+     * @param Message        $message
+     * @param UserAccountId  $memberUserAccountId
+     * @return GroupChatWithEventPair
+     */
+    public function postMessage(MessageId $messageId, Message $message, UserAccountId $memberUserAccountId) {
+        return new GroupChatWithEventPair(
+            $this,
+            new GroupChatMessagePosted()
+        );
     }
 
     public function isDeleted(): bool {

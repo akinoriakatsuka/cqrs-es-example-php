@@ -9,6 +9,9 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepositoryImpl;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
 use J5ik2o\EventStoreAdapterPhp\EventStoreFactory;
@@ -101,5 +104,43 @@ class GroupChatCommandProcessorTest extends TestCase {
         $this->assertSame($groupChatId, $actualGroupChatId);
         $this->assertInstanceOf(GroupChatMemberAdded::class, $event);
         $this->assertSame($memberUserAccountId, $event->getMember()->getUserAccountId());
+    }
+
+    public function testPostMessage():void {
+        // Arrange
+        $eventStore = EventStoreFactory::createInMemory();
+        $repository = new GroupChatRepositoryImpl($eventStore);
+        $commandProcessor = new GroupChatCommandProcessor($repository);
+
+        $groupChatName = new GroupChatName("test");
+        $executorId = new UserAccountId();
+        $result = $commandProcessor->createGroupChat($groupChatName, $executorId);
+
+        $groupChatId = $result->getAggregateId();
+        $memberUserAccountId = new UserAccountId();
+        $memberRole = MemberRole::MEMBER_ROLE;
+        $commandProcessor->addMember(
+            $groupChatId,
+            $memberUserAccountId,
+            $memberRole,
+            $executorId
+        );
+
+        $message_id = new MessageId();
+        $message = new Message(
+            $message_id,
+            "Hello, world!",
+            $memberUserAccountId
+        );
+
+        // Act
+        $event = $commandProcessor->postMessage(
+            $groupChatId,
+            $message,
+            $memberUserAccountId
+        );
+
+        // Assert
+        $this->assertSame($message, $event->getMessage());
     }
 }
