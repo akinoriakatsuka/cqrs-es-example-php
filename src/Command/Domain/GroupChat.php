@@ -8,6 +8,9 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Errors\AlreadyDeletedExcepti
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdited;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
@@ -103,6 +106,13 @@ readonly class GroupChat implements Aggregate {
                     $event->getExecutorId()
                 );
                 return $GroupChatWithEventPair->getGroupChat();
+            case $event instanceof GroupChatMemberRemoved:
+                $groupChat = $this;
+                $GroupChatWithEventPair = $groupChat->removeMember(
+                    $event->getMemberUserAccountId(),
+                    $event->getExecutorId()
+                );
+                return $GroupChatWithEventPair->getGroupChat();
             case $event instanceof GroupChatRenamed:
                 $groupChat = $this;
                 $GroupChatWithEventPair = $groupChat->rename(
@@ -131,6 +141,21 @@ readonly class GroupChat implements Aggregate {
                     $this->version,
                     $this->isDeleted
                 );
+            case $event instanceof GroupChatMessageEdited:
+                $groupChat = $this;
+                $GroupChatWithEventPair = $groupChat->editMessage(
+                    $event->getMessageId(),
+                    $event->getNewText(),
+                    $event->getExecutorId()
+                );
+                return $GroupChatWithEventPair->getGroupChat();
+            case $event instanceof GroupChatMessageDeleted:
+                $groupChat = $this;
+                $GroupChatWithEventPair = $groupChat->deleteMessage(
+                    $event->getMessageId(),
+                    $event->getExecutorId()
+                );
+                return $GroupChatWithEventPair->getGroupChat();
             default:
                 return $this;
         }
@@ -276,6 +301,62 @@ readonly class GroupChat implements Aggregate {
      * @param UserAccountId  $memberUserAccountId
      * @return GroupChatWithEventPair
      */
+    /**
+     * Remove a member from the group chat
+     *
+     * @param UserAccountId $memberUserAccountId
+     * @param UserAccountId $executorId
+     * @return GroupChatWithEventPair
+     * @throws AlreadyDeletedException If group chat is deleted
+     * @throws \RuntimeException If member not found
+     */
+    public function removeMember(
+        UserAccountId $memberUserAccountId,
+        UserAccountId $executorId
+    ): GroupChatWithEventPair {
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot remove member from a deleted group chat");
+        }
+
+        // Check if the member exists
+        $member = $this->members->findByUserAccountId($memberUserAccountId);
+        if ($member === null) {
+            throw new \RuntimeException("Member not found with user account ID: " . $memberUserAccountId->getValue());
+        }
+
+        // Remove the member
+        $newMembers = $this->members->removeMember($memberUserAccountId);
+
+        // Create a new state with the updated members
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $newMembers,
+            $this->messages,
+            $this->sequenceNumber + 1,
+            $this->version
+        );
+
+        // Create the event
+        $event = GroupChatEventFactory::ofMemberRemoved(
+            $this->id,
+            $memberUserAccountId,
+            $executorId,
+            $newState->getSequenceNumber()
+        );
+
+        return new GroupChatWithEventPair($newState, $event);
+    }
+
+    /**
+     * Post a message to the group chat
+     *
+     * @param MessageId $messageId
+     * @param Message        $message
+     * @param UserAccountId  $memberUserAccountId
+     * @return GroupChatWithEventPair
+     * @throws AlreadyDeletedException If group chat is deleted
+     */
     public function postMessage(MessageId $messageId, Message $message, UserAccountId $memberUserAccountId): GroupChatWithEventPair {
         if ($this->isDeleted) {
             throw new AlreadyDeletedException("Cannot post message to a deleted group chat");
@@ -299,6 +380,103 @@ readonly class GroupChat implements Aggregate {
             $this->id,
             $message,
             $memberUserAccountId,
+            $newState->getSequenceNumber()
+        );
+
+        return new GroupChatWithEventPair($newState, $event);
+    }
+
+    /**
+     * Edit a message in the group chat
+     *
+     * @param MessageId $messageId
+     * @param string $newText
+     * @param UserAccountId $executorId
+     * @return GroupChatWithEventPair
+     * @throws AlreadyDeletedException If group chat is deleted
+     * @throws \RuntimeException If message not found
+     */
+    public function editMessage(
+        MessageId $messageId,
+        string $newText,
+        UserAccountId $executorId
+    ): GroupChatWithEventPair {
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot edit message in a deleted group chat");
+        }
+
+        // Check if the message exists
+        $message = $this->messages->findById($messageId);
+        if ($message === null) {
+            throw new \RuntimeException("Message not found with ID: " . $messageId->getValue());
+        }
+
+        // Edit the message
+        $newMessages = $this->messages->editMessage($messageId, $newText);
+
+        // Create a new state with the updated messages
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $this->members,
+            $newMessages,
+            $this->sequenceNumber + 1,
+            $this->version
+        );
+
+        // Create the event
+        $event = GroupChatEventFactory::ofMessageEdited(
+            $this->id,
+            $messageId,
+            $newText,
+            $executorId,
+            $newState->getSequenceNumber()
+        );
+
+        return new GroupChatWithEventPair($newState, $event);
+    }
+
+    /**
+     * Delete a message from the group chat
+     *
+     * @param MessageId $messageId
+     * @param UserAccountId $executorId
+     * @return GroupChatWithEventPair
+     * @throws AlreadyDeletedException If group chat is deleted
+     * @throws \RuntimeException If message not found
+     */
+    public function deleteMessage(
+        MessageId $messageId,
+        UserAccountId $executorId
+    ): GroupChatWithEventPair {
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot delete message from a deleted group chat");
+        }
+
+        // Check if the message exists
+        $message = $this->messages->findById($messageId);
+        if ($message === null) {
+            throw new \RuntimeException("Message not found with ID: " . $messageId->getValue());
+        }
+
+        // Delete the message
+        $newMessages = $this->messages->deleteMessage($messageId);
+
+        // Create a new state with the updated messages
+        $newState = new GroupChat(
+            $this->id,
+            $this->name,
+            $this->members,
+            $newMessages,
+            $this->sequenceNumber + 1,
+            $this->version
+        );
+
+        // Create the event
+        $event = GroupChatEventFactory::ofMessageDeleted(
+            $this->id,
+            $messageId,
+            $executorId,
             $newState->getSequenceNumber()
         );
 

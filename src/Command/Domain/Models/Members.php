@@ -48,6 +48,30 @@ readonly class Members {
 
     /**
      * @param UserAccountId $userAccountId
+     * @return Members
+     * @throws \RuntimeException If member not found
+     */
+    public function removeMember(UserAccountId $userAccountId): Members {
+        $newValues = [];
+        $found = false;
+
+        foreach ($this->values as $member) {
+            if (!$member->getUserAccountId()->equals($userAccountId)) {
+                $newValues[] = $member;
+            } else {
+                $found = true;
+            }
+        }
+
+        if (!$found) {
+            throw new \RuntimeException("Member not found with user account ID: " . $userAccountId->getValue());
+        }
+
+        return new Members($newValues);
+    }
+
+    /**
+     * @param UserAccountId $userAccountId
      * @return Member|null
      */
     public function findByUserAccountId(UserAccountId $userAccountId): Member|null {

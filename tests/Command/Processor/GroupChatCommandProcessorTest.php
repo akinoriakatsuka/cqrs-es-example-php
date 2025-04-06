@@ -6,6 +6,9 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdited;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
@@ -106,6 +109,42 @@ class GroupChatCommandProcessorTest extends TestCase {
         $this->assertSame($memberUserAccountId, $event->getMember()->getUserAccountId());
     }
 
+    public function testRemoveMember(): void {
+        // Arrange
+        $eventStore = EventStoreFactory::createInMemory();
+        $repository = new GroupChatRepositoryImpl($eventStore);
+        $commandProcessor = new GroupChatCommandProcessor($repository);
+
+        // Create a group chat
+        $groupChatName = new GroupChatName("test");
+        $executorId = new UserAccountId();
+        $result = $commandProcessor->createGroupChat($groupChatName, $executorId);
+        $groupChatId = $result->getAggregateId();
+
+        // Add a member
+        $memberUserAccountId = new UserAccountId();
+        $memberRole = MemberRole::MEMBER_ROLE;
+        $commandProcessor->addMember(
+            $groupChatId,
+            $memberUserAccountId,
+            $memberRole,
+            $executorId
+        );
+
+        // Act
+        $event = $commandProcessor->removeMember(
+            $groupChatId,
+            $memberUserAccountId,
+            $executorId
+        );
+
+        // Assert
+        $this->assertInstanceOf(GroupChatMemberRemoved::class, $event);
+        $this->assertSame($groupChatId, $event->getAggregateId());
+        $this->assertSame($memberUserAccountId, $event->getMemberUserAccountId());
+        $this->assertSame($executorId, $event->getExecutorId());
+    }
+
     public function testPostMessage(): void {
         // Arrange
         $eventStore = EventStoreFactory::createInMemory();
@@ -143,5 +182,107 @@ class GroupChatCommandProcessorTest extends TestCase {
         // Assert
         $this->assertInstanceOf(GroupChatMessagePosted::class, $event);
         $this->assertSame($message, $event->getMessage());
+    }
+
+    public function testEditMessage(): void {
+        // Arrange
+        $eventStore = EventStoreFactory::createInMemory();
+        $repository = new GroupChatRepositoryImpl($eventStore);
+        $commandProcessor = new GroupChatCommandProcessor($repository);
+
+        // Create a group chat
+        $groupChatName = new GroupChatName("test");
+        $executorId = new UserAccountId();
+        $result = $commandProcessor->createGroupChat($groupChatName, $executorId);
+        $groupChatId = $result->getAggregateId();
+
+        // Add a member
+        $memberUserAccountId = new UserAccountId();
+        $memberRole = MemberRole::MEMBER_ROLE;
+        $commandProcessor->addMember(
+            $groupChatId,
+            $memberUserAccountId,
+            $memberRole,
+            $executorId
+        );
+
+        // Post a message
+        $messageId = new MessageId();
+        $originalText = "Hello, world!";
+        $message = new Message(
+            $messageId,
+            $originalText,
+            $memberUserAccountId
+        );
+        $commandProcessor->postMessage(
+            $groupChatId,
+            $message,
+            $memberUserAccountId
+        );
+
+        // Act
+        $newText = "Updated message text";
+        $event = $commandProcessor->editMessage(
+            $groupChatId,
+            $messageId,
+            $newText,
+            $memberUserAccountId
+        );
+
+        // Assert
+        $this->assertInstanceOf(GroupChatMessageEdited::class, $event);
+        $this->assertSame($groupChatId, $event->getAggregateId());
+        $this->assertTrue($messageId->equals($event->getMessageId()));
+        $this->assertSame($newText, $event->getNewText());
+        $this->assertSame($memberUserAccountId, $event->getExecutorId());
+    }
+
+    public function testDeleteMessage(): void {
+        // Arrange
+        $eventStore = EventStoreFactory::createInMemory();
+        $repository = new GroupChatRepositoryImpl($eventStore);
+        $commandProcessor = new GroupChatCommandProcessor($repository);
+
+        // Create a group chat
+        $groupChatName = new GroupChatName("test");
+        $executorId = new UserAccountId();
+        $result = $commandProcessor->createGroupChat($groupChatName, $executorId);
+        $groupChatId = $result->getAggregateId();
+
+        // Add a member
+        $memberUserAccountId = new UserAccountId();
+        $memberRole = MemberRole::MEMBER_ROLE;
+        $commandProcessor->addMember(
+            $groupChatId,
+            $memberUserAccountId,
+            $memberRole,
+            $executorId
+        );
+
+        // Post a message
+        $messageId = new MessageId();
+        $message = new Message(
+            $messageId,
+            "Hello, world!",
+            $memberUserAccountId
+        );
+        $commandProcessor->postMessage(
+            $groupChatId,
+            $message,
+            $memberUserAccountId
+        );
+
+        // Act
+        $event = $commandProcessor->deleteMessage(
+            $groupChatId,
+            $messageId,
+            $memberUserAccountId
+        );
+
+        // Assert
+        $this->assertInstanceOf(GroupChatMessageDeleted::class, $event);
+        $this->assertSame($groupChatId, $event->getAggregateId());
+        $this->assertTrue($messageId->equals($event->getMessageId()));
+        $this->assertSame($memberUserAccountId, $event->getExecutorId());
     }
 }
