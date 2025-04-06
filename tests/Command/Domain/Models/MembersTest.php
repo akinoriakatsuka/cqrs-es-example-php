@@ -50,6 +50,46 @@ class MembersTest extends TestCase {
         $this->assertSame(MemberRole::MEMBER_ROLE, $newMember->getRole());
     }
 
+    public function testRemoveMember(): void {
+        // Arrange
+        $adminId = new UserAccountId();
+        $members = Members::create($adminId);
+
+        $memberId = new UserAccountId();
+        $membersWithTwo = $members->addMember($memberId);
+
+        // Act
+        $updatedMembers = $membersWithTwo->removeMember($memberId);
+
+        // Assert
+        // Original members should be unchanged
+        $this->assertCount(2, $membersWithTwo->getValues());
+
+        // New members collection should have 1 member (admin only)
+        $this->assertCount(1, $updatedMembers->getValues());
+
+        // Admin should still be present
+        $adminMember = $updatedMembers->findByUserAccountId($adminId);
+        $this->assertNotNull($adminMember);
+
+        // Removed member should not be present
+        $removedMember = $updatedMembers->findByUserAccountId($memberId);
+        $this->assertNull($removedMember);
+    }
+
+    public function testRemoveMemberWithNonExistentId(): void {
+        // Arrange
+        $adminId = new UserAccountId();
+        $members = Members::create($adminId);
+
+        // Act & Assert
+        $nonExistentId = new UserAccountId();
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("Member not found with user account ID: " . $nonExistentId->getValue());
+
+        $members->removeMember($nonExistentId);
+    }
+
     public function testFindByUserAccountId(): void {
         $adminId = new UserAccountId();
         $members = Members::create($adminId);
