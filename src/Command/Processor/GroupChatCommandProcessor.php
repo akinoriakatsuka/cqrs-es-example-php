@@ -9,6 +9,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
 
@@ -88,6 +89,34 @@ class GroupChatCommandProcessor {
     }
 
     /**
+     * Remove a member from a group chat
+     *
+     * @param GroupChatId $groupChatId
+     * @param UserAccountId $memberUserAccountId
+     * @param UserAccountId $executorId
+     * @return GroupChatEvent
+     * @throws \RuntimeException If group chat not found
+     */
+    public function removeMember(
+        GroupChatId $groupChatId,
+        UserAccountId $memberUserAccountId,
+        UserAccountId $executorId
+    ): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("Group chat not found");
+        }
+
+        $groupChatWithEvent = $groupChat->removeMember(
+            $memberUserAccountId,
+            $executorId
+        );
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+
+        return $groupChatWithEvent->getEvent();
+    }
+
+    /**
      * Post a message to a group chat
      *
      * @param GroupChatId $groupChatId
@@ -106,6 +135,65 @@ class GroupChatCommandProcessor {
             $message->getId(),
             $message,
             $memberUserAccountId
+        );
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+
+        return $groupChatWithEvent->getEvent();
+    }
+
+    /**
+     * Edit a message in a group chat
+     *
+     * @param GroupChatId $groupChatId
+     * @param MessageId $messageId
+     * @param string $newText
+     * @param UserAccountId $executorId
+     * @return GroupChatEvent
+     * @throws \RuntimeException If group chat not found
+     */
+    public function editMessage(
+        GroupChatId $groupChatId,
+        MessageId $messageId,
+        string $newText,
+        UserAccountId $executorId
+    ): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("Group chat not found");
+        }
+
+        $groupChatWithEvent = $groupChat->editMessage(
+            $messageId,
+            $newText,
+            $executorId
+        );
+        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+
+        return $groupChatWithEvent->getEvent();
+    }
+
+    /**
+     * Delete a message from a group chat
+     *
+     * @param GroupChatId $groupChatId
+     * @param MessageId $messageId
+     * @param UserAccountId $executorId
+     * @return GroupChatEvent
+     * @throws \RuntimeException If group chat not found
+     */
+    public function deleteMessage(
+        GroupChatId $groupChatId,
+        MessageId $messageId,
+        UserAccountId $executorId
+    ): GroupChatEvent {
+        $groupChat = $this->repository->findById($groupChatId);
+        if ($groupChat === null) {
+            throw new \RuntimeException("Group chat not found");
+        }
+
+        $groupChatWithEvent = $groupChat->deleteMessage(
+            $messageId,
+            $executorId
         );
         $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 

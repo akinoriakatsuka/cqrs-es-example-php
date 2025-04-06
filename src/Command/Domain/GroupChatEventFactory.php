@@ -9,11 +9,15 @@ use DateTimeImmutable;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdited;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
@@ -100,6 +104,62 @@ final class GroupChatEventFactory {
             $eventId,
             $id,
             $message,
+            $executorId,
+            $sequenceNumber,
+            $occurredAt
+        );
+    }
+
+    public static function ofMemberRemoved(
+        GroupChatId $id,
+        UserAccountId $memberUserAccountId,
+        UserAccountId $executorId,
+        int $sequenceNumber
+    ): GroupChatMemberRemoved {
+        $eventId = "group-chat-event-" . Ulid::generate();
+        $occurredAt = new DateTimeImmutable('now');
+        return new GroupChatMemberRemoved(
+            $eventId,
+            $id,
+            $memberUserAccountId,
+            $executorId,
+            $sequenceNumber,
+            $occurredAt
+        );
+    }
+
+    public static function ofMessageEdited(
+        GroupChatId $id,
+        MessageId $messageId,
+        string $newText,
+        UserAccountId $executorId,
+        int $sequenceNumber
+    ): GroupChatMessageEdited {
+        $eventId = "group-chat-event-" . Ulid::generate();
+        $occurredAt = new DateTimeImmutable('now');
+        return new GroupChatMessageEdited(
+            $eventId,
+            $id,
+            $messageId,
+            $newText,
+            $executorId,
+            $sequenceNumber,
+            $occurredAt
+        );
+    }
+
+    public static function ofMessageDeleted(
+        GroupChatId $id,
+        MessageId $messageId,
+        UserAccountId $executorId,
+        int $sequenceNumber
+    ): GroupChatMessageDeleted {
+        $eventId = "group-chat-event-" . Ulid::generate();
+        $occurredAt = new DateTimeImmutable('now');
+        return new GroupChatMessageDeleted(
+            $eventId,
+            $id,
+            $messageId,
             $executorId,
             $sequenceNumber,
             $occurredAt
