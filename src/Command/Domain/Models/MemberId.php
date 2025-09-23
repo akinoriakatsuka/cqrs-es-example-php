@@ -7,11 +7,10 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 use Ulid\Ulid;
 
 readonly class MemberId {
-    private string $value;
+    public string $value;
 
-    public function __construct() {
-        $value = Ulid::generate();
-        $this->value = (string) $value;
+    public function __construct(?string $value = null) {
+        $this->value = $value ?? (string) Ulid::generate();
     }
 
     public function getValue(): string {
