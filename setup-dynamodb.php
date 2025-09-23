@@ -10,8 +10,8 @@ $client = new DynamoDbClient([
     'endpoint' => 'http://localhost:8000',
     'credentials' => [
         'key' => 'dummy',
-        'secret' => 'dummy'
-    ]
+        'secret' => 'dummy',
+    ],
 ]);
 
 // Create Journal Table
@@ -21,26 +21,26 @@ try {
         'KeySchema' => [
             [
                 'AttributeName' => 'pkey',
-                'KeyType' => 'HASH'
+                'KeyType' => 'HASH',
             ],
             [
                 'AttributeName' => 'skey',
-                'KeyType' => 'RANGE'
-            ]
+                'KeyType' => 'RANGE',
+            ],
         ],
         'AttributeDefinitions' => [
             [
                 'AttributeName' => 'pkey',
-                'AttributeType' => 'S'
+                'AttributeType' => 'S',
             ],
             [
                 'AttributeName' => 'skey',
-                'AttributeType' => 'S'
+                'AttributeType' => 'S',
             ],
             [
                 'AttributeName' => 'aid',
-                'AttributeType' => 'S'
-            ]
+                'AttributeType' => 'S',
+            ],
         ],
         'GlobalSecondaryIndexes' => [
             [
@@ -48,20 +48,20 @@ try {
                 'KeySchema' => [
                     [
                         'AttributeName' => 'aid',
-                        'KeyType' => 'HASH'
+                        'KeyType' => 'HASH',
                     ],
                     [
                         'AttributeName' => 'skey',
-                        'KeyType' => 'RANGE'
-                    ]
+                        'KeyType' => 'RANGE',
+                    ],
                 ],
                 'Projection' => [
-                    'ProjectionType' => 'ALL'
+                    'ProjectionType' => 'ALL',
                 ],
-                'BillingMode' => 'PAY_PER_REQUEST'
-            ]
+                'BillingMode' => 'PAY_PER_REQUEST',
+            ],
         ],
-        'BillingMode' => 'PAY_PER_REQUEST'
+        'BillingMode' => 'PAY_PER_REQUEST',
     ]);
     echo "Journal table created successfully\n";
 } catch (Exception $e) {
@@ -75,26 +75,26 @@ try {
         'KeySchema' => [
             [
                 'AttributeName' => 'pkey',
-                'KeyType' => 'HASH'
+                'KeyType' => 'HASH',
             ],
             [
                 'AttributeName' => 'skey',
-                'KeyType' => 'RANGE'
-            ]
+                'KeyType' => 'RANGE',
+            ],
         ],
         'AttributeDefinitions' => [
             [
                 'AttributeName' => 'pkey',
-                'AttributeType' => 'S'
+                'AttributeType' => 'S',
             ],
             [
                 'AttributeName' => 'skey',
-                'AttributeType' => 'S'
+                'AttributeType' => 'S',
             ],
             [
                 'AttributeName' => 'aid',
-                'AttributeType' => 'S'
-            ]
+                'AttributeType' => 'S',
+            ],
         ],
         'GlobalSecondaryIndexes' => [
             [
@@ -102,20 +102,20 @@ try {
                 'KeySchema' => [
                     [
                         'AttributeName' => 'aid',
-                        'KeyType' => 'HASH'
+                        'KeyType' => 'HASH',
                     ],
                     [
                         'AttributeName' => 'skey',
-                        'KeyType' => 'RANGE'
-                    ]
+                        'KeyType' => 'RANGE',
+                    ],
                 ],
                 'Projection' => [
-                    'ProjectionType' => 'ALL'
+                    'ProjectionType' => 'ALL',
                 ],
-                'BillingMode' => 'PAY_PER_REQUEST'
-            ]
+                'BillingMode' => 'PAY_PER_REQUEST',
+            ],
         ],
-        'BillingMode' => 'PAY_PER_REQUEST'
+        'BillingMode' => 'PAY_PER_REQUEST',
     ]);
     echo "Snapshot table created successfully\n";
 } catch (Exception $e) {
