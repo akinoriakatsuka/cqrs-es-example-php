@@ -185,6 +185,7 @@ readonly class GroupChat implements Aggregate {
             $this->messages,
             $this->sequenceNumber + 1,
             $this->version,
+            $this->isDeleted
         );
         $event = GroupChatEventFactory::ofMemberAdded(
             $this->id,
@@ -206,7 +207,9 @@ readonly class GroupChat implements Aggregate {
         GroupChatName $name,
         UserAccountId $executorId
     ): GroupChatWithEventPair {
-        // TODO: Error handling
+        if ($this->isDeleted) {
+            throw new AlreadyDeletedException("Cannot rename a deleted group chat");
+        }
         $newState = new GroupChat(
             $this->id,
             $name,
@@ -214,6 +217,7 @@ readonly class GroupChat implements Aggregate {
             $this->messages,
             $this->sequenceNumber + 1,
             $this->version,
+            $this->isDeleted
         );
         $event = GroupChatEventFactory::ofRenamed(
             $this->id,
@@ -255,11 +259,19 @@ readonly class GroupChat implements Aggregate {
      * @return Aggregate
      */
     public function withVersion(int $version): Aggregate {
-        return $this;
+        return new GroupChat(
+            $this->id,
+            $this->name,
+            $this->members,
+            $this->messages,
+            $this->sequenceNumber,
+            $version,
+            $this->isDeleted
+        );
     }
 
     public function equals(Aggregate $other): bool {
-        return true;
+        return $other instanceof self && $this->id->equals($other->getId());
     }
 
     /**

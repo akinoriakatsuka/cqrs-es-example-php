@@ -391,14 +391,6 @@ class GroupChatTest extends TestCase {
         $this->assertEquals($this->groupChat->isDeleted(), $json['isDeleted']);
     }
 
-    public function testWithVersion(): void {
-        // When
-        $newGroupChat = $this->groupChat->withVersion(10);
-
-        // Then
-        // The current implementation of withVersion returns $this, so it should be the same object
-        $this->assertSame($this->groupChat, $newGroupChat);
-    }
 
     public function testReplay(): void {
         // Given
@@ -502,8 +494,20 @@ class GroupChatTest extends TestCase {
     }
 
     public function testEquals(): void {
-        // Create another GroupChat instance
-        $otherGroupChat = new GroupChat(
+        // Create GroupChat with same ID
+        $sameId = $this->groupChat->getId();
+        $sameGroupChat = new GroupChat(
+            $sameId instanceof GroupChatId ? $sameId : new GroupChatId(),
+            $this->groupChat->getName(),
+            $this->groupChat->getMembers(),
+            $this->groupChat->getMessages(),
+            $this->groupChat->getSequenceNumber(),
+            $this->groupChat->getVersion(),
+            $this->groupChat->isDeleted()
+        );
+
+        // Create GroupChat with different ID
+        $differentGroupChat = new GroupChat(
             new GroupChatId(),
             new GroupChatName("Other Group Chat"),
             Members::create(new UserAccountId()),
@@ -512,7 +516,65 @@ class GroupChatTest extends TestCase {
             1
         );
 
-        // The equals method always returns true in the current implementation
-        $this->assertTrue($this->groupChat->equals($otherGroupChat));
+        // Should return true for same GroupChat instances
+        $this->assertTrue($this->groupChat->equals($sameGroupChat));
+        // Should return false for different GroupChat instances
+        $this->assertFalse($this->groupChat->equals($differentGroupChat));
     }
+
+    public function testWithVersionReturnsNewInstance(): void {
+        // Given
+        $originalVersion = $this->groupChat->getVersion();
+        $newVersion = 10;
+
+        // When
+        $newGroupChat = $this->groupChat->withVersion($newVersion);
+
+        // Then
+        // Should return new instance with updated version
+        $this->assertEquals($newVersion, $newGroupChat->getVersion());
+        // Original should remain unchanged
+        $this->assertEquals($originalVersion, $this->groupChat->getVersion());
+        // Should be different instances
+        $this->assertNotSame($this->groupChat, $newGroupChat);
+    }
+
+    public function testAddMemberPreservesIsDeletedState(): void {
+        // Test with normal (non-deleted) GroupChat
+        $memberId = new MemberId();
+        $userAccountId = new UserAccountId();
+
+        $groupChatWithEvent = $this->groupChat->addMember(
+            $memberId,
+            $userAccountId,
+            MemberRole::MEMBER_ROLE,
+            $this->adminId
+        );
+
+        $newGroupChat = $groupChatWithEvent->getGroupChat();
+        $this->assertFalse($newGroupChat->isDeleted());
+    }
+
+    public function testRenamePreservesIsDeletedState(): void {
+        // Test with normal (non-deleted) GroupChat
+        $newName = new GroupChatName("renamed-group-chat");
+
+        $groupChatWithEvent = $this->groupChat->rename($newName, $this->adminId);
+
+        $newGroupChat = $groupChatWithEvent->getGroupChat();
+        $this->assertFalse($newGroupChat->isDeleted());
+    }
+
+    public function testRenameDeletedGroupChatShouldThrowException(): void {
+        // Given: Delete the group chat first
+        $deletedGroupChatResult = $this->groupChat->delete($this->adminId);
+        $deletedGroupChat = $deletedGroupChatResult->getGroupChat();
+
+        // When/Then: Attempt to rename deleted group chat should throw exception
+        $this->expectException(\Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Errors\AlreadyDeletedException::class);
+
+        $newName = new GroupChatName("new-name");
+        $deletedGroupChat->rename($newName, $this->adminId);
+    }
+
 }
