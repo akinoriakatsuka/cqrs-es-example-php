@@ -73,7 +73,7 @@ readonly class GroupChatCreated implements GroupChatEvent {
      * @return int
      */
     public function getSequenceNumber(): int {
-        return 0;
+        return $this->sequenceNumber;
     }
 
     /**
@@ -91,7 +91,7 @@ readonly class GroupChatCreated implements GroupChatEvent {
      * @return DateTimeImmutable
      */
     public function getOccurredAt(): DateTimeImmutable {
-        return new DateTimeImmutable();
+        return $this->occurredAt;
     }
 
     public function jsonSerialize(): mixed {

@@ -19,7 +19,7 @@ class GroupChatEventFactoryTest extends TestCase {
         $event = GroupChatEventFactory::ofCreated($id, $name);
         $this->assertSame($id, $event->getAggregateId());
         $this->assertSame($name, $event->getName());
-        $this->assertEquals(0, $event->getSequenceNumber());
+        $this->assertEquals(1, $event->getSequenceNumber());
         $this->assertNotEmpty($event->getOccurredAt());
     }
 

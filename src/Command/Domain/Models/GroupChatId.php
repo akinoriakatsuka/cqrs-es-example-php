@@ -11,29 +11,30 @@ class GroupChatId implements AggregateId {
     public const TYPE_NAME = "GroupChatId";
     private readonly string $value;
 
-    public function __construct() {
-        $value = Ulid::generate();
-        $this->value = (string) $value;
+    public function __construct(?string $value = null) {
+        $this->value = $value ?? (string) Ulid::generate();
     }
 
-
     public function getTypeName(): string {
-        return "";
+        return self::TYPE_NAME;
     }
 
     public function getValue(): string {
-        return "";
+        return $this->value;
     }
 
     public function asString(): string {
-        return "";
+        return $this->value;
     }
 
     public function equals(AggregateId $other): bool {
-        return true;
+        return $other instanceof self && $this->value === $other->value;
     }
 
-    public function jsonSerialize(): mixed {
+    /**
+     * @return array<string, string>
+     */
+    public function jsonSerialize(): array {
         return [
             "value" => $this->value,
         ];

@@ -7,9 +7,8 @@ use Ulid\Ulid;
 readonly class MessageId {
     private string $value;
 
-    public function __construct() {
-        $value = (string) Ulid::generate();
-        $this->value = $value;
+    public function __construct(?string $value = null) {
+        $this->value = $value ?? (string) Ulid::generate();
     }
 
     public function getValue(): string {

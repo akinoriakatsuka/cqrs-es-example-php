@@ -22,7 +22,7 @@ class GroupChatCreatedTest extends TestCase {
         $this->id = 'event-id-123';
         $this->aggregateId = new GroupChatId();
         $this->name = new GroupChatName('Test Group Chat');
-        $this->sequenceNumber = 1;
+        $this->sequenceNumber = 5;
         $this->occurredAt = new DateTimeImmutable();
 
         $this->event = new GroupChatCreated(
@@ -51,12 +51,42 @@ class GroupChatCreatedTest extends TestCase {
     }
 
     public function testGetSequenceNumber(): void {
-        // Note: The implementation always returns 0 regardless of the constructor value
-        $this->assertSame(0, $this->event->getSequenceNumber());
+        // Should return the sequence number passed to constructor
+        $this->assertSame($this->sequenceNumber, $this->event->getSequenceNumber());
+    }
+
+    public function testGetSequenceNumberWithDifferentValue(): void {
+        $sequenceNumber = 5;
+        $event = new GroupChatCreated(
+            'test-id',
+            new GroupChatId(),
+            new GroupChatName('Test'),
+            $sequenceNumber,
+            new DateTimeImmutable()
+        );
+
+        $this->assertEquals($sequenceNumber, $event->getSequenceNumber());
     }
 
     public function testIsCreated(): void {
         $this->assertTrue($this->event->isCreated());
+    }
+
+    public function testGetOccurredAt(): void {
+        // Should return the occurredAt passed to constructor
+        $this->assertSame($this->occurredAt, $this->event->getOccurredAt());
+    }
+
+    public function testGetOccurredAtWithDifferentValue(): void {
+        $occurredAt = new DateTimeImmutable('2023-01-01 12:00:00');
+        $event = new GroupChatCreated(
+            'test-id',
+            new GroupChatId(),
+            new GroupChatName('Test'),
+            1,
+            $occurredAt
+        );
+        $this->assertEquals($occurredAt, $event->getOccurredAt());
     }
 
     public function testJsonSerialize(): void {
