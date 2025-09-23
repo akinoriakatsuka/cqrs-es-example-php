@@ -1,5 +1,27 @@
-version: '3'
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www/html/src
+      - ./public:/var/www/html/public
+    environment:
+      - APP_ENV=development
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+    depends_on:
+      - dynamodb-local
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+  
   dynamodb-local:
     image: amazon/dynamodb-local:2.6.1
     hostname: dynamodb-local

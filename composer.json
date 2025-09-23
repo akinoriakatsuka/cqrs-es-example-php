@@ -22,7 +22,12 @@
     "require": {
         "php": ">= 8.2",
         "aws/aws-sdk-php": "^3.283",
-        "j5ik2o/event-store-adapter-php": "dev-fix/in-memory"
+        "j5ik2o/event-store-adapter-php": "dev-fix/in-memory",
+        "slim/slim": "^4.12",
+        "slim/psr7": "^1.6",
+        "psr/http-message": "^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0"
     },
     "autoload": {
         "psr-4": {
