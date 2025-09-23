@@ -4,8 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./src:/var/www/html/src
-      - ./public:/var/www/html/public
+      - .:/var/www/html
     environment:
       - APP_ENV=development
       - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
