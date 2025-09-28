@@ -156,16 +156,17 @@ WRONG_CONTENT_TYPE_RESPONSE=$(curl -s -w "%{http_code}" \
 
 WRONG_CONTENT_TYPE_STATUS=${WRONG_CONTENT_TYPE_RESPONSE: -3}
 
-if [ "$WRONG_CONTENT_TYPE_STATUS" = "200" ]; then
+if [ "$WRONG_CONTENT_TYPE_STATUS" = "400" ]; then
     ERROR_COUNT=$(cat /tmp/wrong_content_type_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "    ✅ Wrong Content-Type properly rejected"
     else
-        echo "    ❌ Wrong Content-Type should be rejected"
+        echo "    ❌ Wrong Content-Type should be rejected with errors"
         exit 1
     fi
 else
     echo "    ❌ Content-Type validation test failed (Status: $WRONG_CONTENT_TYPE_STATUS)"
+    echo "    Expected status 400, got $WRONG_CONTENT_TYPE_STATUS"
     exit 1
 fi
 
@@ -179,16 +180,17 @@ EMPTY_BODY_RESPONSE=$(curl -s -w "%{http_code}" \
 
 EMPTY_BODY_STATUS=${EMPTY_BODY_RESPONSE: -3}
 
-if [ "$EMPTY_BODY_STATUS" = "200" ]; then
+if [ "$EMPTY_BODY_STATUS" = "400" ]; then
     ERROR_COUNT=$(cat /tmp/empty_body_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "    ✅ Empty body properly rejected"
     else
-        echo "    ❌ Empty body should be rejected"
+        echo "    ❌ Empty body should be rejected with errors"
         exit 1
     fi
 else
     echo "    ❌ Empty body test failed (Status: $EMPTY_BODY_STATUS)"
+    echo "    Expected status 400, got $EMPTY_BODY_STATUS"
     exit 1
 fi
 
@@ -202,7 +204,7 @@ INVALID_JSON_RESPONSE=$(curl -s -w "%{http_code}" \
 
 INVALID_JSON_STATUS=${INVALID_JSON_RESPONSE: -3}
 
-if [ "$INVALID_JSON_STATUS" = "200" ]; then
+if [ "$INVALID_JSON_STATUS" = "400" ]; then
     ERROR_COUNT=$(cat /tmp/invalid_json_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "    ✅ Invalid JSON properly rejected"
@@ -227,7 +229,7 @@ INVALID_RESPONSE=$(curl -s -w "%{http_code}" \
 
 INVALID_STATUS_CODE=${INVALID_RESPONSE: -3}
 
-if [ "$INVALID_STATUS_CODE" = "200" ]; then
+if [ "$INVALID_STATUS_CODE" = "400" ]; then
     ERROR_COUNT=$(cat /tmp/invalid_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "    ✅ Invalid GraphQL query properly rejected with errors"
@@ -252,7 +254,7 @@ EMPTY_QUERY_RESPONSE=$(curl -s -w "%{http_code}" \
 
 EMPTY_QUERY_STATUS=${EMPTY_QUERY_RESPONSE: -3}
 
-if [ "$EMPTY_QUERY_STATUS" = "200" ]; then
+if [ "$EMPTY_QUERY_STATUS" = "400" ]; then
     ERROR_COUNT=$(cat /tmp/empty_query_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "    ✅ Empty query properly rejected"
@@ -282,7 +284,7 @@ MISSING_RESPONSE=$(curl -s -w "%{http_code}" \
 
 MISSING_STATUS_CODE=${MISSING_RESPONSE: -3}
 
-if [ "$MISSING_STATUS_CODE" = "200" ]; then
+if [ "$MISSING_STATUS_CODE" = "400" ]; then
     ERROR_COUNT=$(cat /tmp/missing_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "    ✅ Missing parameters properly rejected with errors"
