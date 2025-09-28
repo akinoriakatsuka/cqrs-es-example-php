@@ -14,6 +14,7 @@ use GraphQL\GraphQL;
 use GraphQL\Validator\Rules\QueryComplexity;
 use GraphQL\Validator\Rules\QueryDepth;
 use GraphQL\Validator\DocumentValidator;
+use Aws\DynamoDb\DynamoDbClient;
 use J5ik2o\EventStoreAdapterPhp\EventStoreFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -36,12 +37,49 @@ $max_query_depth = (int)($_ENV['GRAPHQL_MAX_QUERY_DEPTH'] ?? 10);
 $rate_limit_max_requests = (int)($_ENV['RATE_LIMIT_MAX_REQUESTS'] ?? 60);
 $rate_limit_window_seconds = (int)($_ENV['RATE_LIMIT_WINDOW_SECONDS'] ?? 60);
 
+// DynamoDB configuration
+$event_store_type = $_ENV['EVENT_STORE_TYPE'] ?? 'memory';
+$dynamodb_endpoint = $_ENV['DYNAMODB_ENDPOINT'] ?? 'http://localhost:8000';
+$dynamodb_region = $_ENV['DYNAMODB_REGION'] ?? 'us-east-1';
+$dynamodb_access_key = $_ENV['DYNAMODB_ACCESS_KEY_ID'] ?? 'dummy';
+$dynamodb_secret_key = $_ENV['DYNAMODB_SECRET_ACCESS_KEY'] ?? 'dummy';
+
 $app = AppFactory::create();
 
 $app->addErrorMiddleware($app_debug, true, true);
 
-// EventStore setup - In-Memory for development
-$eventStore = EventStoreFactory::createInMemory();
+// EventStore setup - configurable based on environment
+if ($event_store_type === 'dynamodb') {
+    // DynamoDB client setup
+    $dynamodb_client = new DynamoDbClient([
+        'version' => 'latest',
+        'region' => $dynamodb_region,
+        'endpoint' => $dynamodb_endpoint,
+        'credentials' => [
+            'key' => $dynamodb_access_key,
+            'secret' => $dynamodb_secret_key,
+        ],
+    ]);
+
+    // EventStore creation with Goサンプル準拠のテーブル名とインデックス名
+    $eventStore = EventStoreFactory::create(
+        $dynamodb_client,
+        'journal',                    // journalTableName
+        'snapshot', // snapshotTableName
+        'journal-aid-index',          // journalAidIndexName
+        'snapshot-aid-index',         // snapshotAidIndexName
+        32,                           // shardCount
+        function ($event) {            // eventConverter
+            return json_encode($event);
+        },
+        function ($snapshot) {         // snapshotConverter
+            return json_encode($snapshot);
+        }
+    );
+} else {
+    // Default to in-memory for development
+    $eventStore = EventStoreFactory::createInMemory();
+}
 
 // Repository setup
 $repository = new GroupChatRepositoryImpl($eventStore);
