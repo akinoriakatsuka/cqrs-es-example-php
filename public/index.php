@@ -8,27 +8,33 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL\Resolvers\
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL\Schema\GroupChatSchema;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepositoryImpl;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Middleware\RateLimitMiddleware;
+use Dotenv\Dotenv;
 use GraphQL\GraphQL;
+use GraphQL\Validator\Rules\QueryComplexity;
+use GraphQL\Validator\Rules\QueryDepth;
+use GraphQL\Validator\DocumentValidator;
 use J5ik2o\EventStoreAdapterPhp\EventStoreFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-// Load environment variables
-$dotenv_path = __DIR__ . '/../.env';
-if (file_exists($dotenv_path)) {
-    $env_vars = parse_ini_file($dotenv_path);
-    foreach ($env_vars as $key => $value) {
-        if (!isset($_ENV[$key])) {
-            $_ENV[$key] = $value;
-        }
-    }
+// Load environment variables securely using phpdotenv
+$dotenv_path = __DIR__ . '/..';
+if (file_exists($dotenv_path . '/.env')) {
+    $dotenv = Dotenv::createImmutable($dotenv_path);
+    $dotenv->safeLoad();
 }
 
-// Environment configuration
+// Environment configuration with defaults
 $app_debug = filter_var($_ENV['APP_DEBUG'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
 $graphql_debug = filter_var($_ENV['GRAPHQL_DEBUG_MODE'] ?? 'false', FILTER_VALIDATE_BOOLEAN);
-$allowed_origins = explode(',', $_ENV['GRAPHQL_CORS_ALLOWED_ORIGINS'] ?? 'http://localhost:3000');
+$allowed_origins_string = $_ENV['GRAPHQL_CORS_ALLOWED_ORIGINS'] ?? 'http://localhost:3000';
+$allowed_origins = array_map('trim', explode(',', $allowed_origins_string));
+$max_query_complexity = (int)($_ENV['GRAPHQL_MAX_QUERY_COMPLEXITY'] ?? 100);
+$max_query_depth = (int)($_ENV['GRAPHQL_MAX_QUERY_DEPTH'] ?? 10);
+$rate_limit_max_requests = (int)($_ENV['RATE_LIMIT_MAX_REQUESTS'] ?? 60);
+$rate_limit_window_seconds = (int)($_ENV['RATE_LIMIT_WINDOW_SECONDS'] ?? 60);
 
 $app = AppFactory::create();
 
@@ -50,6 +56,9 @@ $mutationResolver = new MutationResolver($commandProcessor);
 $groupChatSchema = new GroupChatSchema($mutationResolver);
 $schema = $groupChatSchema->build();
 
+// Rate limiter setup
+$rate_limiter = new RateLimitMiddleware($rate_limit_max_requests, $rate_limit_window_seconds);
+
 // Health check endpoint
 $app->get('/health', function (Request $request, Response $response) {
     $data = [
@@ -61,7 +70,7 @@ $app->get('/health', function (Request $request, Response $response) {
 });
 
 // Helper function for CORS headers
-$add_cors_headers = function (Response $response, string $origin = null) use ($allowed_origins): Response {
+$add_cors_headers = function (Response $response, ?string $origin = null) use ($allowed_origins): Response {
     $allowed_origin = 'null';
     if ($origin && in_array($origin, $allowed_origins, true)) {
         $allowed_origin = $origin;
@@ -76,14 +85,53 @@ $add_cors_headers = function (Response $response, string $origin = null) use ($a
         ->withHeader('Access-Control-Max-Age', '86400');
 };
 
+// Simple rate limiting check function
+$check_rate_limit = function (Request $request) use ($rate_limit_max_requests, $rate_limit_window_seconds): ?Response {
+    static $requests = [];
+
+    $client_ip = $request->getServerParams()['REMOTE_ADDR'] ?? '127.0.0.1';
+    $current_time = time();
+    $window_start = $current_time - $rate_limit_window_seconds;
+
+    // Clean old requests
+    $requests[$client_ip] = array_filter($requests[$client_ip] ?? [], fn ($time) => $time > $window_start);
+
+    // Check limit
+    if (count($requests[$client_ip]) >= $rate_limit_max_requests) {
+        $response = new \Slim\Psr7\Response();
+        $response->getBody()->write(json_encode([
+            'errors' => [[
+                'message' => 'Rate limit exceeded. Too many requests.',
+                'extensions' => ['category' => 'rate_limit'],
+            ]],
+        ]));
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(429);
+    }
+
+    // Record request
+    $requests[$client_ip][] = $current_time;
+    return null;
+};
+
 // GraphQL endpoint
-$app->post('/graphql', function (Request $request, Response $response) use ($schema, $graphql_debug, $add_cors_headers) {
+$app->post('/graphql', function (Request $request, Response $response) use ($schema, $graphql_debug, $add_cors_headers, $max_query_complexity, $max_query_depth, $check_rate_limit) {
     $origin = $request->getHeaderLine('Origin');
+
+    // Check rate limit
+    $rate_limit_response = $check_rate_limit($request);
+    if ($rate_limit_response !== null) {
+        return $add_cors_headers($rate_limit_response, $origin);
+    }
+
+    $http_status = 200;
 
     try {
         // Validate Content-Type
         $content_type = $request->getHeaderLine('Content-Type');
         if (!str_contains($content_type, 'application/json')) {
+            $http_status = 400;
             throw new \InvalidArgumentException('Content-Type must be application/json');
         }
 
@@ -91,22 +139,26 @@ $app->post('/graphql', function (Request $request, Response $response) use ($sch
 
         // Validate request body is not empty
         if (empty(trim($body))) {
+            $http_status = 400;
             throw new \InvalidArgumentException('Request body cannot be empty');
         }
 
         $input = json_decode($body, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
+            $http_status = 400;
             throw new \InvalidArgumentException('Invalid JSON in request body: ' . json_last_error_msg());
         }
 
         // Validate required fields
         if (!isset($input['query']) || !is_string($input['query'])) {
+            $http_status = 400;
             throw new \InvalidArgumentException('Query field is required and must be a string');
         }
 
         $query = trim($input['query']);
         if (empty($query)) {
+            $http_status = 400;
             throw new \InvalidArgumentException('Query cannot be empty');
         }
 
@@ -114,33 +166,91 @@ $app->post('/graphql', function (Request $request, Response $response) use ($sch
 
         // Validate variables if provided
         if ($variable_values !== null && !is_array($variable_values)) {
+            $http_status = 400;
             throw new \InvalidArgumentException('Variables must be an object/array');
         }
 
-        $result = GraphQL::executeQuery($schema, $query, null, null, $variable_values);
+        // Configure GraphQL security validators
+        $validation_rules = DocumentValidator::allRules();
+
+        // Add query complexity and depth limits
+        $validation_rules[] = new QueryComplexity($max_query_complexity);
+        $validation_rules[] = new QueryDepth($max_query_depth);
+
+        $result = GraphQL::executeQuery(
+            $schema,
+            $query,
+            null,
+            null,
+            $variable_values,
+            null,
+            null,
+            $validation_rules
+        );
+
         $output = $result->toArray();
 
-    } catch (\Exception $e) {
+        // If there are GraphQL errors, set appropriate HTTP status
+        if (!empty($output['errors'])) {
+            $http_status = 400;
+        }
+
+    } catch (\InvalidArgumentException $e) {
+        // Client errors (400)
         $error_output = [
             'errors' => [
                 [
                     'message' => $e->getMessage(),
+                    'extensions' => [
+                        'category' => 'validation',
+                    ],
                 ],
             ],
         ];
 
-        // Add debug information only in debug mode
         if ($graphql_debug) {
-            $error_output['errors'][0]['trace'] = $e->getTraceAsString();
-            $error_output['errors'][0]['file'] = $e->getFile();
-            $error_output['errors'][0]['line'] = $e->getLine();
+            $error_output['errors'][0]['extensions']['trace'] = $e->getTraceAsString();
+            $error_output['errors'][0]['extensions']['file'] = $e->getFile();
+            $error_output['errors'][0]['extensions']['line'] = $e->getLine();
         }
 
         $output = $error_output;
+
+    } catch (\Throwable $e) {
+        // Server errors (500)
+        $http_status = 500;
+        $error_output = [
+            'errors' => [
+                [
+                    'message' => $graphql_debug ? $e->getMessage() : 'Internal server error',
+                    'extensions' => [
+                        'category' => 'internal',
+                    ],
+                ],
+            ],
+        ];
+
+        if ($graphql_debug) {
+            $error_output['errors'][0]['extensions']['trace'] = $e->getTraceAsString();
+            $error_output['errors'][0]['extensions']['file'] = $e->getFile();
+            $error_output['errors'][0]['extensions']['line'] = $e->getLine();
+        }
+
+        $output = $error_output;
+
+        // Log server errors (in production, you'd use a proper logger)
+        error_log(sprintf(
+            'GraphQL Server Error: %s in %s:%d',
+            $e->getMessage(),
+            $e->getFile(),
+            $e->getLine()
+        ));
     }
 
     $response->getBody()->write(json_encode($output, JSON_PRETTY_PRINT));
-    $response = $response->withHeader('Content-Type', 'application/json; charset=UTF-8');
+    $response = $response
+        ->withHeader('Content-Type', 'application/json; charset=UTF-8')
+        ->withStatus($http_status);
 
     return $add_cors_headers($response, $origin);
 });
