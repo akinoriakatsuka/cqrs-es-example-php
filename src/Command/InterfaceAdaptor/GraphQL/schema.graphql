@@ -1,0 +1,140 @@
+scalar DateTime
+
+enum MemberRole {
+    MEMBER
+    ADMIN
+}
+
+type GroupChat {
+    id: ID!
+    name: String!
+    members: [Member!]!
+    messages: [Message!]!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type Member {
+    id: ID!
+    userAccountId: ID!
+    role: MemberRole!
+    joinedAt: DateTime!
+}
+
+type Message {
+    id: ID!
+    content: String!
+    senderId: ID!
+    sentAt: DateTime!
+    editedAt: DateTime
+}
+
+input CreateGroupChatInput {
+    executorId: ID!
+    name: String!
+    members: [AddMemberInput!]!
+}
+
+input AddMemberInput {
+    userAccountId: ID!
+    role: MemberRole!
+}
+
+input DeleteGroupChatInput {
+    executorId: ID!
+    groupChatId: ID!
+}
+
+input RenameGroupChatInput {
+    executorId: ID!
+    groupChatId: ID!
+    name: String!
+}
+
+input AddGroupChatMemberInput {
+    executorId: ID!
+    groupChatId: ID!
+    userAccountId: ID!
+    role: MemberRole!
+}
+
+input RemoveGroupChatMemberInput {
+    executorId: ID!
+    groupChatId: ID!
+    userAccountId: ID!
+}
+
+input PostMessageInput {
+    executorId: ID!
+    groupChatId: ID!
+    content: String!
+}
+
+input EditMessageInput {
+    executorId: ID!
+    groupChatId: ID!
+    messageId: ID!
+    content: String!
+}
+
+input DeleteMessageInput {
+    executorId: ID!
+    groupChatId: ID!
+    messageId: ID!
+}
+
+type CreateGroupChatPayload {
+    groupChat: GroupChat!
+}
+
+type DeleteGroupChatPayload {
+    deletedGroupChatId: ID!
+}
+
+type RenameGroupChatPayload {
+    groupChat: GroupChat!
+}
+
+type AddGroupChatMemberPayload {
+    groupChat: GroupChat!
+}
+
+type RemoveGroupChatMemberPayload {
+    groupChat: GroupChat!
+}
+
+type PostMessagePayload {
+    message: Message!
+    groupChat: GroupChat!
+}
+
+type EditMessagePayload {
+    message: Message!
+    groupChat: GroupChat!
+}
+
+type DeleteMessagePayload {
+    deletedMessageId: ID!
+    groupChat: GroupChat!
+}
+
+type Mutation {
+    createGroupChat(input: CreateGroupChatInput!): CreateGroupChatPayload!
+    deleteGroupChat(input: DeleteGroupChatInput!): DeleteGroupChatPayload!
+    renameGroupChat(input: RenameGroupChatInput!): RenameGroupChatPayload!
+    addMember(input: AddGroupChatMemberInput!): AddGroupChatMemberPayload!
+    removeMember(input: RemoveGroupChatMemberInput!): RemoveGroupChatMemberPayload!
+    postMessage(input: PostMessageInput!): PostMessagePayload!
+    editMessage(input: EditMessageInput!): EditMessagePayload!
+    deleteMessage(input: DeleteMessageInput!): DeleteMessagePayload!
+}
+
+type Query {
+    # Read側の実装時に追加予定
+    hello: String
+}
+
+schema {
+    query: Query
+    mutation: Mutation
+}
