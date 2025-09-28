@@ -20,9 +20,16 @@ HEALTH_STATUS_CODE=${HEALTH_RESPONSE: -3}
 
 if [ "$HEALTH_STATUS_CODE" = "200" ]; then
     echo "✅ Health check passed"
-    cat /tmp/health_response.json | jq .
+    # JSON形式を確認してからjqを使用
+    if [ -s /tmp/health_response.json ] && head -c 1 /tmp/health_response.json | grep -q '{'; then
+        cat /tmp/health_response.json | jq . 2>/dev/null || cat /tmp/health_response.json
+    else
+        echo "  Response is not valid JSON:"
+        cat /tmp/health_response.json
+    fi
 else
     echo "❌ Health check failed (Status: $HEALTH_STATUS_CODE)"
+    cat /tmp/health_response.json
     exit 1
 fi
 
@@ -136,11 +143,80 @@ done
 
 echo
 
-# エラーケースのテスト
-echo "4. Testing error cases..."
+# セキュリティとエラーケースのテスト
+echo "4. Testing security and error cases..."
+
+# Content-Type検証テスト
+echo "  Testing Content-Type validation..."
+WRONG_CONTENT_TYPE_RESPONSE=$(curl -s -w "%{http_code}" \
+  -H "Content-Type: text/plain" \
+  -d '{"query": "{ __typename }"}' \
+  -o /tmp/wrong_content_type_response.json \
+  "$GRAPHQL_ENDPOINT")
+
+WRONG_CONTENT_TYPE_STATUS=${WRONG_CONTENT_TYPE_RESPONSE: -3}
+
+if [ "$WRONG_CONTENT_TYPE_STATUS" = "200" ]; then
+    ERROR_COUNT=$(cat /tmp/wrong_content_type_response.json | jq '.errors | length' 2>/dev/null || echo "0")
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "    ✅ Wrong Content-Type properly rejected"
+    else
+        echo "    ❌ Wrong Content-Type should be rejected"
+        exit 1
+    fi
+else
+    echo "    ❌ Content-Type validation test failed (Status: $WRONG_CONTENT_TYPE_STATUS)"
+    exit 1
+fi
+
+# 空のリクエストボディテスト
+echo "  Testing empty request body..."
+EMPTY_BODY_RESPONSE=$(curl -s -w "%{http_code}" \
+  -H "Content-Type: application/json" \
+  -d '' \
+  -o /tmp/empty_body_response.json \
+  "$GRAPHQL_ENDPOINT")
+
+EMPTY_BODY_STATUS=${EMPTY_BODY_RESPONSE: -3}
+
+if [ "$EMPTY_BODY_STATUS" = "200" ]; then
+    ERROR_COUNT=$(cat /tmp/empty_body_response.json | jq '.errors | length' 2>/dev/null || echo "0")
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "    ✅ Empty body properly rejected"
+    else
+        echo "    ❌ Empty body should be rejected"
+        exit 1
+    fi
+else
+    echo "    ❌ Empty body test failed (Status: $EMPTY_BODY_STATUS)"
+    exit 1
+fi
+
+# 無効なJSONテスト
+echo "  Testing invalid JSON..."
+INVALID_JSON_RESPONSE=$(curl -s -w "%{http_code}" \
+  -H "Content-Type: application/json" \
+  -d '{"query": invalid json}' \
+  -o /tmp/invalid_json_response.json \
+  "$GRAPHQL_ENDPOINT")
+
+INVALID_JSON_STATUS=${INVALID_JSON_RESPONSE: -3}
+
+if [ "$INVALID_JSON_STATUS" = "200" ]; then
+    ERROR_COUNT=$(cat /tmp/invalid_json_response.json | jq '.errors | length' 2>/dev/null || echo "0")
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "    ✅ Invalid JSON properly rejected"
+    else
+        echo "    ❌ Invalid JSON should be rejected"
+        exit 1
+    fi
+else
+    echo "    ❌ Invalid JSON test failed (Status: $INVALID_JSON_STATUS)"
+    exit 1
+fi
 
 # 無効なクエリ
-echo "  Testing invalid query..."
+echo "  Testing invalid GraphQL query..."
 INVALID_QUERY='{"query": "invalid graphql query"}'
 
 INVALID_RESPONSE=$(curl -s -w "%{http_code}" \
@@ -154,13 +230,38 @@ INVALID_STATUS_CODE=${INVALID_RESPONSE: -3}
 if [ "$INVALID_STATUS_CODE" = "200" ]; then
     ERROR_COUNT=$(cat /tmp/invalid_response.json | jq '.errors | length' 2>/dev/null || echo "0")
     if [ "$ERROR_COUNT" -gt 0 ]; then
-        echo "    ✅ Invalid query properly rejected with errors"
+        echo "    ✅ Invalid GraphQL query properly rejected with errors"
     else
-        echo "    ❌ Invalid query should have errors"
+        echo "    ❌ Invalid GraphQL query should have errors"
         exit 1
     fi
 else
-    echo "    ❌ Invalid query test failed (Status: $INVALID_STATUS_CODE)"
+    echo "    ❌ Invalid GraphQL query test failed (Status: $INVALID_STATUS_CODE)"
+    exit 1
+fi
+
+# 空のクエリテスト
+echo "  Testing empty query..."
+EMPTY_QUERY='{"query": ""}'
+
+EMPTY_QUERY_RESPONSE=$(curl -s -w "%{http_code}" \
+  -H "Content-Type: application/json" \
+  -d "$EMPTY_QUERY" \
+  -o /tmp/empty_query_response.json \
+  "$GRAPHQL_ENDPOINT")
+
+EMPTY_QUERY_STATUS=${EMPTY_QUERY_RESPONSE: -3}
+
+if [ "$EMPTY_QUERY_STATUS" = "200" ]; then
+    ERROR_COUNT=$(cat /tmp/empty_query_response.json | jq '.errors | length' 2>/dev/null || echo "0")
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "    ✅ Empty query properly rejected"
+    else
+        echo "    ❌ Empty query should be rejected"
+        exit 1
+    fi
+else
+    echo "    ❌ Empty query test failed (Status: $EMPTY_QUERY_STATUS)"
     exit 1
 fi
 
@@ -194,6 +295,29 @@ else
     exit 1
 fi
 
+# CORS テスト
+echo "  Testing CORS headers..."
+CORS_RESPONSE=$(curl -s -I -H "Origin: http://localhost:3000" -H "Content-Type: application/json" -X OPTIONS "$GRAPHQL_ENDPOINT")
+
+if echo "$CORS_RESPONSE" | grep -q "Access-Control-Allow-Origin: http://localhost:3000"; then
+    echo "    ✅ CORS headers properly configured for allowed origin"
+else
+    echo "    ❌ CORS headers not properly configured"
+    echo "$CORS_RESPONSE"
+    exit 1
+fi
+
+# 不正なOriginテスト
+echo "  Testing unauthorized origin..."
+UNAUTHORIZED_ORIGIN_RESPONSE=$(curl -s -I -H "Origin: http://malicious-site.com" -H "Content-Type: application/json" -X OPTIONS "$GRAPHQL_ENDPOINT")
+
+if echo "$UNAUTHORIZED_ORIGIN_RESPONSE" | grep -q "Access-Control-Allow-Origin: http://malicious-site.com"; then
+    echo "    ❌ Unauthorized origin should be rejected"
+    exit 1
+else
+    echo "    ✅ Unauthorized origin properly rejected"
+fi
+
 echo
 
 # クリーンアップ
@@ -201,7 +325,11 @@ echo "Cleaning up temporary files..."
 rm -f /tmp/health_response.json
 rm -f /tmp/graphql_response.json
 rm -f /tmp/multi_response_*.json
+rm -f /tmp/wrong_content_type_response.json
+rm -f /tmp/empty_body_response.json
+rm -f /tmp/invalid_json_response.json
 rm -f /tmp/invalid_response.json
+rm -f /tmp/empty_query_response.json
 rm -f /tmp/missing_response.json
 
 echo
