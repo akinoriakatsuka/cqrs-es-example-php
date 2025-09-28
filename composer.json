@@ -16,7 +16,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/j5ik2o/event-store-adapter-php"
+            "url": "https://github.com/j5ik2o/event-store-adapter-php.git"
         }
     ],
     "require": {
@@ -27,7 +27,8 @@
         "slim/psr7": "^1.6",
         "psr/http-message": "^2.0",
         "psr/http-server-handler": "^1.0",
-        "psr/http-server-middleware": "^1.0"
+        "psr/http-server-middleware": "^1.0",
+        "webonyx/graphql-php": "^15.0"
     },
     "autoload": {
         "psr-4": {
