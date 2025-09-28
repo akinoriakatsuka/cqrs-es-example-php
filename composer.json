@@ -56,7 +56,10 @@
         "cs:fix": "php-cs-fixer fix",
         "fmt": "composer run cs:fix",
         "lint": "composer run cs && composer run phpstan",
-        "phpstan": "phpstan analyse --memory-limit=512M"
+        "phpstan": "phpstan analyse --memory-limit=512M",
+        "setup:dynamodb": "php scripts/init-dynamodb.php",
+        "ci:setup": "composer run setup:dynamodb",
+        "ci:test": "composer run lint && composer run test"
     },
     "config": {
         "allow-plugins": {
