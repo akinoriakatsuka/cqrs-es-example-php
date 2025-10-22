@@ -45,7 +45,7 @@ services:
       - dynamodb-local
   
   mysql:
-    image: mysql:9.4
+    image: mysql:9.5
     ports:
       - "3306:3306"
     environment:
