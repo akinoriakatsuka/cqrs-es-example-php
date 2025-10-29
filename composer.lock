@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.358.0",
+            "version": "3.359.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d0558813a2e0d1459959e2fe485b1baf1e9aaaf9"
+                "reference": "7231e7c309d6262855289511d6ee124fafbe664f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d0558813a2e0d1459959e2fe485b1baf1e9aaaf9",
-                "reference": "d0558813a2e0d1459959e2fe485b1baf1e9aaaf9",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7231e7c309d6262855289511d6ee124fafbe664f",
+                "reference": "7231e7c309d6262855289511d6ee124fafbe664f",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.358.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.359.0"
             },
-            "time": "2025-10-28T00:41:34+00:00"
+            "time": "2025-10-29T00:06:16+00:00"
         },
         {
             "name": "fig/http-message-util",
