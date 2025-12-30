@@ -79,7 +79,7 @@ class GroupChatCreatedEventHandler
     {
         return match ($roleValue) {
             0 => 'member',
-            1 => 'adimin',
+            1 => 'admin',
             default => throw new \InvalidArgumentException("Invalid role value: {$roleValue}"),
         };
     }
