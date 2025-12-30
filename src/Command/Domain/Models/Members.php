@@ -33,7 +33,7 @@ final readonly class Members
     public static function fromArray(array $data, \App\Infrastructure\Ulid\UlidValidator $validator): self
     {
         $members = array_map(
-            fn($member_data) => Member::fromArray($member_data, $validator),
+            fn ($member_data) => Member::fromArray($member_data, $validator),
             $data['values']
         );
         return new self($members);
@@ -87,7 +87,7 @@ final readonly class Members
     public function toArray(): array
     {
         return [
-            'values' => array_map(fn($member) => $member->toArray(), $this->members)
+            'values' => array_map(fn ($member) => $member->toArray(), $this->members),
         ];
     }
 }

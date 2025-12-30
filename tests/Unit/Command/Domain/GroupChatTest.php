@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Command\Domain;
 
-use App\Command\Domain\GroupChat;
 use App\Command\Domain\Events\GroupChatCreated;
+use App\Command\Domain\GroupChat;
 use App\Command\Domain\Models\GroupChatId;
 use App\Command\Domain\Models\GroupChatName;
 use App\Command\Domain\Models\UserAccountId;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use App\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
+use App\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatTest extends TestCase

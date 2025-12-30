@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Rmu;
 
 use App\Rmu\EventHandlers\GroupChatCreatedEventHandler;
-use App\Rmu\EventHandlers\GroupChatRenamedEventHandler;
 use App\Rmu\EventHandlers\GroupChatDeletedEventHandler;
 use App\Rmu\EventHandlers\GroupChatMemberAddedEventHandler;
 use App\Rmu\EventHandlers\GroupChatMemberRemovedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMessageEditedEventHandler;
 use App\Rmu\EventHandlers\GroupChatMessageDeletedEventHandler;
+use App\Rmu\EventHandlers\GroupChatMessageEditedEventHandler;
+use App\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
+use App\Rmu\EventHandlers\GroupChatRenamedEventHandler;
 use App\Rmu\Models\Checkpoint;
 use Psr\Log\LoggerInterface;
 
@@ -34,7 +34,8 @@ class StreamProcessor
         private GroupChatMessageEditedEventHandler $groupChatMessageEditedHandler,
         private GroupChatMessageDeletedEventHandler $groupChatMessageDeletedHandler,
         private LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * 無限ループでStreamsを処理
@@ -71,7 +72,7 @@ class StreamProcessor
                 $shardIterators[$shardId] = $iterator;
                 $this->logger->info('StreamProcessor: ShardIterator obtained', [
                     'shardId' => $shardId,
-                    'checkpoint' => $sequenceNumber ?? 'none'
+                    'checkpoint' => $sequenceNumber ?? 'none',
                 ]);
             }
         }
@@ -92,7 +93,7 @@ class StreamProcessor
                 if (count($records) > 0) {
                     $this->logger->info('StreamProcessor: Records received', [
                         'shardId' => $shardId,
-                        'count' => count($records)
+                        'count' => count($records),
                     ]);
 
                     foreach ($records as $record) {
@@ -117,7 +118,7 @@ class StreamProcessor
         $eventName = $record['eventName'];
         $this->logger->debug('StreamProcessor: Processing record', [
             'eventID' => $record['eventID'],
-            'eventName' => $eventName
+            'eventName' => $eventName,
         ]);
 
         // INSERTイベントのみ処理
@@ -140,7 +141,7 @@ class StreamProcessor
             'has_S' => isset($payloadData['S']),
             'B_type' => isset($payloadData['B']) ? gettype($payloadData['B']) : 'N/A',
             'B_class' => isset($payloadData['B']) && is_object($payloadData['B']) ? get_class($payloadData['B']) : 'N/A',
-            'B_sample' => isset($payloadData['B']) ? (is_string($payloadData['B']) ? substr($payloadData['B'], 0, 50) : 'not-string') : 'N/A'
+            'B_sample' => isset($payloadData['B']) ? (is_string($payloadData['B']) ? substr($payloadData['B'], 0, 50) : 'not-string') : 'N/A',
         ]);
 
         if (isset($payloadData['B'])) {
@@ -157,7 +158,7 @@ class StreamProcessor
 
         $this->logger->debug('StreamProcessor: Payload JSON', [
             'payloadJson' => substr($payloadJson, 0, 200),
-            'length' => strlen($payloadJson)
+            'length' => strlen($payloadJson),
         ]);
 
         $payload = json_decode($payloadJson, true);
@@ -165,7 +166,7 @@ class StreamProcessor
         if ($payload === null) {
             $this->logger->error('StreamProcessor: Failed to decode payload JSON', [
                 'error' => json_last_error_msg(),
-                'payloadSample' => substr($payloadJson, 0, 100)
+                'payloadSample' => substr($payloadJson, 0, 100),
             ]);
             return;
         }
@@ -184,7 +185,7 @@ class StreamProcessor
             $this->logger->error('StreamProcessor: Failed to handle event', [
                 'type' => $typeName,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -196,7 +197,7 @@ class StreamProcessor
 
         $this->logger->debug('StreamProcessor: Checkpoint saved', [
             'shardId' => $shardId,
-            'sequenceNumber' => $sequenceNumber
+            'sequenceNumber' => $sequenceNumber,
         ]);
     }
 

@@ -11,7 +11,9 @@ use PDO;
  */
 class GroupChatDaoImpl implements GroupChatDao
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     /**
      * グループチャットを作成

@@ -12,7 +12,8 @@ class GroupChatMessageEditedEventHandler
     public function __construct(
         private GroupChatDao $dao,
         private LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function handle(array $event): void
     {

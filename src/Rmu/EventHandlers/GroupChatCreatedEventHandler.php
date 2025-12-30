@@ -15,7 +15,8 @@ class GroupChatCreatedEventHandler
     public function __construct(
         private GroupChatDao $dao,
         private LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     /**
      * GroupChatCreatedイベントを処理

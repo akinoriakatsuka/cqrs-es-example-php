@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Command\Domain\Models;
 
-use App\Infrastructure\Ulid\UlidValidator;
-use App\Infrastructure\Ulid\UlidGenerator;
 use App\Infrastructure\Ulid\Ulid;
+use App\Infrastructure\Ulid\UlidGenerator;
+use App\Infrastructure\Ulid\UlidValidator;
 
 final readonly class MemberId
 {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Query\InterfaceAdaptor\GraphQL;
 
-use GraphQL\Type\Schema as GraphQLSchema;
-use App\Query\InterfaceAdaptor\GraphQL\Types\QueryType;
 use App\Query\InterfaceAdaptor\GraphQL\Types\GroupChatType;
 use App\Query\InterfaceAdaptor\GraphQL\Types\MemberType;
 use App\Query\InterfaceAdaptor\GraphQL\Types\MessageType;
+use App\Query\InterfaceAdaptor\GraphQL\Types\QueryType;
+use GraphQL\Type\Schema as GraphQLSchema;
 use PDO;
 
 class Schema

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Ulid;
 
-use Ulid\Ulid;
 use Ulid\Exception\InvalidUlidStringException;
+use Ulid\Ulid;
 
 final class RobinvdvleutenUlidValidator implements UlidValidator
 {

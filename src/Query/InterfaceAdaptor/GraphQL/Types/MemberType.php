@@ -22,12 +22,12 @@ class MemberType extends ObjectType
                 'groupChatId' => [
                     'type' => Type::nonNull(Type::id()),
                     'description' => 'グループチャットID',
-                    'resolve' => fn($root) => $root['group_chat_id'] ?? null,
+                    'resolve' => fn ($root) => $root['group_chat_id'] ?? null,
                 ],
                 'userAccountId' => [
                     'type' => Type::nonNull(Type::id()),
                     'description' => 'ユーザーアカウントID',
-                    'resolve' => fn($root) => $root['user_account_id'] ?? null,
+                    'resolve' => fn ($root) => $root['user_account_id'] ?? null,
                 ],
                 'role' => [
                     'type' => Type::nonNull(Type::string()),
@@ -36,12 +36,12 @@ class MemberType extends ObjectType
                 'createdAt' => [
                     'type' => Type::nonNull(Type::string()),
                     'description' => '作成日時',
-                    'resolve' => fn($root) => $root['created_at'] ?? null,
+                    'resolve' => fn ($root) => $root['created_at'] ?? null,
                 ],
                 'updatedAt' => [
                     'type' => Type::nonNull(Type::string()),
                     'description' => '更新日時',
-                    'resolve' => fn($root) => $root['updated_at'] ?? null,
+                    'resolve' => fn ($root) => $root['updated_at'] ?? null,
                 ],
             ],
         ]);

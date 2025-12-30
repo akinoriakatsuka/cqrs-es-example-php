@@ -12,7 +12,9 @@ use PDO;
  */
 class CheckpointRepository
 {
-    public function __construct(private PDO $pdo) {}
+    public function __construct(private PDO $pdo)
+    {
+    }
 
     /**
      * Shard別チェックポイント読み込み

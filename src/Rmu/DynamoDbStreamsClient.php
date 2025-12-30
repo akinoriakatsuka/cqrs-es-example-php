@@ -18,7 +18,8 @@ class DynamoDbStreamsClient
         private DynamoDbClient $dynamoDbClient,
         private AwsStreamsClient $streamsClient,
         private string $tableName
-    ) {}
+    ) {
+    }
 
     /**
      * テーブルのStream ARNを取得

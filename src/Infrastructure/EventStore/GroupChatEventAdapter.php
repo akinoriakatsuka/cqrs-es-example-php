@@ -7,8 +7,8 @@ namespace App\Infrastructure\EventStore;
 use App\Command\Domain\Events\GroupChatEvent;
 use App\Command\Domain\Models\GroupChatId;
 use App\Infrastructure\Ulid\UlidValidator;
-use J5ik2o\EventStoreAdapterPhp\Event;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
+use J5ik2o\EventStoreAdapterPhp\Event;
 
 class GroupChatEventAdapter implements Event
 {

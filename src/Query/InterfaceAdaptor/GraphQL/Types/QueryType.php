@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Query\InterfaceAdaptor\GraphQL\Types;
 
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type;
 use App\Query\InterfaceAdaptor\Repository\GroupChatQueryRepository;
 use App\Query\InterfaceAdaptor\Repository\MemberQueryRepository;
 use App\Query\InterfaceAdaptor\Repository\MessageQueryRepository;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\Type;
 use PDO;
 
 class QueryType extends ObjectType

@@ -12,8 +12,8 @@ use App\Command\Domain\Models\MessageId;
 use App\Command\Domain\Models\Role;
 use App\Command\Domain\Models\UserAccountId;
 use App\Command\InterfaceAdaptor\Repository\GroupChatRepository;
-use App\Infrastructure\Ulid\UlidValidator;
 use App\Infrastructure\Ulid\UlidGenerator;
+use App\Infrastructure\Ulid\UlidValidator;
 
 class GroupChatCommandProcessor
 {

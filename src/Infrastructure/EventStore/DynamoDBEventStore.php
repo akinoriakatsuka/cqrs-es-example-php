@@ -24,7 +24,7 @@ class DynamoDBEventStore implements EventStore
         foreach ($events as $event) {
             if ($event->isCreated()) {
                 throw new \RuntimeException(
-                    "persistEvent cannot be used for created events. Use persistEventAndSnapshot instead."
+                    'persistEvent cannot be used for created events. Use persistEventAndSnapshot instead.'
                 );
             }
         }
@@ -45,7 +45,7 @@ class DynamoDBEventStore implements EventStore
         // j5ik2o版は単一イベントを扱うので、最初のイベントだけを使用
         // （通常、persistEventAndSnapshotは単一イベントで呼ばれる想定）
         if (empty($events)) {
-            throw new \RuntimeException("No events provided");
+            throw new \RuntimeException('No events provided');
         }
 
         $first_event = $events[0];
@@ -75,7 +75,7 @@ class DynamoDBEventStore implements EventStore
             } else {
                 // j5ik2o版から返されたイベントをデシリアライズして変換
                 // これは通常発生しないはずですが、念のため
-                throw new \RuntimeException("Unexpected event type returned from j5ik2o EventStore");
+                throw new \RuntimeException('Unexpected event type returned from j5ik2o EventStore');
             }
         }
 
@@ -99,6 +99,6 @@ class DynamoDBEventStore implements EventStore
             return $snapshot->getGroupChat();
         }
 
-        throw new \RuntimeException("Unexpected snapshot type returned from j5ik2o EventStore");
+        throw new \RuntimeException('Unexpected snapshot type returned from j5ik2o EventStore');
     }
 }

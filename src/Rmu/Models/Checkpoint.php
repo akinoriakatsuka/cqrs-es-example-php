@@ -20,5 +20,6 @@ readonly class Checkpoint
         public string $shardId,
         public string $sequenceNumber,
         public string $streamArn
-    ) {}
+    ) {
+    }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventStore;
 
-use J5ik2o\EventStoreAdapterPhp\EventSerializer as EventSerializerInterface;
 use J5ik2o\EventStoreAdapterPhp\Event;
+use J5ik2o\EventStoreAdapterPhp\EventSerializer as EventSerializerInterface;
 
 class EventSerializer implements EventSerializerInterface
 {

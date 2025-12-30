@@ -22,7 +22,7 @@ final readonly class Messages
     public static function fromArray(array $data, \App\Infrastructure\Ulid\UlidValidator $validator): self
     {
         $messages = array_map(
-            fn($message_data) => Message::fromArray($message_data, $validator),
+            fn ($message_data) => Message::fromArray($message_data, $validator),
             $data['values'] ?? []
         );
         return new self($messages);
@@ -104,7 +104,7 @@ final readonly class Messages
     public function toArray(): array
     {
         return [
-            'values' => array_map(fn($message) => $message->toArray(), $this->messages)
+            'values' => array_map(fn ($message) => $message->toArray(), $this->messages),
         ];
     }
 }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventStore;
 
-use J5ik2o\EventStoreAdapterPhp\SnapshotSerializer as SnapshotSerializerInterface;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
+use J5ik2o\EventStoreAdapterPhp\SnapshotSerializer as SnapshotSerializerInterface;
 
 class SnapshotSerializer implements SnapshotSerializerInterface
 {

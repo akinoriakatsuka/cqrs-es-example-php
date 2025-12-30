@@ -21,12 +21,14 @@ class DynamoDbStreamsClientTest extends TestCase
      */
     private function createDynamoDbClientStub(callable $describeTableCallback): DynamoDbClient
     {
-        return new class($describeTableCallback) extends DynamoDbClient {
-            public function __construct(private $callback) {
+        return new class ($describeTableCallback) extends DynamoDbClient {
+            public function __construct(private $callback)
+            {
                 // 親のコンストラクタは呼ばない
             }
 
-            public function describeTable(array $args = []) {
+            public function describeTable(array $args = [])
+            {
                 return ($this->callback)($args);
             }
         };
@@ -40,7 +42,7 @@ class DynamoDbStreamsClientTest extends TestCase
         ?callable $getShardIteratorCallback = null,
         ?callable $getRecordsCallback = null
     ): AwsStreamsClient {
-        return new class($describeStreamCallback, $getShardIteratorCallback, $getRecordsCallback) extends AwsStreamsClient {
+        return new class ($describeStreamCallback, $getShardIteratorCallback, $getRecordsCallback) extends AwsStreamsClient {
             public function __construct(
                 private $describeStreamCallback,
                 private $getShardIteratorCallback,
@@ -49,15 +51,18 @@ class DynamoDbStreamsClientTest extends TestCase
                 // 親のコンストラクタは呼ばない
             }
 
-            public function describeStream(array $args = []) {
+            public function describeStream(array $args = [])
+            {
                 return ($this->describeStreamCallback)($args);
             }
 
-            public function getShardIterator(array $args = []) {
+            public function getShardIterator(array $args = [])
+            {
                 return ($this->getShardIteratorCallback)($args);
             }
 
-            public function getRecords(array $args = []) {
+            public function getRecords(array $args = [])
+            {
                 return ($this->getRecordsCallback)($args);
             }
         };
@@ -67,7 +72,7 @@ class DynamoDbStreamsClientTest extends TestCase
     {
         $expectedArn = 'arn:aws:dynamodb:ap-northeast-1:123456789012:table/journal/stream/2024-01-01T00:00:00.000';
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(function($args) use ($expectedArn) {
+        $dynamoDbClient = $this->createDynamoDbClientStub(function ($args) use ($expectedArn) {
             $this->assertEquals('journal', $args['TableName']);
             return new Result([
                 'Table' => [
@@ -86,7 +91,7 @@ class DynamoDbStreamsClientTest extends TestCase
 
     public function test_getStreamArn_StreamARNが存在しない場合はnullを返す(): void
     {
-        $dynamoDbClient = $this->createDynamoDbClientStub(function($args) {
+        $dynamoDbClient = $this->createDynamoDbClientStub(function ($args) {
             return new Result(['Table' => []]);
         });
 
@@ -103,7 +108,7 @@ class DynamoDbStreamsClientTest extends TestCase
         $streamArn = 'arn:aws:dynamodb:ap-northeast-1:123456789012:table/journal/stream/2024-01-01T00:00:00.000';
 
         $streamsClient = $this->createStreamsClientStub(
-            describeStreamCallback: function($args) use ($streamArn) {
+            describeStreamCallback: function ($args) use ($streamArn) {
                 $this->assertEquals($streamArn, $args['StreamArn']);
                 return new Result([
                     'StreamDescription' => [
@@ -116,7 +121,7 @@ class DynamoDbStreamsClientTest extends TestCase
             }
         );
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(fn() => new Result([]));
+        $dynamoDbClient = $this->createDynamoDbClientStub(fn () => new Result([]));
         $client = new DynamoDbStreamsClient($dynamoDbClient, $streamsClient, 'journal');
 
         $shards = $client->describeStream($streamArn);
@@ -132,7 +137,7 @@ class DynamoDbStreamsClientTest extends TestCase
         $callCount = 0;
 
         $streamsClient = $this->createStreamsClientStub(
-            describeStreamCallback: function($args) use (&$callCount) {
+            describeStreamCallback: function ($args) use (&$callCount) {
                 $callCount++;
                 if ($callCount === 1) {
                     return new Result([
@@ -154,7 +159,7 @@ class DynamoDbStreamsClientTest extends TestCase
             }
         );
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(fn() => new Result([]));
+        $dynamoDbClient = $this->createDynamoDbClientStub(fn () => new Result([]));
         $client = new DynamoDbStreamsClient($dynamoDbClient, $streamsClient, 'journal');
 
         $shards = $client->describeStream($streamArn);
@@ -170,7 +175,7 @@ class DynamoDbStreamsClientTest extends TestCase
         $expectedIterator = 'shard-iterator-value';
 
         $streamsClient = $this->createStreamsClientStub(
-            getShardIteratorCallback: function($args) use ($streamArn, $shardId, $expectedIterator) {
+            getShardIteratorCallback: function ($args) use ($streamArn, $shardId, $expectedIterator) {
                 $this->assertEquals($streamArn, $args['StreamArn']);
                 $this->assertEquals($shardId, $args['ShardId']);
                 $this->assertEquals('TRIM_HORIZON', $args['ShardIteratorType']);
@@ -179,7 +184,7 @@ class DynamoDbStreamsClientTest extends TestCase
             }
         );
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(fn() => new Result([]));
+        $dynamoDbClient = $this->createDynamoDbClientStub(fn () => new Result([]));
         $client = new DynamoDbStreamsClient($dynamoDbClient, $streamsClient, 'journal');
 
         $iterator = $client->getShardIterator($streamArn, $shardId, null);
@@ -195,7 +200,7 @@ class DynamoDbStreamsClientTest extends TestCase
         $expectedIterator = 'shard-iterator-value';
 
         $streamsClient = $this->createStreamsClientStub(
-            getShardIteratorCallback: function($args) use ($streamArn, $shardId, $sequenceNumber, $expectedIterator) {
+            getShardIteratorCallback: function ($args) use ($streamArn, $shardId, $sequenceNumber, $expectedIterator) {
                 $this->assertEquals($streamArn, $args['StreamArn']);
                 $this->assertEquals($shardId, $args['ShardId']);
                 $this->assertEquals('AFTER_SEQUENCE_NUMBER', $args['ShardIteratorType']);
@@ -204,7 +209,7 @@ class DynamoDbStreamsClientTest extends TestCase
             }
         );
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(fn() => new Result([]));
+        $dynamoDbClient = $this->createDynamoDbClientStub(fn () => new Result([]));
         $client = new DynamoDbStreamsClient($dynamoDbClient, $streamsClient, 'journal');
 
         $iterator = $client->getShardIterator($streamArn, $shardId, $sequenceNumber);
@@ -218,7 +223,7 @@ class DynamoDbStreamsClientTest extends TestCase
         $nextIterator = 'next-shard-iterator-value';
 
         $streamsClient = $this->createStreamsClientStub(
-            getRecordsCallback: function($args) use ($shardIterator, $nextIterator) {
+            getRecordsCallback: function ($args) use ($shardIterator, $nextIterator) {
                 $this->assertEquals($shardIterator, $args['ShardIterator']);
                 return new Result([
                     'Records' => [
@@ -230,7 +235,7 @@ class DynamoDbStreamsClientTest extends TestCase
             }
         );
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(fn() => new Result([]));
+        $dynamoDbClient = $this->createDynamoDbClientStub(fn () => new Result([]));
         $client = new DynamoDbStreamsClient($dynamoDbClient, $streamsClient, 'journal');
 
         $response = $client->getRecords($shardIterator);
@@ -246,13 +251,13 @@ class DynamoDbStreamsClientTest extends TestCase
         $shardIterator = 'shard-iterator-value';
 
         $streamsClient = $this->createStreamsClientStub(
-            getRecordsCallback: function($args) use ($shardIterator) {
+            getRecordsCallback: function ($args) use ($shardIterator) {
                 $this->assertEquals($shardIterator, $args['ShardIterator']);
                 return new Result(['Records' => []]);
             }
         );
 
-        $dynamoDbClient = $this->createDynamoDbClientStub(fn() => new Result([]));
+        $dynamoDbClient = $this->createDynamoDbClientStub(fn () => new Result([]));
         $client = new DynamoDbStreamsClient($dynamoDbClient, $streamsClient, 'journal');
 
         $response = $client->getRecords($shardIterator);

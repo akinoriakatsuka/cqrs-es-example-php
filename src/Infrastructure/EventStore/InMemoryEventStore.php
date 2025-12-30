@@ -24,7 +24,7 @@ class InMemoryEventStore implements EventStore
         foreach ($events as $event) {
             if ($event->isCreated()) {
                 throw new \RuntimeException(
-                    "persistEvent cannot be used for created events. Use persistEventAndSnapshot instead."
+                    'persistEvent cannot be used for created events. Use persistEventAndSnapshot instead.'
                 );
             }
         }

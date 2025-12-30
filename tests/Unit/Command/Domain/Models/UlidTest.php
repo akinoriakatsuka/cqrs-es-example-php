@@ -78,9 +78,14 @@ class UlidTest extends TestCase
     public function test_generate_カスタムジェネレーターで生成できる(): void
     {
         $custom_ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $generator = new class($custom_ulid) implements UlidGenerator {
-            public function __construct(private string $ulid) {}
-            public function generate(): string { return $this->ulid; }
+        $generator = new class ($custom_ulid) implements UlidGenerator {
+            public function __construct(private string $ulid)
+            {
+            }
+            public function generate(): string
+            {
+                return $this->ulid;
+            }
         };
 
         $id = Ulid::generate($generator);
@@ -90,8 +95,11 @@ class UlidTest extends TestCase
 
     public function test_fromString_カスタムバリデーターで検証できる(): void
     {
-        $validator = new class implements UlidValidator {
-            public function isValid(string $value): bool { return $value === 'custom-valid'; }
+        $validator = new class () implements UlidValidator {
+            public function isValid(string $value): bool
+            {
+                return $value === 'custom-valid';
+            }
         };
 
         $id = Ulid::fromString('custom-valid', $validator);
@@ -101,8 +109,11 @@ class UlidTest extends TestCase
 
     public function test_fromString_カスタムバリデーターで無効判定される(): void
     {
-        $validator = new class implements UlidValidator {
-            public function isValid(string $value): bool { return false; }
+        $validator = new class () implements UlidValidator {
+            public function isValid(string $value): bool
+            {
+                return false;
+            }
         };
 
         $this->expectException(\InvalidArgumentException::class);

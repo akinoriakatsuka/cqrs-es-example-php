@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Infrastructure\EventStore;
 
 use App\Command\Domain\Events\GroupChatCreated;
-use App\Command\Domain\Events\GroupChatRenamed;
 use App\Command\Domain\Events\GroupChatDeleted;
+use App\Command\Domain\Events\GroupChatEvent;
 use App\Command\Domain\Events\GroupChatMemberAdded;
 use App\Command\Domain\Events\GroupChatMemberRemoved;
-use App\Command\Domain\Events\GroupChatMessagePosted;
-use App\Command\Domain\Events\GroupChatMessageEdited;
 use App\Command\Domain\Events\GroupChatMessageDeleted;
-use App\Command\Domain\Events\GroupChatEvent;
+use App\Command\Domain\Events\GroupChatMessageEdited;
+use App\Command\Domain\Events\GroupChatMessagePosted;
+use App\Command\Domain\Events\GroupChatRenamed;
 use App\Infrastructure\Ulid\UlidValidator;
 
 class EventConverter

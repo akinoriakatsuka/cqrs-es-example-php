@@ -7,8 +7,8 @@ namespace App\Command\Domain\Events;
 use App\Command\Domain\Models\GroupChatId;
 use App\Command\Domain\Models\Message;
 use App\Command\Domain\Models\UserAccountId;
-use App\Infrastructure\Ulid\UlidValidator;
 use App\Infrastructure\Ulid\UlidGenerator;
+use App\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatMessageEdited implements GroupChatEvent
 {
