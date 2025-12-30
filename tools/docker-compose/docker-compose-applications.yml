@@ -1,0 +1,125 @@
+name: cqrs-es-example-php
+services:
+  write-api-server-php-fpm:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.php-fpm
+    image: cqrs-es-example-php-fpm:latest
+    container_name: write-api-server-php-fpm
+    environment:
+      APP_ENV: local
+      CORS_ALLOWED_ORIGINS: "http://localhost:38080,http://localhost:38082,http://localhost:8888"
+      AWS_REGION: ap-northeast-1
+      PERSISTENCE_JOURNAL_TABLE_NAME: journal
+      PERSISTENCE_JOURNAL_AID_INDEX_NAME: journal-aid-index
+      PERSISTENCE_SNAPSHOT_TABLE_NAME: snapshot
+      PERSISTENCE_SNAPSHOT_AID_INDEX_NAME: snapshot-aid-index
+      PERSISTENCE_SHARD_COUNT: 64
+      AWS_DYNAMODB_ENDPOINT_URL: http://localstack:4566
+      AWS_DYNAMODB_ACCESS_KEY_ID: x
+      AWS_DYNAMODB_SECRET_ACCESS_KEY: x
+    volumes:
+      - ../../:/var/www/html
+    networks:
+      - cqrs-es-example-php_default
+
+  write-api-server-nginx:
+    image: nginx:alpine
+    container_name: write-api-server-nginx
+    ports:
+      - "38080:8080"
+    volumes:
+      - ../../:/var/www/html
+      - ./nginx/write-api-server.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - write-api-server-php-fpm
+    networks:
+      - cqrs-es-example-php_default
+  # Go RMU (commented out - replaced by PHP RMU)
+  # read-model-updater-1:
+  #   command: [ "localRmu" ]
+  #   image: cqrs-es-example-go:latest
+  #   container_name: read-model-updater-1
+  #   ports:
+  #     - 28081:8080
+  #   environment:
+  #     AWS_REGION: ${AWS_REGION}
+  #     API_HOST: "0.0.0.0"
+  #     API_PORT: 8080
+  #     AWS_REGION_NAME: ${AWS_REGION}
+  #     AWS_DYNAMODB_ENDPOINT_URL: http://localstack:4566
+  #     AWS_DYNAMODB_ACCESS_KEY_ID: x
+  #     AWS_DYNAMODB_SECRET_ACCESS_KEY: x
+  #     STREAM_JOURNAL_TABLE_NAME: journal
+  #     STREAM_MAX_ITEM_COUNT: 32
+  #     DATABASE_URL: ceer:ceer@tcp(mysql-local:3306)/ceer
+  #   depends_on:
+  #     - localstack
+  #     - dynamodb-admin
+  #     - dynamodb-setup
+  #   restart: on-failure
+  read-model-updater-php:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.rmu-php
+    image: cqrs-es-example-rmu-php:latest
+    container_name: read-model-updater-php
+    ports:
+      - 38081:8080
+    environment:
+      APP_ENV: local
+      AWS_REGION: ap-northeast-1
+      AWS_DYNAMODB_ENDPOINT_URL: http://localstack:4566
+      AWS_DYNAMODB_ACCESS_KEY_ID: x
+      AWS_DYNAMODB_SECRET_ACCESS_KEY: x
+      PERSISTENCE_JOURNAL_TABLE_NAME: journal
+      DB_HOST: cqrs-es-example-php-mysql-1
+      DB_PORT: 3306
+      DB_DATABASE: ceer
+      DB_USERNAME: root
+      DB_PASSWORD: passwd
+    volumes:
+      - ../../:/var/www/html
+    depends_on:
+      - localstack
+      - dynamodb-admin
+      - dynamodb-setup
+      - migration
+    restart: on-failure
+    networks:
+      - cqrs-es-example-php_default
+  read-api-server-php-fpm:
+    build:
+      context: ../../
+      dockerfile: Dockerfile.php-fpm
+    image: cqrs-es-example-php-fpm:latest
+    container_name: read-api-server-php-fpm
+    environment:
+      APP_ENV: local
+      DB_HOST: cqrs-es-example-php-mysql-1
+      DB_PORT: 3306
+      DB_DATABASE: ceer
+      DB_USERNAME: root
+      DB_PASSWORD: passwd
+      CORS_ALLOWED_ORIGINS: "http://localhost:28080,http://localhost:38082,http://localhost:8888"
+    volumes:
+      - ../../:/var/www/html
+    networks:
+      - cqrs-es-example-php_default
+
+  read-api-server-nginx:
+    image: nginx:alpine
+    container_name: read-api-server-nginx
+    ports:
+      - "38082:8080"
+    volumes:
+      - ../../:/var/www/html
+      - ./nginx/read-api-server.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - read-api-server-php-fpm
+    networks:
+      - cqrs-es-example-php_default
+
+networks:
+  cqrs-es-example-php_default:
+    external: true
