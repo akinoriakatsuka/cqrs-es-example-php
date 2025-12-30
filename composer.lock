@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "91afdab5536fa57be824f4bc5d582b84",
+    "content-hash": "7fce1c01d4dac747ebd118019726e1fc",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.3",
+            "version": "3.369.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "11d11bd6b5b0fc2b8e1ee1b5b758360dc2671a33"
+                "reference": "2aa1ef195e90140d733382e4341732ce113024f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/11d11bd6b5b0fc2b8e1ee1b5b758360dc2671a33",
-                "reference": "11d11bd6b5b0fc2b8e1ee1b5b758360dc2671a33",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2aa1ef195e90140d733382e4341732ce113024f5",
+                "reference": "2aa1ef195e90140d733382e4341732ce113024f5",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.3"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.4"
             },
-            "time": "2025-12-26T19:10:15+00:00"
+            "time": "2025-12-29T19:07:47+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -2127,16 +2127,16 @@
         },
         {
             "name": "webonyx/graphql-php",
-            "version": "v15.29.1",
+            "version": "v15.29.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webonyx/graphql-php.git",
-                "reference": "3f2b7e2ae367c1f19b5189af0a31651e95b69bb0"
+                "reference": "abe7cf760fd7d322e3e685b0b2fe14cedb73fafe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/3f2b7e2ae367c1f19b5189af0a31651e95b69bb0",
-                "reference": "3f2b7e2ae367c1f19b5189af0a31651e95b69bb0",
+                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/abe7cf760fd7d322e3e685b0b2fe14cedb73fafe",
+                "reference": "abe7cf760fd7d322e3e685b0b2fe14cedb73fafe",
                 "shasum": ""
             },
             "require": {
@@ -2190,7 +2190,7 @@
             ],
             "support": {
                 "issues": "https://github.com/webonyx/graphql-php/issues",
-                "source": "https://github.com/webonyx/graphql-php/tree/v15.29.1"
+                "source": "https://github.com/webonyx/graphql-php/tree/v15.29.3"
             },
             "funding": [
                 {
@@ -2198,7 +2198,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2025-12-19T11:03:09+00:00"
+            "time": "2025-12-29T13:48:44+00:00"
         }
     ],
     "packages-dev": [
