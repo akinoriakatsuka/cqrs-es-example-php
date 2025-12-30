@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\EventStore;
+
+use J5ik2o\EventStoreAdapterPhp\SnapshotSerializer as SnapshotSerializerInterface;
+use J5ik2o\EventStoreAdapterPhp\Aggregate;
+
+class SnapshotSerializer implements SnapshotSerializerInterface
+{
+    public function serialize(Aggregate $aggregate): string
+    {
+        // AggregateAdapterからjsonSerializeを使用
+        $data = $aggregate->jsonSerialize();
+        $json = json_encode($data, JSON_THROW_ON_ERROR);
+
+        if ($json === false) {
+            throw new \RuntimeException('Failed to serialize snapshot');
+        }
+
+        return $json;
+    }
+
+    public function deserialize(string $data): array
+    {
+        $decoded = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
+
+        if (!is_array($decoded)) {
+            throw new \RuntimeException('Failed to deserialize snapshot');
+        }
+
+        return $decoded;
+    }
+}
