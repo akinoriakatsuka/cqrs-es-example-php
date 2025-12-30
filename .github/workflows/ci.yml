@@ -52,6 +52,8 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+      - name: Build Docker images
+        run: docker compose -f tools/docker-compose/docker-compose-databases.yml -f tools/docker-compose/docker-compose-applications.yml build
       - name: Run docker-compose
         run: docker compose -f tools/docker-compose/docker-compose-databases.yml -f tools/docker-compose/docker-compose-applications.yml up -d
       - name: Run test suite
