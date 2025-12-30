@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Command\Domain\Models;
 
-use App\Command\Domain\Models\UserAccountId;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
-use App\Infrastructure\Ulid\UlidGenerator;
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class UserAccountIdTest extends TestCase

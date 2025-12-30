@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rmu\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models;
 
 /**
  * チェックポイント値オブジェクト

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Events;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
-use App\Command\Domain\Models\GroupChatId;
-use App\Command\Domain\Models\Message;
-use App\Command\Domain\Models\UserAccountId;
-use App\Infrastructure\Ulid\UlidGenerator;
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatMessagePosted implements GroupChatEvent
 {
@@ -29,7 +29,7 @@ final readonly class GroupChatMessagePosted implements GroupChatEvent
         UserAccountId $executor_id,
         UlidGenerator $generator
     ): self {
-        $ulid = \App\Infrastructure\Ulid\Ulid::generate($generator);
+        $ulid = \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid::generate($generator);
         $id = $ulid->toString();
         $occurred_at = (int)(microtime(true) * 1000);
         return new self($id, $aggregate_id, $message, $seq_nr, $executor_id, $occurred_at);

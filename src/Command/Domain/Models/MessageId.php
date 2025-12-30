@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-use App\Infrastructure\Ulid\Ulid;
-use App\Infrastructure\Ulid\UlidGenerator;
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class MessageId
 {

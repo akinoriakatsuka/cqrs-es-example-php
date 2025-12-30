@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Processor;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor;
 
-use App\Command\Domain\GroupChat;
-use App\Command\Domain\Models\GroupChatId;
-use App\Command\Domain\Models\GroupChatName;
-use App\Command\Domain\Models\MemberId;
-use App\Command\Domain\Models\MessageId;
-use App\Command\Domain\Models\Role;
-use App\Command\Domain\Models\UserAccountId;
-use App\Command\InterfaceAdaptor\Repository\GroupChatRepository;
-use App\Infrastructure\Ulid\UlidGenerator;
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 class GroupChatCommandProcessor
 {

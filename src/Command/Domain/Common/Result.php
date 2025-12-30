@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Common;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Common;
 
 use Exception;
 

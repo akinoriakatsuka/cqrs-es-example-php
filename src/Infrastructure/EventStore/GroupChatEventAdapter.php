@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\EventStore;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use App\Command\Domain\Events\GroupChatEvent;
-use App\Command\Domain\Models\GroupChatId;
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use J5ik2o\EventStoreAdapterPhp\Event;
 

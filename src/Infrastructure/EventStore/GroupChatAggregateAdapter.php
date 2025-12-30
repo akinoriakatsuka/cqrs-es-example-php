@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\EventStore;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use App\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 

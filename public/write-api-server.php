@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use App\Command\InterfaceAdaptor\GraphQL\Schema;
-use App\Command\Processor\GroupChatCommandProcessor;
-use App\Command\InterfaceAdaptor\Repository\GroupChatRepository;
-use App\Infrastructure\EventStore\DynamoDBEventStore;
-use App\Infrastructure\EventStore\EventSerializer;
-use App\Infrastructure\EventStore\EventConverter;
-use App\Infrastructure\EventStore\GroupChatEventAdapter;
-use App\Infrastructure\EventStore\SnapshotSerializer;
-use App\Infrastructure\EventStore\SnapshotConverter;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL\Schema;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\DynamoDBEventStore;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\EventSerializer;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\EventConverter;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\GroupChatEventAdapter;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\SnapshotSerializer;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\SnapshotConverter;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Aws\DynamoDb\DynamoDbClient;
 use J5ik2o\EventStoreAdapterPhp\EventStoreFactory;
 use GraphQL\GraphQL;

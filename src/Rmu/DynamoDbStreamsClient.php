@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rmu;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu;
 
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDbStreams\DynamoDbStreamsClient as AwsStreamsClient;

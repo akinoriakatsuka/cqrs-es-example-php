@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 enum Role: int
 {

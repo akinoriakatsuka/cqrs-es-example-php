@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\EventStore;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use App\Command\Domain\Events\GroupChatEvent;
-use App\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 
 interface EventStore
 {

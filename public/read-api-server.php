@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use App\Query\InterfaceAdaptor\GraphQL\Schema;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Schema;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 

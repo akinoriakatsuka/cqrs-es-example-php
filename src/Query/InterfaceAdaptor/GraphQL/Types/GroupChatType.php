@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Query\InterfaceAdaptor\GraphQL\Types;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Types;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;

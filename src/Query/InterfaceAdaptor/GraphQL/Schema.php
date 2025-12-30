@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Query\InterfaceAdaptor\GraphQL;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL;
 
-use App\Query\InterfaceAdaptor\GraphQL\Types\GroupChatType;
-use App\Query\InterfaceAdaptor\GraphQL\Types\MemberType;
-use App\Query\InterfaceAdaptor\GraphQL\Types\MessageType;
-use App\Query\InterfaceAdaptor\GraphQL\Types\QueryType;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Types\GroupChatType;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Types\MemberType;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Types\MessageType;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Types\QueryType;
 use GraphQL\Type\Schema as GraphQLSchema;
 use PDO;
 

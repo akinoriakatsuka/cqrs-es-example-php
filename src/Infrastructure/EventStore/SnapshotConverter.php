@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\EventStore;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use App\Command\Domain\GroupChat;
-use App\Command\Domain\Models\GroupChatId;
-use App\Command\Domain\Models\GroupChatName;
-use App\Command\Domain\Models\Members;
-use App\Command\Domain\Models\Messages;
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 
 class SnapshotConverter

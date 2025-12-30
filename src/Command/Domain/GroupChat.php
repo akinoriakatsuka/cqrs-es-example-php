@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
-use App\Command\Domain\Events\GroupChatCreated;
-use App\Command\Domain\Events\GroupChatDeleted;
-use App\Command\Domain\Events\GroupChatEvent;
-use App\Command\Domain\Events\GroupChatMemberAdded;
-use App\Command\Domain\Events\GroupChatMemberRemoved;
-use App\Command\Domain\Events\GroupChatMessageDeleted;
-use App\Command\Domain\Events\GroupChatMessageEdited;
-use App\Command\Domain\Events\GroupChatMessagePosted;
-use App\Command\Domain\Events\GroupChatRenamed;
-use App\Command\Domain\Models\GroupChatId;
-use App\Command\Domain\Models\GroupChatName;
-use App\Command\Domain\Models\Member;
-use App\Command\Domain\Models\MemberId;
-use App\Command\Domain\Models\Members;
-use App\Command\Domain\Models\Message;
-use App\Command\Domain\Models\MessageId;
-use App\Command\Domain\Models\Messages;
-use App\Command\Domain\Models\Role;
-use App\Command\Domain\Models\UserAccountId;
-use App\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdited;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 
 /**
  * GroupChat is an aggregate of a group chat.

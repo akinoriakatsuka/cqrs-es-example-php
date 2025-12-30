@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Ulid;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid;
 
 use Ulid\Ulid;
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Rmu\EventHandlers;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers;
 
-use App\Rmu\GroupChatDao;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\GroupChatDao;
 use Psr\Log\LoggerInterface;
 
 /**

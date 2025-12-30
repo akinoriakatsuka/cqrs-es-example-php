@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Rmu;
 
-use App\Rmu\GroupChatDaoImpl;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\GroupChatDaoImpl;
 use PDO;
 use PHPUnit\Framework\TestCase;
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Command\InterfaceAdaptor\Repository;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository;
 
-use App\Command\Domain\Events\GroupChatEvent;
-use App\Command\Domain\GroupChat;
-use App\Command\Domain\Models\GroupChatId;
-use App\Infrastructure\EventStore\EventStore;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\EventStore;
 
 /**
  * GroupChatRepository provides persistence for GroupChat aggregates.

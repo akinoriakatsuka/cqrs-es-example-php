@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Events;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 interface GroupChatEvent
 {

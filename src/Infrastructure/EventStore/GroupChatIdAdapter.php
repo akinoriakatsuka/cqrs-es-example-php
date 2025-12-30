@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\EventStore;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use App\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 
 class GroupChatIdAdapter implements AggregateId

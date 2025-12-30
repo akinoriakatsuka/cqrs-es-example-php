@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Command\InterfaceAdaptor\GraphQL;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL;
 
-use App\Command\Processor\GroupChatCommandProcessor;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
 use GraphQL\Type\Definition\InputObjectType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;

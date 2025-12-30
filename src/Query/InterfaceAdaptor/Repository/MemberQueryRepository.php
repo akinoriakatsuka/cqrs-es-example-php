@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Query\InterfaceAdaptor\Repository;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 
 use PDO;
 

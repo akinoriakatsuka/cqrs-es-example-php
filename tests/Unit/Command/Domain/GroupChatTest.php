@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Command\Domain;
 
-use App\Command\Domain\Events\GroupChatCreated;
-use App\Command\Domain\GroupChat;
-use App\Command\Domain\Models\GroupChatId;
-use App\Command\Domain\Models\GroupChatName;
-use App\Command\Domain\Models\UserAccountId;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatTest extends TestCase

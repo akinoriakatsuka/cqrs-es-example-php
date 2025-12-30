@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Rmu;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu;
 
-use App\Rmu\EventHandlers\GroupChatCreatedEventHandler;
-use App\Rmu\EventHandlers\GroupChatDeletedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMemberAddedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMemberRemovedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMessageDeletedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMessageEditedEventHandler;
-use App\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
-use App\Rmu\EventHandlers\GroupChatRenamedEventHandler;
-use App\Rmu\Models\Checkpoint;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatCreatedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatDeletedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMemberAddedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMemberRemovedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessageDeletedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessageEditedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatRenamedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models\Checkpoint;
 use Psr\Log\LoggerInterface;
 
 /**

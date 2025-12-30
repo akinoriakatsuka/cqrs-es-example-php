@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Rmu;
 
-use App\Rmu\CheckpointRepository;
-use App\Rmu\Models\Checkpoint;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\CheckpointRepository;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models\Checkpoint;
 use PDO;
 use PHPUnit\Framework\TestCase;
 

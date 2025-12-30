@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Rmu;
 
-use App\Rmu\DynamoDbStreamsClient;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\DynamoDbStreamsClient;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDbStreams\DynamoDbStreamsClient as AwsStreamsClient;
 use Aws\Result;

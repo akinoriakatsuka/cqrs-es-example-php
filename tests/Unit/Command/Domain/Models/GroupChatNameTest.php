@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Command\Domain\Models;
 
-use App\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatNameTest extends TestCase

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Rmu;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu;
 
 /**
  * グループチャット読み取りモデルDAO（インターフェース）

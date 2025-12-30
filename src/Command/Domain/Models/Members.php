@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-use App\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 
 final readonly class Members
 {
@@ -30,7 +30,7 @@ final readonly class Members
         return new self([$member]);
     }
 
-    public static function fromArray(array $data, \App\Infrastructure\Ulid\UlidValidator $validator): self
+    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
     {
         $members = array_map(
             fn ($member_data) => Member::fromArray($member_data, $validator),

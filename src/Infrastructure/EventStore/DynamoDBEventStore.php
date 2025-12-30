@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\EventStore;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use App\Infrastructure\Ulid\UlidValidator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use J5ik2o\EventStoreAdapterPhp\EventStore as J5EventStore;
 
 class DynamoDBEventStore implements EventStore
@@ -40,7 +40,7 @@ class DynamoDBEventStore implements EventStore
         string $aggregate_id,
         int $version,
         array $events,
-        \App\Command\Domain\GroupChat $aggregate
+        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat $aggregate
     ): void {
         // j5ik2o版は単一イベントを扱うので、最初のイベントだけを使用
         // （通常、persistEventAndSnapshotは単一イベントで呼ばれる想定）
@@ -61,7 +61,7 @@ class DynamoDBEventStore implements EventStore
         int $since_seq_nr = 0
     ): array {
         // AggregateIdを作成
-        $group_chat_id = \App\Command\Domain\Models\GroupChatId::fromString($aggregate_id, $this->validator);
+        $group_chat_id = \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId::fromString($aggregate_id, $this->validator);
         $aggregate_id_adapter = new GroupChatIdAdapter($group_chat_id);
 
         // イベントを取得
@@ -82,10 +82,10 @@ class DynamoDBEventStore implements EventStore
         return $events;
     }
 
-    public function getLatestSnapshotById(string $aggregate_id): ?\App\Command\Domain\GroupChat
+    public function getLatestSnapshotById(string $aggregate_id): ?\Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat
     {
         // AggregateIdを作成
-        $group_chat_id = \App\Command\Domain\Models\GroupChatId::fromString($aggregate_id, $this->validator);
+        $group_chat_id = \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId::fromString($aggregate_id, $this->validator);
         $aggregate_id_adapter = new GroupChatIdAdapter($group_chat_id);
 
         // スナップショットを取得

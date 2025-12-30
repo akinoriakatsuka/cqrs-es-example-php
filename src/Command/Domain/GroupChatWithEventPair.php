@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain;
 
-use App\Command\Domain\Common\Pair;
-use App\Command\Domain\Events\GroupChatEvent;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Common\Pair;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 
 /**
  * Type alias for GroupChat and GroupChatEvent pair.

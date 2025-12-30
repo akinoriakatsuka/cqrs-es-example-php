@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Rmu;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu;
 
-use App\Rmu\Models\Checkpoint;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models\Checkpoint;
 use PDO;
 
 /**

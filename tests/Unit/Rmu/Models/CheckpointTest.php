@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Rmu\Models;
 
-use App\Rmu\Models\Checkpoint;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models\Checkpoint;
 use PHPUnit\Framework\TestCase;
 
 class CheckpointTest extends TestCase

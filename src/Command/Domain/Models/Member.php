@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Domain\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 final readonly class Member
 {
@@ -42,7 +42,7 @@ final readonly class Member
         ];
     }
 
-    public static function fromArray(array $data, \App\Infrastructure\Ulid\UlidValidator $validator): self
+    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
     {
         return new self(
             MemberId::fromArray($data['id'], $validator),
