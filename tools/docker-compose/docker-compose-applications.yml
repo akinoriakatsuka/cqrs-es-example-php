@@ -4,7 +4,6 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile.php-fpm
-    image: cqrs-es-example-php-fpm:latest
     container_name: write-api-server-php-fpm
     environment:
       APP_ENV: local
@@ -35,34 +34,10 @@ services:
       - write-api-server-php-fpm
     networks:
       - cqrs-es-example-php_default
-  # Go RMU (commented out - replaced by PHP RMU)
-  # read-model-updater-1:
-  #   command: [ "localRmu" ]
-  #   image: cqrs-es-example-go:latest
-  #   container_name: read-model-updater-1
-  #   ports:
-  #     - 28081:8080
-  #   environment:
-  #     AWS_REGION: ${AWS_REGION}
-  #     API_HOST: "0.0.0.0"
-  #     API_PORT: 8080
-  #     AWS_REGION_NAME: ${AWS_REGION}
-  #     AWS_DYNAMODB_ENDPOINT_URL: http://localstack:4566
-  #     AWS_DYNAMODB_ACCESS_KEY_ID: x
-  #     AWS_DYNAMODB_SECRET_ACCESS_KEY: x
-  #     STREAM_JOURNAL_TABLE_NAME: journal
-  #     STREAM_MAX_ITEM_COUNT: 32
-  #     DATABASE_URL: ceer:ceer@tcp(mysql-local:3306)/ceer
-  #   depends_on:
-  #     - localstack
-  #     - dynamodb-admin
-  #     - dynamodb-setup
-  #   restart: on-failure
   read-model-updater-php:
     build:
       context: ../../
       dockerfile: Dockerfile.rmu-php
-    image: cqrs-es-example-rmu-php:latest
     container_name: read-model-updater-php
     ports:
       - 38081:8080
