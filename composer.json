@@ -40,7 +40,7 @@
   "extra": {
     "patches": {
       "j5ik2o/event-store-adapter-php": {
-        "Fix payload type to Binary for Go compatibility": "../../repo/cqrs-es-example-php/patches/event-store-adapter-php-binary-payload.patch"
+        "Fix payload type to Binary for Go compatibility": "patches/event-store-adapter-php-binary-payload.patch"
       }
     }
   }
