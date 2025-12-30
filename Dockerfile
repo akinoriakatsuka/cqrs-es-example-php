@@ -16,6 +16,6 @@ WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
 COPY patches ./patches/
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install
 
 COPY . .

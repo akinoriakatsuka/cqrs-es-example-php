@@ -32,7 +32,6 @@ jobs:
         run: composer run lint
   test:
     runs-on: ubuntu-24.04
-    needs: lint
     steps:
       - uses: actions/checkout@v4
       - name: Setup PHP
@@ -60,9 +59,23 @@ jobs:
         run: composer run test
   e2e:
     runs-on: ubuntu-24.04
-    needs: test
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, mbstring, json
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
       - name: Install tools
         run: |
           sudo apt-get update
