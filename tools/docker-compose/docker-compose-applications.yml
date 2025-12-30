@@ -97,4 +97,4 @@ services:
 
 networks:
   cqrs-es-example-php_default:
-    external: true
+    driver: bridge
