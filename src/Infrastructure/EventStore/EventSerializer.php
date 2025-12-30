@@ -13,13 +13,7 @@ class EventSerializer implements EventSerializerInterface
     {
         // EventAdapterからjsonSerializeを使用
         $data = $event->jsonSerialize();
-        $json = json_encode($data, JSON_THROW_ON_ERROR);
-
-        if ($json === false) {
-            throw new \RuntimeException('Failed to serialize event');
-        }
-
-        return $json;
+        return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
     public function deserialize(string $data): array

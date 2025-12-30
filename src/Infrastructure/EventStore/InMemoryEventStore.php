@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventStore;
 
+use App\Command\Domain\Events\GroupChatCreated;
 use App\Command\Domain\Events\GroupChatEvent;
 use App\Command\Domain\GroupChat;
 
@@ -117,5 +118,44 @@ class InMemoryEventStore implements EventStore
         }
 
         return $events;
+    }
+
+    public function getLatestSnapshotById(string $aggregate_id): ?GroupChat
+    {
+        // InMemoryEventStore doesn't maintain snapshots separately
+        // We rebuild from events
+        $events = $this->loadEvents($aggregate_id);
+        if (empty($events)) {
+            return null;
+        }
+
+        // Find the first created event
+        $created_event = null;
+        foreach ($events as $event) {
+            if ($event->isCreated()) {
+                $created_event = $event;
+                break;
+            }
+        }
+
+        if (!$created_event) {
+            return null;
+        }
+
+        // Rebuild aggregate from events
+        if (!$created_event instanceof GroupChatCreated) {
+            throw new \RuntimeException('First event must be GroupChatCreated');
+        }
+        $aggregate = GroupChat::fromEvent($created_event);
+
+        // Apply remaining events
+        foreach ($events as $event) {
+            if ($event === $created_event) {
+                continue;
+            }
+            $aggregate = $aggregate->applyEvent($event);
+        }
+
+        return $aggregate;
     }
 }

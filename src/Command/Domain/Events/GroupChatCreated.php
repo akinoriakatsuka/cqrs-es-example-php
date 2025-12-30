@@ -53,6 +53,21 @@ final readonly class GroupChatCreated implements GroupChatEvent
         return $this->aggregate_id->toString();
     }
 
+    public function getAggregateIdAsObject(): GroupChatId
+    {
+        return $this->aggregate_id;
+    }
+
+    public function getName(): GroupChatName
+    {
+        return $this->name;
+    }
+
+    public function getMembers(): Members
+    {
+        return $this->members;
+    }
+
     public function getSeqNr(): int
     {
         return $this->seq_nr;

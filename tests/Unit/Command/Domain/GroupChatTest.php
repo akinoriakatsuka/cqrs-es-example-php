@@ -10,17 +10,14 @@ use App\Command\Domain\Models\GroupChatId;
 use App\Command\Domain\Models\GroupChatName;
 use App\Command\Domain\Models\UserAccountId;
 use App\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
-use App\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatTest extends TestCase
 {
-    private RobinvdvleutenUlidValidator $validator;
     private RobinvdvleutenUlidGenerator $generator;
 
     protected function setUp(): void
     {
-        $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
     }
 

@@ -144,7 +144,6 @@ class CheckpointRepositoryTest extends TestCase
     {
         $checkpoints = $this->repository->loadAll('non-existent-stream-arn');
 
-        $this->assertIsArray($checkpoints);
         $this->assertEmpty($checkpoints);
     }
 }

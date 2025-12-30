@@ -35,6 +35,7 @@ class CheckpointTest extends TestCase
         $this->expectException(\Error::class);
         $this->expectExceptionMessage('Cannot modify readonly property');
 
+        // @phpstan-ignore-next-line
         $checkpoint->shardId = 'new-shard-id';
     }
 

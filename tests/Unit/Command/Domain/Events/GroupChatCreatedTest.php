@@ -64,7 +64,6 @@ class GroupChatCreatedTest extends TestCase
 
         $array = $event->toArray();
 
-        $this->assertIsArray($array);
         $this->assertEquals('GroupChatCreated', $array['type_name']);
         $this->assertArrayHasKey('id', $array);
         $this->assertArrayHasKey('aggregate_id', $array);

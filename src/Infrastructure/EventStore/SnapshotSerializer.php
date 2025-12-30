@@ -13,13 +13,7 @@ class SnapshotSerializer implements SnapshotSerializerInterface
     {
         // AggregateAdapterからjsonSerializeを使用
         $data = $aggregate->jsonSerialize();
-        $json = json_encode($data, JSON_THROW_ON_ERROR);
-
-        if ($json === false) {
-            throw new \RuntimeException('Failed to serialize snapshot');
-        }
-
-        return $json;
+        return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
     public function deserialize(string $data): array

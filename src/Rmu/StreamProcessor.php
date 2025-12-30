@@ -78,6 +78,7 @@ class StreamProcessor
         }
 
         // 無限ループでレコードを処理
+        // @phpstan-ignore-next-line
         while (true) {
             foreach ($shardIterators as $shardId => $iterator) {
                 if ($iterator === null) {

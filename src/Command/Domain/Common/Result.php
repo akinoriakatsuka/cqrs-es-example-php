@@ -40,9 +40,8 @@ final class Result
     /**
      * Creates a failed Result.
      *
-     * @template U
      * @param Exception $error
-     * @return self<U>
+     * @return self<null>
      */
     public static function err(Exception $error): self
     {
