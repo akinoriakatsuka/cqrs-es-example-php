@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
+use PHPUnit\Framework\Attributes\TestDox;
 use PHPUnit\Framework\TestCase;
 
 class RoleTest extends TestCase
 {
-    public function test_ADMINISTRATOR生成(): void
+    #[TestDox('ADMINISTRATOR生成')]
+    public function test_ganerate_ADMINISTRATOR(): void
     {
         $role = Role::ADMINISTRATOR;
 
@@ -18,7 +20,8 @@ class RoleTest extends TestCase
         $this->assertEquals(1, $role->value);
     }
 
-    public function test_MEMBER生成(): void
+    #[TestDox('MEMBER生成')]
+    public function test_ganerate_MEMBER(): void
     {
         $role = Role::MEMBER;
 
@@ -36,7 +39,8 @@ class RoleTest extends TestCase
         $this->assertFalse($member->isAdministrator());
     }
 
-    public function test_無効な値でエラー(): void
+    #[TestDox('無効な値でエラーaaa')]
+    public function test_error(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid role value');
