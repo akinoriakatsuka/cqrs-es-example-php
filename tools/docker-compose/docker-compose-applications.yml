@@ -1,5 +1,10 @@
 name: cqrs-es-example-php
 services:
+  app:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    container_name: cqrs-es-example-php-app
   write-api-server-php-fpm:
     build:
       context: ../../
