@@ -16,7 +16,7 @@
   "require": {
     "php": "^8.4",
     "aws/aws-sdk-php": "^3.0",
-    "cweagans/composer-patches": "^1.7",
+    "cweagans/composer-patches": "^2.0",
     "j5ik2o/event-store-adapter-php": "^1.0",
     "monolog/monolog": "^3.9",
     "psr/log": "^3.0",
