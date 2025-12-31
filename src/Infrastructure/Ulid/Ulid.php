@@ -28,8 +28,11 @@ final readonly class Ulid
         return new self($value);
     }
 
-    public static function generate(UlidGenerator $generator): self
+    public static function generate(?UlidGenerator $generator = null): self
     {
+        if ($generator === null) {
+            $generator = new RobinvdvleutenUlidGenerator();
+        }
         return new self($generator->generate());
     }
 

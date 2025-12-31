@@ -14,12 +14,10 @@ use PHPUnit\Framework\TestCase;
 class GroupChatDeletedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
-    private RobinvdvleutenUlidGenerator $generator;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
-        $this->generator = new RobinvdvleutenUlidGenerator();
     }
 
     public function test_正常に生成できる(): void
@@ -30,8 +28,7 @@ class GroupChatDeletedTest extends TestCase
         $event = GroupChatDeleted::create(
             $aggregate_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatDeleted::class, $event);
@@ -49,8 +46,7 @@ class GroupChatDeletedTest extends TestCase
         $event = GroupChatDeleted::create(
             $aggregate_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -71,8 +67,7 @@ class GroupChatDeletedTest extends TestCase
         $original_event = GroupChatDeleted::create(
             $aggregate_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -90,8 +85,7 @@ class GroupChatDeletedTest extends TestCase
         $original_event = GroupChatDeleted::create(
             $aggregate_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

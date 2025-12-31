@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
@@ -15,17 +15,21 @@ class MessageTest extends TestCase
 {
     private RobinvdvleutenUlidGenerator $generator;
     private RobinvdvleutenUlidValidator $validator;
+    private MessageIdFactory $message_id_factory;
+    private UserAccountIdFactory $user_account_id_factory;
 
     protected function setUp(): void
     {
         $this->generator = new RobinvdvleutenUlidGenerator();
         $this->validator = new RobinvdvleutenUlidValidator();
+        $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
+        $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
     }
 
     public function test_constructor_正常に生成できる(): void
     {
-        $message_id = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->create();
 
         $message = new Message($message_id, 'Test Message', $sender_id);
 
@@ -36,8 +40,8 @@ class MessageTest extends TestCase
 
     public function test_withText_テキストを変更した新しいインスタンスを作成できる(): void
     {
-        $message_id = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->create();
         $message = new Message($message_id, 'Original Text', $sender_id);
 
         $new_message = $message->withText('New Text');
@@ -50,9 +54,9 @@ class MessageTest extends TestCase
 
     public function test_equals_同じIDのメッセージは等価(): void
     {
-        $message_id = MessageId::generate($this->generator);
-        $sender_id1 = UserAccountId::generate($this->generator);
-        $sender_id2 = UserAccountId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
+        $sender_id1 = $this->user_account_id_factory->create();
+        $sender_id2 = $this->user_account_id_factory->create();
 
         $message1 = new Message($message_id, 'Text 1', $sender_id1);
         $message2 = new Message($message_id, 'Text 2', $sender_id2);
@@ -62,9 +66,9 @@ class MessageTest extends TestCase
 
     public function test_equals_異なるIDのメッセージは等価でない(): void
     {
-        $message_id1 = MessageId::generate($this->generator);
-        $message_id2 = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::generate($this->generator);
+        $message_id1 = $this->message_id_factory->create();
+        $message_id2 = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->create();
 
         $message1 = new Message($message_id1, 'Same Text', $sender_id);
         $message2 = new Message($message_id2, 'Same Text', $sender_id);
@@ -74,8 +78,8 @@ class MessageTest extends TestCase
 
     public function test_toArray_配列に変換できる(): void
     {
-        $message_id = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->create();
         $message = new Message($message_id, 'Test Message', $sender_id);
 
         $array = $message->toArray();
@@ -88,8 +92,8 @@ class MessageTest extends TestCase
 
     public function test_fromArray_配列から復元できる(): void
     {
-        $message_id = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->create();
 
         $data = [
             'id' => ['value' => $message_id->toString()],
@@ -106,8 +110,8 @@ class MessageTest extends TestCase
 
     public function test_toArray_fromArray_ラウンドトリップでデータが保持される(): void
     {
-        $message_id = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->create();
         $original_message = new Message($message_id, 'Round Trip Test', $sender_id);
 
         $array = $original_message->toArray();

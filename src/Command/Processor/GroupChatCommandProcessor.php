@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 class GroupChatCommandProcessor
 {
     public function __construct(
         private GroupChatRepository $repository,
-        private UlidValidator $validator,
-        private UlidGenerator $generator
+        private GroupChatIdFactory $group_chat_id_factory,
+        private UserAccountIdFactory $user_account_id_factory,
+        private MemberIdFactory $member_id_factory,
+        private MessageIdFactory $message_id_factory
     ) {
     }
 
@@ -32,16 +32,16 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $group_chat_name = new GroupChatName($name);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約作成
         $pair = GroupChat::create(
             $id,
             $group_chat_name,
             $executor_user_account_id,
-            $this->generator
+            $this->member_id_factory
         );
 
         // 保存
@@ -59,9 +59,9 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
         $group_chat_name = new GroupChatName($name);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -72,8 +72,7 @@ class GroupChatCommandProcessor
         // リネーム
         $pair = $group_chat->rename(
             $group_chat_name,
-            $executor_user_account_id,
-            $this->generator
+            $executor_user_account_id
         );
 
         // 保存
@@ -88,8 +87,8 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -98,10 +97,7 @@ class GroupChatCommandProcessor
         }
 
         // 削除
-        $pair = $group_chat->delete(
-            $executor_user_account_id,
-            $this->generator
-        );
+        $pair = $group_chat->delete($executor_user_account_id);
 
         // 保存
         $this->repository->store($pair->getEvent(), $pair->getGroupChat());
@@ -118,10 +114,10 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id_obj = UserAccountId::fromString($user_account_id_ulid, $this->validator);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id_obj = $this->user_account_id_factory->fromString($user_account_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // ロールを文字列から変換
         $role = match (strtoupper($role_string)) {
@@ -141,8 +137,7 @@ class GroupChatCommandProcessor
             $member_id,
             $user_account_id_obj,
             $role,
-            $executor_user_account_id,
-            $this->generator
+            $executor_user_account_id
         );
 
         // 保存
@@ -159,9 +154,9 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
-        $user_account_id_obj = UserAccountId::fromString($user_account_id_ulid, $this->validator);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
+        $user_account_id_obj = $this->user_account_id_factory->fromString($user_account_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -172,8 +167,7 @@ class GroupChatCommandProcessor
         // メンバー削除
         $pair = $group_chat->removeMember(
             $user_account_id_obj,
-            $executor_user_account_id,
-            $this->generator
+            $executor_user_account_id
         );
 
         // 保存
@@ -189,9 +183,9 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
-        $message_id = MessageId::generate($this->generator);
-        $sender_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
+        $message_id = $this->message_id_factory->create();
+        $sender_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -203,8 +197,7 @@ class GroupChatCommandProcessor
         $pair = $group_chat->postMessage(
             $message_id,
             $content,
-            $sender_id,
-            $this->generator
+            $sender_id
         );
 
         // 保存
@@ -223,9 +216,9 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
-        $message_id_obj = MessageId::fromString($message_id, $this->validator);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
+        $message_id_obj = $this->message_id_factory->fromString($message_id);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -237,8 +230,7 @@ class GroupChatCommandProcessor
         $pair = $group_chat->editMessage(
             $message_id_obj,
             $content,
-            $executor_user_account_id,
-            $this->generator
+            $executor_user_account_id
         );
 
         // 保存
@@ -254,9 +246,9 @@ class GroupChatCommandProcessor
         $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
 
         // 値オブジェクト生成
-        $id = GroupChatId::fromString($group_chat_id, $this->validator);
-        $message_id_obj = MessageId::fromString($message_id, $this->validator);
-        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+        $id = $this->group_chat_id_factory->fromString($group_chat_id);
+        $message_id_obj = $this->message_id_factory->fromString($message_id);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -267,8 +259,7 @@ class GroupChatCommandProcessor
         // メッセージ削除
         $pair = $group_chat->deleteMessage(
             $message_id_obj,
-            $executor_user_account_id,
-            $this->generator
+            $executor_user_account_id
         );
 
         // 保存
