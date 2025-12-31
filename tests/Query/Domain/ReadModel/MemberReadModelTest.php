@@ -45,36 +45,4 @@ final class MemberReadModelTest extends TestCase
             ],
         ];
     }
-
-    #[\PHPUnit\Framework\Attributes\DataProvider('toArrayProvider')]
-    public function testToArray(MemberReadModel $read_model, array $expected): void
-    {
-        $result = $read_model->toArray();
-
-        $this->assertSame($expected, $result);
-    }
-
-    public static function toArrayProvider(): array
-    {
-        return [
-            '正常な変換' => [
-                new MemberReadModel(
-                    id: 'member-123',
-                    group_chat_id: 'gc-456',
-                    user_account_id: 'user-789',
-                    role: 'admin',
-                    created_at: '2024-01-01 00:00:00',
-                    updated_at: '2024-01-02 00:00:00'
-                ),
-                [
-                    'id' => 'member-123',
-                    'group_chat_id' => 'gc-456',
-                    'user_account_id' => 'user-789',
-                    'role' => 'admin',
-                    'created_at' => '2024-01-01 00:00:00',
-                    'updated_at' => '2024-01-02 00:00:00',
-                ],
-            ],
-        ];
-    }
 }

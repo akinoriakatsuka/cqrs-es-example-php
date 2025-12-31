@@ -36,21 +36,4 @@ final class MemberReadModel
             updated_at: (string)$data['updated_at']
         );
     }
-
-    /**
-     * GraphQL用の配列に変換
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'group_chat_id' => $this->group_chat_id,
-            'user_account_id' => $this->user_account_id,
-            'role' => $this->role,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-        ];
-    }
 }

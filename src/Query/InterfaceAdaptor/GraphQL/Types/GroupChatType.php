@@ -19,12 +19,10 @@ class GroupChatType extends ObjectType
                 'id' => [
                     'type' => Type::nonNull(Type::id()),
                     'description' => 'グループチャットID',
-                    'resolve' => fn (GroupChatReadModel $root) => $root->id,
                 ],
                 'name' => [
                     'type' => Type::nonNull(Type::string()),
                     'description' => 'グループチャット名',
-                    'resolve' => fn (GroupChatReadModel $root) => $root->name,
                 ],
                 'ownerId' => [
                     'type' => Type::nonNull(Type::id()),

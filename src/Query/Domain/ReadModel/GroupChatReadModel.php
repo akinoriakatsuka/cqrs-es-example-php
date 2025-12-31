@@ -36,21 +36,4 @@ final class GroupChatReadModel
             disabled: (int)$data['disabled']
         );
     }
-
-    /**
-     * GraphQL用の配列に変換
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'owner_id' => $this->owner_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'disabled' => $this->disabled,
-        ];
-    }
 }

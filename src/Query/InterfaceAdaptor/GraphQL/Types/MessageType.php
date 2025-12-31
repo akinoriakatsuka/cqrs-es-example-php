@@ -19,7 +19,6 @@ class MessageType extends ObjectType
                 'id' => [
                     'type' => Type::nonNull(Type::id()),
                     'description' => 'メッセージID',
-                    'resolve' => fn (MessageReadModel $root) => $root->id,
                 ],
                 'groupChatId' => [
                     'type' => Type::nonNull(Type::id()),
@@ -34,7 +33,6 @@ class MessageType extends ObjectType
                 'text' => [
                     'type' => Type::nonNull(Type::string()),
                     'description' => 'メッセージテキスト',
-                    'resolve' => fn (MessageReadModel $root) => $root->text,
                 ],
                 'createdAt' => [
                     'type' => Type::nonNull(Type::string()),

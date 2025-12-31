@@ -19,7 +19,6 @@ class MemberType extends ObjectType
                 'id' => [
                     'type' => Type::nonNull(Type::id()),
                     'description' => 'メンバーID',
-                    'resolve' => fn (MemberReadModel $root) => $root->id,
                 ],
                 'groupChatId' => [
                     'type' => Type::nonNull(Type::id()),
@@ -34,7 +33,6 @@ class MemberType extends ObjectType
                 'role' => [
                     'type' => Type::nonNull(Type::string()),
                     'description' => 'ロール',
-                    'resolve' => fn (MemberReadModel $root) => $root->role,
                 ],
                 'createdAt' => [
                     'type' => Type::nonNull(Type::string()),
