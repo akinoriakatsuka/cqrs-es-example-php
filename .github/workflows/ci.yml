@@ -6,6 +6,7 @@ on:
     branches: [ "main" ]
 permissions:
   contents: read
+  pull-requests: write
 jobs:
   lint:
     runs-on: ubuntu-24.04
@@ -78,9 +79,53 @@ jobs:
           done
           echo "Additional wait for service initialization..."
           sleep 10
-      - name: Run E2E tests
+      - name: Run tests with coverage
         run: |
-          make test
+          docker compose \
+            -f tools/docker-compose/docker-compose-databases.yml \
+            -f tools/docker-compose/docker-compose-applications.yml \
+            exec -T app vendor/bin/phpunit --testdox --coverage-text > coverage_output.txt 2>&1 || true
+          cat coverage_output.txt
+      - name: Generate coverage report
+        id: coverage
+        run: |
+          COVERAGE_SUMMARY=$(docker compose \
+            -f tools/docker-compose/docker-compose-databases.yml \
+            -f tools/docker-compose/docker-compose-applications.yml \
+            exec -T app vendor/bin/phpunit --testdox --coverage-text 2>&1 | grep -A 50 "Code Coverage Report:" || echo "Coverage report not found")
+
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$COVERAGE_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          PERCENTAGE=$(echo "$COVERAGE_SUMMARY" | grep -oP "Lines:\s+\K[\d\.]+(?=%)" | head -1 || echo "0")
+          echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+          echo "Coverage: $PERCENTAGE%"
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const coverage = '${{ steps.coverage.outputs.percentage }}';
+            const summary = `${{ steps.coverage.outputs.summary }}`;
+            const comment = `## Test Coverage Report
+
+            📊 **Overall Coverage: ${coverage}%**
+            <details>
+            
+            \`\`\`
+            ${summary}
+            \`\`\`
+            
+            </details>  
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
       - name: Show logs on failure
         if: failure()
         run: |
