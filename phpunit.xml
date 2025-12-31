@@ -11,6 +11,10 @@
          failOnPhpunitDeprecation="true"
          failOnRisky="true"
          failOnWarning="true">
+    <php>
+        <env name="ENV_FILE" value=".env.testing"/>
+    </php>
+
     <testsuites>
         <testsuite name="default">
             <directory>tests</directory>
@@ -21,5 +25,8 @@
         <include>
             <directory>src</directory>
         </include>
+        <exclude>
+            <directory>src/Query/InterfaceAdaptor/GraphQL</directory>
+        </exclude>
     </source>
 </phpunit>

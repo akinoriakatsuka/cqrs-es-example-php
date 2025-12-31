@@ -30,7 +30,8 @@
     "friendsofphp/php-cs-fixer": "^3.0",
     "mockery/mockery": "^1.6",
     "phpstan/phpstan": "^2.0",
-    "phpunit/phpunit": "^12.0"
+    "phpunit/phpunit": "^12.0",
+    "ext-pdo": "*"
   },
   "autoload": {
     "psr-4": {
@@ -44,7 +45,8 @@
   },
   "scripts": {
     "test": "phpunit --testdox",
-    "test:coverage": "phpunit --testdox --coverage-text",
+    "test:coverage": "phpunit --testdox --coverage-text --colors",
+    "test:coverage:html": "phpunit --testdox --coverage-html coverage",
     "cs": "php-cs-fixer fix --allow-risky=yes --dry-run --diff",
     "cs:fix": "php-cs-fixer fix --allow-risky=yes",
     "fmt": "@cs:fix",

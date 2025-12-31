@@ -35,11 +35,17 @@ test: ## テストを実行
 		-f tools/docker-compose/docker-compose-applications.yml \
 		exec app composer test
 
-coverage: ## カバレッジ付きテストを実行
+test-coverage: ## カバレッジ付きテストを実行
 	docker compose \
 		-f tools/docker-compose/docker-compose-databases.yml \
 		-f tools/docker-compose/docker-compose-applications.yml \
 		exec app composer test:coverage
+
+test-coverage-html: ## カバレッジ付きテストを実行
+	docker compose \
+		-f tools/docker-compose/docker-compose-databases.yml \
+		-f tools/docker-compose/docker-compose-applications.yml \
+		exec app composer test:coverage:html
 
 lint: ## リント（フォーマットチェック + 静的解析）を実行
 	docker compose \

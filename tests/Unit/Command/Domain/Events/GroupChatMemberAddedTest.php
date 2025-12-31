@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Unit\Command\Domain\Events;
+
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
+use PHPUnit\Framework\TestCase;
+
+class GroupChatMemberAddedTest extends TestCase
+{
+    private RobinvdvleutenUlidValidator $validator;
+    private RobinvdvleutenUlidGenerator $generator;
+
+    protected function setUp(): void
+    {
+        $this->validator = new RobinvdvleutenUlidValidator();
+        $this->generator = new RobinvdvleutenUlidGenerator();
+    }
+
+    public function test_正常に生成できる(): void
+    {
+        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
+        $member_id = MemberId::generate($this->generator);
+        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $member = new Member($member_id, $user_account_id, Role::MEMBER);
+        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+
+        $event = GroupChatMemberAdded::create(
+            $aggregate_id,
+            $member,
+            1,
+            $executor_id,
+            $this->generator
+        );
+
+        $this->assertInstanceOf(GroupChatMemberAdded::class, $event);
+        $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
+        $this->assertEquals('GroupChatMemberAdded', $event->getTypeName());
+        $this->assertFalse($event->isCreated());
+        $this->assertEquals(1, $event->getSeqNr());
+        $this->assertEquals($member, $event->getMember());
+    }
+
+    public function test_toArrayでシリアライズできる(): void
+    {
+        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
+        $member_id = MemberId::generate($this->generator);
+        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $member = new Member($member_id, $user_account_id, Role::MEMBER);
+        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+
+        $event = GroupChatMemberAdded::create(
+            $aggregate_id,
+            $member,
+            1,
+            $executor_id,
+            $this->generator
+        );
+
+        $array = $event->toArray();
+
+        $this->assertEquals('GroupChatMemberAdded', $array['type_name']);
+        $this->assertArrayHasKey('id', $array);
+        $this->assertArrayHasKey('aggregate_id', $array);
+        $this->assertArrayHasKey('member', $array);
+        $this->assertArrayHasKey('executor_id', $array);
+        $this->assertEquals(1, $array['seq_nr']);
+        $this->assertArrayHasKey('occurred_at', $array);
+    }
+
+    public function test_fromArrayでデシリアライズできる(): void
+    {
+        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
+        $member_id = MemberId::generate($this->generator);
+        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $member = new Member($member_id, $user_account_id, Role::MEMBER);
+        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+
+        $original_event = GroupChatMemberAdded::create(
+            $aggregate_id,
+            $member,
+            1,
+            $executor_id,
+            $this->generator
+        );
+
+        $data = $original_event->toArray();
+        $event = GroupChatMemberAdded::fromArray($data, $this->validator);
+
+        $this->assertInstanceOf(GroupChatMemberAdded::class, $event);
+        $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
+    }
+
+    public function test_ラウンドトリップでデータが保持される(): void
+    {
+        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
+        $member_id = MemberId::generate($this->generator);
+        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $member = new Member($member_id, $user_account_id, Role::MEMBER);
+        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+
+        $original_event = GroupChatMemberAdded::create(
+            $aggregate_id,
+            $member,
+            1,
+            $executor_id,
+            $this->generator
+        );
+
+        $array = $original_event->toArray();
+        $restored_event = GroupChatMemberAdded::fromArray($array, $this->validator);
+
+        $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
+        $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());
+        $this->assertEquals($original_event->getTypeName(), $restored_event->getTypeName());
+        $this->assertEquals($original_event->getId(), $restored_event->getId());
+        $this->assertEquals($original_event->getOccurredAt(), $restored_event->getOccurredAt());
+        $this->assertTrue($original_event->getMember()->equals($restored_event->getMember()));
+    }
+}
