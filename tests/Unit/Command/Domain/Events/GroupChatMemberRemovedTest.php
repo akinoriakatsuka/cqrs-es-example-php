@@ -7,19 +7,16 @@ namespace Tests\Unit\Command\Domain\Events;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatMemberRemovedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
-    private RobinvdvleutenUlidGenerator $generator;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
-        $this->generator = new RobinvdvleutenUlidGenerator();
     }
 
     public function test_正常に生成できる(): void
@@ -32,8 +29,7 @@ class GroupChatMemberRemovedTest extends TestCase
             $aggregate_id,
             $user_account_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatMemberRemoved::class, $event);
@@ -54,8 +50,7 @@ class GroupChatMemberRemovedTest extends TestCase
             $aggregate_id,
             $user_account_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -79,8 +74,7 @@ class GroupChatMemberRemovedTest extends TestCase
             $aggregate_id,
             $user_account_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -100,8 +94,7 @@ class GroupChatMemberRemovedTest extends TestCase
             $aggregate_id,
             $user_account_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

@@ -7,6 +7,7 @@ namespace Tests\Unit\Command\Domain\Events;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
@@ -17,11 +18,13 @@ class GroupChatCreatedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
     private RobinvdvleutenUlidGenerator $generator;
+    private MemberIdFactory $member_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
@@ -29,15 +32,14 @@ class GroupChatCreatedTest extends TestCase
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $name = new GroupChatName('Test Group');
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $members = Members::create($executor_id, $this->generator);
+        $members = Members::create($executor_id, $this->member_id_factory);
 
         $event = GroupChatCreated::create(
             $aggregate_id,
             $name,
             $members,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatCreated::class, $event);
@@ -51,15 +53,14 @@ class GroupChatCreatedTest extends TestCase
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $name = new GroupChatName('Test Group');
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $members = Members::create($executor_id, $this->generator);
+        $members = Members::create($executor_id, $this->member_id_factory);
 
         $event = GroupChatCreated::create(
             $aggregate_id,
             $name,
             $members,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -78,15 +79,14 @@ class GroupChatCreatedTest extends TestCase
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $name = new GroupChatName('Test Group');
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $members = Members::create($executor_id, $this->generator);
+        $members = Members::create($executor_id, $this->member_id_factory);
 
         $original_event = GroupChatCreated::create(
             $aggregate_id,
             $name,
             $members,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -101,15 +101,14 @@ class GroupChatCreatedTest extends TestCase
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $name = new GroupChatName('Test Group');
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $members = Members::create($executor_id, $this->generator);
+        $members = Members::create($executor_id, $this->member_id_factory);
 
         $original_event = GroupChatCreated::create(
             $aggregate_id,
             $name,
             $members,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

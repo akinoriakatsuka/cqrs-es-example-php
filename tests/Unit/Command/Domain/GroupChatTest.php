@@ -13,35 +13,46 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdite
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatTest extends TestCase
 {
     private RobinvdvleutenUlidGenerator $generator;
+    private RobinvdvleutenUlidValidator $validator;
+    private GroupChatIdFactory $group_chat_id_factory;
+    private UserAccountIdFactory $user_account_id_factory;
+    private MemberIdFactory $member_id_factory;
+    private MessageIdFactory $message_id_factory;
 
     protected function setUp(): void
     {
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->validator = new RobinvdvleutenUlidValidator();
+        $this->group_chat_id_factory = new GroupChatIdFactory($this->generator, $this->validator);
+        $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
+        $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
     }
 
     public function test_create_GroupChatが作成される(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
 
         $this->assertInstanceOf(GroupChat::class, $pair->getGroupChat());
         $this->assertEquals($id->toString(), $pair->getGroupChat()->getId()->toString());
@@ -49,11 +60,11 @@ class GroupChatTest extends TestCase
 
     public function test_create_GroupChatCreatedイベントが記録される(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
 
         $this->assertInstanceOf(GroupChatCreated::class, $pair->getEvent());
         $this->assertEquals($id->toString(), $pair->getEvent()->getAggregateId());
@@ -61,11 +72,11 @@ class GroupChatTest extends TestCase
 
     public function test_create_executorがADMINISTRATORとして追加される(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         $this->assertTrue($group_chat->isMember($executor_id));
@@ -74,15 +85,15 @@ class GroupChatTest extends TestCase
 
     public function test_rename_正常にリネームできる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Old Name');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         $new_name = new GroupChatName('New Name');
-        $result_pair = $group_chat->rename($new_name, $executor_id, $this->generator);
+        $result_pair = $group_chat->rename($new_name, $executor_id);
 
         $this->assertEquals('New Name', $result_pair->getGroupChat()->getName()->toString());
         $this->assertEquals(2, $result_pair->getGroupChat()->getSeqNr());
@@ -90,58 +101,57 @@ class GroupChatTest extends TestCase
 
     public function test_rename_削除済みのグループチャットはリネームできない(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $deleted_pair = $group_chat->delete($executor_id, $this->generator);
+        $deleted_pair = $group_chat->delete($executor_id);
         $deleted_group_chat = $deleted_pair->getGroupChat();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The group chat is deleted');
 
         $new_name = new GroupChatName('New Name');
-        $deleted_group_chat->rename($new_name, $executor_id, $this->generator);
+        $deleted_group_chat->rename($new_name, $executor_id);
     }
 
     public function test_rename_メンバーでない場合はエラー(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $non_member_id = UserAccountId::generate($this->generator);
+        $non_member_id = $this->user_account_id_factory->create();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The executorId is not the member of the group chat');
 
         $new_name = new GroupChatName('New Name');
-        $group_chat->rename($new_name, $non_member_id, $this->generator);
+        $group_chat->rename($new_name, $non_member_id);
     }
 
     public function test_rename_管理者でない場合はエラー(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         // Add a regular member
-        $member_id = UserAccountId::generate($this->generator);
+        $member_id = $this->user_account_id_factory->create();
         $add_member_pair = $group_chat->addMember(
-            MemberId::generate($this->generator),
+            $this->member_id_factory->create(),
             $member_id,
             Role::MEMBER,
-            $admin_id,
-            $this->generator
+            $admin_id
         );
         $updated_group_chat = $add_member_pair->getGroupChat();
 
@@ -149,35 +159,35 @@ class GroupChatTest extends TestCase
         $this->expectExceptionMessage('The executorId is not an administrator of the group chat');
 
         $new_name = new GroupChatName('New Name');
-        $updated_group_chat->rename($new_name, $member_id, $this->generator);
+        $updated_group_chat->rename($new_name, $member_id);
     }
 
     public function test_rename_同じ名前ではエラー(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The name is already the same as the current name');
 
         $same_name = new GroupChatName('Test Group');
-        $group_chat->rename($same_name, $executor_id, $this->generator);
+        $group_chat->rename($same_name, $executor_id);
     }
 
     public function test_delete_正常に削除できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $result_pair = $group_chat->delete($executor_id, $this->generator);
+        $result_pair = $group_chat->delete($executor_id);
 
         $this->assertTrue($result_pair->getGroupChat()->isDeleted());
         $this->assertEquals(2, $result_pair->getGroupChat()->getSeqNr());
@@ -185,38 +195,37 @@ class GroupChatTest extends TestCase
 
     public function test_delete_既に削除済みの場合はエラー(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $deleted_pair = $group_chat->delete($executor_id, $this->generator);
+        $deleted_pair = $group_chat->delete($executor_id);
         $deleted_group_chat = $deleted_pair->getGroupChat();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The group chat is deleted');
 
-        $deleted_group_chat->delete($executor_id, $this->generator);
+        $deleted_group_chat->delete($executor_id);
     }
 
     public function test_addMember_正常にメンバーを追加できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $new_user_id = UserAccountId::generate($this->generator);
+        $new_user_id = $this->user_account_id_factory->create();
         $result_pair = $group_chat->addMember(
-            MemberId::generate($this->generator),
+            $this->member_id_factory->create(),
             $new_user_id,
             Role::MEMBER,
-            $admin_id,
-            $this->generator
+            $admin_id
         );
 
         $this->assertTrue($result_pair->getGroupChat()->isMember($new_user_id));
@@ -225,76 +234,74 @@ class GroupChatTest extends TestCase
 
     public function test_addMember_既存メンバーは追加できない(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The userAccountId is already the member of the group chat');
 
         $group_chat->addMember(
-            MemberId::generate($this->generator),
+            $this->member_id_factory->create(),
             $admin_id,
             Role::MEMBER,
-            $admin_id,
-            $this->generator
+            $admin_id
         );
     }
 
     public function test_removeMember_正常にメンバーを削除できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $new_user_id = UserAccountId::generate($this->generator);
+        $new_user_id = $this->user_account_id_factory->create();
         $add_pair = $group_chat->addMember(
-            MemberId::generate($this->generator),
+            $this->member_id_factory->create(),
             $new_user_id,
             Role::MEMBER,
-            $admin_id,
-            $this->generator
+            $admin_id
         );
 
-        $result_pair = $add_pair->getGroupChat()->removeMember($new_user_id, $admin_id, $this->generator);
+        $result_pair = $add_pair->getGroupChat()->removeMember($new_user_id, $admin_id);
 
         $this->assertFalse($result_pair->getGroupChat()->isMember($new_user_id));
     }
 
     public function test_removeMember_存在しないメンバーは削除できない(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $non_member_id = UserAccountId::generate($this->generator);
+        $non_member_id = $this->user_account_id_factory->create();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The userAccountId is not a member of the group chat');
 
-        $group_chat->removeMember($non_member_id, $admin_id, $this->generator);
+        $group_chat->removeMember($non_member_id, $admin_id);
     }
 
     public function test_postMessage_正常にメッセージを投稿できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $sender_id = UserAccountId::generate($this->generator);
+        $sender_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $sender_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $sender_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $message_id = MessageId::generate($this->generator);
-        $result_pair = $group_chat->postMessage($message_id, 'Hello, World!', $sender_id, $this->generator);
+        $message_id = $this->message_id_factory->create();
+        $result_pair = $group_chat->postMessage($message_id, 'Hello, World!', $sender_id);
 
         $message = $result_pair->getGroupChat()->getMessages()->findById($message_id);
         $this->assertNotNull($message);
@@ -303,35 +310,35 @@ class GroupChatTest extends TestCase
 
     public function test_postMessage_メンバーでない場合はエラー(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $non_member_id = UserAccountId::generate($this->generator);
+        $non_member_id = $this->user_account_id_factory->create();
 
         $this->expectException(\DomainException::class);
         $this->expectExceptionMessage('The senderId is not a member of the group chat');
 
-        $message_id = MessageId::generate($this->generator);
-        $group_chat->postMessage($message_id, 'Hello!', $non_member_id, $this->generator);
+        $message_id = $this->message_id_factory->create();
+        $group_chat->postMessage($message_id, 'Hello!', $non_member_id);
     }
 
     public function test_editMessage_正常にメッセージを編集できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $sender_id = UserAccountId::generate($this->generator);
+        $sender_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $sender_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $sender_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $message_id = MessageId::generate($this->generator);
-        $post_pair = $group_chat->postMessage($message_id, 'Original Text', $sender_id, $this->generator);
+        $message_id = $this->message_id_factory->create();
+        $post_pair = $group_chat->postMessage($message_id, 'Original Text', $sender_id);
 
-        $result_pair = $post_pair->getGroupChat()->editMessage($message_id, 'Edited Text', $sender_id, $this->generator);
+        $result_pair = $post_pair->getGroupChat()->editMessage($message_id, 'Edited Text', $sender_id);
 
         $message = $result_pair->getGroupChat()->getMessages()->findById($message_id);
         $this->assertNotNull($message);
@@ -340,17 +347,17 @@ class GroupChatTest extends TestCase
 
     public function test_deleteMessage_正常にメッセージを削除できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $sender_id = UserAccountId::generate($this->generator);
+        $sender_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $sender_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $sender_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $message_id = MessageId::generate($this->generator);
-        $post_pair = $group_chat->postMessage($message_id, 'To be deleted', $sender_id, $this->generator);
+        $message_id = $this->message_id_factory->create();
+        $post_pair = $group_chat->postMessage($message_id, 'To be deleted', $sender_id);
 
-        $result_pair = $post_pair->getGroupChat()->deleteMessage($message_id, $sender_id, $this->generator);
+        $result_pair = $post_pair->getGroupChat()->deleteMessage($message_id, $sender_id);
 
         $message = $result_pair->getGroupChat()->getMessages()->findById($message_id);
         $this->assertNull($message);
@@ -358,11 +365,11 @@ class GroupChatTest extends TestCase
 
     public function test_getters_各種ゲッターが正しく動作する(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         $this->assertEquals($id->toString(), $group_chat->getId()->toString());
@@ -377,10 +384,10 @@ class GroupChatTest extends TestCase
     public function test_fromSnapshot_スナップショットから復元できる(): void
     {
 
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Snapshot Group');
-        $executor_id = UserAccountId::generate($this->generator);
-        $members = Members::create($executor_id, $this->generator);
+        $executor_id = $this->user_account_id_factory->create();
+        $members = Members::create($executor_id, $this->member_id_factory);
         $messages = Messages::create();
 
         $group_chat = GroupChat::fromSnapshot($id, $name, $members, $messages, 5, 3, false);
@@ -394,12 +401,12 @@ class GroupChatTest extends TestCase
 
     public function test_fromEvent_イベントから復元できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Event Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $members = Members::create($executor_id, $this->generator);
-        $event = GroupChatCreated::create($id, $name, $members, 1, $executor_id, $this->generator);
+        $members = Members::create($executor_id, $this->member_id_factory);
+        $event = GroupChatCreated::create($id, $name, $members, 1, $executor_id);
 
         $group_chat = GroupChat::fromEvent($event);
 
@@ -412,17 +419,17 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatCreatedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $new_id = GroupChatId::generate($this->generator);
+        $new_id = $this->group_chat_id_factory->create();
         $new_name = new GroupChatName('New Group');
-        $new_members = Members::create($executor_id, $this->generator);
-        $created_event = GroupChatCreated::create($new_id, $new_name, $new_members, 1, $executor_id, $this->generator);
+        $new_members = Members::create($executor_id, $this->member_id_factory);
+        $created_event = GroupChatCreated::create($new_id, $new_name, $new_members, 1, $executor_id);
 
         $new_group_chat = $group_chat->applyEvent($created_event);
 
@@ -432,15 +439,15 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatRenamedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Old Name');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
         $new_name = new GroupChatName('Renamed');
-        $renamed_event = GroupChatRenamed::create($id, $new_name, 2, $executor_id, $this->generator);
+        $renamed_event = GroupChatRenamed::create($id, $new_name, 2, $executor_id);
 
         $new_group_chat = $group_chat->applyEvent($renamed_event);
 
@@ -451,14 +458,14 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatDeletedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $executor_id = UserAccountId::generate($this->generator);
+        $executor_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $executor_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $executor_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $deleted_event = GroupChatDeleted::create($id, 2, $executor_id, $this->generator);
+        $deleted_event = GroupChatDeleted::create($id, 2, $executor_id);
 
         $new_group_chat = $group_chat->applyEvent($deleted_event);
 
@@ -469,16 +476,16 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatMemberAddedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $new_user_id = UserAccountId::generate($this->generator);
-        $new_member = new Member(MemberId::generate($this->generator), $new_user_id, Role::MEMBER);
-        $member_added_event = GroupChatMemberAdded::create($id, $new_member, 2, $admin_id, $this->generator);
+        $new_user_id = $this->user_account_id_factory->create();
+        $new_member = new Member($this->member_id_factory->create(), $new_user_id, Role::MEMBER);
+        $member_added_event = GroupChatMemberAdded::create($id, $new_member, 2, $admin_id);
 
         $new_group_chat = $group_chat->applyEvent($member_added_event);
 
@@ -487,24 +494,23 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatMemberRemovedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $admin_id = UserAccountId::generate($this->generator);
+        $admin_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $admin_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $admin_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $user_id = UserAccountId::generate($this->generator);
+        $user_id = $this->user_account_id_factory->create();
         $add_pair = $group_chat->addMember(
-            MemberId::generate($this->generator),
+            $this->member_id_factory->create(),
             $user_id,
             Role::MEMBER,
-            $admin_id,
-            $this->generator
+            $admin_id
         );
         $updated_group_chat = $add_pair->getGroupChat();
 
-        $member_removed_event = GroupChatMemberRemoved::create($id, $user_id, 3, $admin_id, $this->generator);
+        $member_removed_event = GroupChatMemberRemoved::create($id, $user_id, 3, $admin_id);
 
         $new_group_chat = $updated_group_chat->applyEvent($member_removed_event);
 
@@ -513,16 +519,16 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatMessagePostedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $sender_id = UserAccountId::generate($this->generator);
+        $sender_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $sender_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $sender_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $message_id = MessageId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
         $message = new Message($message_id, 'Hello', $sender_id);
-        $message_posted_event = GroupChatMessagePosted::create($id, $message, 2, $sender_id, $this->generator);
+        $message_posted_event = GroupChatMessagePosted::create($id, $message, 2, $sender_id);
 
         $new_group_chat = $group_chat->applyEvent($message_posted_event);
 
@@ -533,19 +539,19 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatMessageEditedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $sender_id = UserAccountId::generate($this->generator);
+        $sender_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $sender_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $sender_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $message_id = MessageId::generate($this->generator);
-        $post_pair = $group_chat->postMessage($message_id, 'Original', $sender_id, $this->generator);
+        $message_id = $this->message_id_factory->create();
+        $post_pair = $group_chat->postMessage($message_id, 'Original', $sender_id);
         $updated_group_chat = $post_pair->getGroupChat();
 
         $edited_message = new Message($message_id, 'Edited', $sender_id);
-        $message_edited_event = GroupChatMessageEdited::create($id, $edited_message, 3, $sender_id, $this->generator);
+        $message_edited_event = GroupChatMessageEdited::create($id, $edited_message, 3, $sender_id);
 
         $new_group_chat = $updated_group_chat->applyEvent($message_edited_event);
 
@@ -556,18 +562,18 @@ class GroupChatTest extends TestCase
 
     public function test_applyEvent_GroupChatMessageDeletedイベントを適用できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->group_chat_id_factory->create();
         $name = new GroupChatName('Test Group');
-        $sender_id = UserAccountId::generate($this->generator);
+        $sender_id = $this->user_account_id_factory->create();
 
-        $pair = GroupChat::create($id, $name, $sender_id, $this->generator);
+        $pair = GroupChat::create($id, $name, $sender_id, $this->member_id_factory);
         $group_chat = $pair->getGroupChat();
 
-        $message_id = MessageId::generate($this->generator);
-        $post_pair = $group_chat->postMessage($message_id, 'To be deleted', $sender_id, $this->generator);
+        $message_id = $this->message_id_factory->create();
+        $post_pair = $group_chat->postMessage($message_id, 'To be deleted', $sender_id);
         $updated_group_chat = $post_pair->getGroupChat();
 
-        $message_deleted_event = GroupChatMessageDeleted::create($id, $message_id, 3, $sender_id, $this->generator);
+        $message_deleted_event = GroupChatMessageDeleted::create($id, $message_id, 3, $sender_id);
 
         $new_group_chat = $updated_group_chat->applyEvent($message_deleted_event);
 

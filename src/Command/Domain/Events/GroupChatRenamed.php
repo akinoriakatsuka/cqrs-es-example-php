@@ -7,7 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatRenamed implements GroupChatEvent
@@ -26,10 +26,9 @@ final readonly class GroupChatRenamed implements GroupChatEvent
         GroupChatId $aggregate_id,
         GroupChatName $name,
         int $seq_nr,
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): self {
-        $ulid = \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid::generate($generator);
+        $ulid = Ulid::generate();
         $id = $ulid->toString();
         $occurred_at = (int)(microtime(true) * 1000);
         return new self($id, $aggregate_id, $name, $seq_nr, $executor_id, $occurred_at);

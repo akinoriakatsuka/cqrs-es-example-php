@@ -7,6 +7,7 @@ namespace Tests\Unit\Command\Domain\Events;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
@@ -16,25 +17,26 @@ class GroupChatMessageDeletedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
     private RobinvdvleutenUlidGenerator $generator;
+    private MessageIdFactory $message_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $message_id = MessageId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
 
         $event = GroupChatMessageDeleted::create(
             $aggregate_id,
             $message_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatMessageDeleted::class, $event);
@@ -48,15 +50,14 @@ class GroupChatMessageDeletedTest extends TestCase
     public function test_toArrayでシリアライズできる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $message_id = MessageId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
 
         $event = GroupChatMessageDeleted::create(
             $aggregate_id,
             $message_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -80,8 +81,7 @@ class GroupChatMessageDeletedTest extends TestCase
             $aggregate_id,
             $message_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -101,8 +101,7 @@ class GroupChatMessageDeletedTest extends TestCase
             $aggregate_id,
             $message_id,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

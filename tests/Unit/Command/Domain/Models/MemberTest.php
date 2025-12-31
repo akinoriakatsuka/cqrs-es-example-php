@@ -6,8 +6,10 @@ namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
@@ -16,17 +18,21 @@ class MemberTest extends TestCase
 {
     private RobinvdvleutenUlidGenerator $generator;
     private RobinvdvleutenUlidValidator $validator;
+    private MemberIdFactory $member_id_factory;
+    private UserAccountIdFactory $user_account_id_factory;
 
     protected function setUp(): void
     {
         $this->generator = new RobinvdvleutenUlidGenerator();
         $this->validator = new RobinvdvleutenUlidValidator();
+        $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
+        $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
     }
 
     public function test_constructor_正常に生成できる(): void
     {
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id = UserAccountId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id = $this->user_account_id_factory->create();
         $role = Role::ADMINISTRATOR;
 
         $member = new Member($member_id, $user_account_id, $role);
@@ -38,8 +44,8 @@ class MemberTest extends TestCase
 
     public function test_getters_各種ゲッターが正しく動作する(): void
     {
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id = UserAccountId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id = $this->user_account_id_factory->create();
         $role = Role::MEMBER;
 
         $member = new Member($member_id, $user_account_id, $role);
@@ -51,9 +57,9 @@ class MemberTest extends TestCase
 
     public function test_equals_同じIDのメンバーは等価(): void
     {
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id1 = UserAccountId::generate($this->generator);
-        $user_account_id2 = UserAccountId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id1 = $this->user_account_id_factory->create();
+        $user_account_id2 = $this->user_account_id_factory->create();
 
         $member1 = new Member($member_id, $user_account_id1, Role::ADMINISTRATOR);
         $member2 = new Member($member_id, $user_account_id2, Role::MEMBER);
@@ -63,9 +69,9 @@ class MemberTest extends TestCase
 
     public function test_equals_異なるIDのメンバーは等価でない(): void
     {
-        $member_id1 = MemberId::generate($this->generator);
-        $member_id2 = MemberId::generate($this->generator);
-        $user_account_id = UserAccountId::generate($this->generator);
+        $member_id1 = $this->member_id_factory->create();
+        $member_id2 = $this->member_id_factory->create();
+        $user_account_id = $this->user_account_id_factory->create();
 
         $member1 = new Member($member_id1, $user_account_id, Role::MEMBER);
         $member2 = new Member($member_id2, $user_account_id, Role::MEMBER);
@@ -75,8 +81,8 @@ class MemberTest extends TestCase
 
     public function test_toArray_配列に変換できる(): void
     {
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id = UserAccountId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id = $this->user_account_id_factory->create();
         $member = new Member($member_id, $user_account_id, Role::ADMINISTRATOR);
 
         $array = $member->toArray();
@@ -89,8 +95,8 @@ class MemberTest extends TestCase
 
     public function test_fromArray_配列から復元できる(): void
     {
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id = UserAccountId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id = $this->user_account_id_factory->create();
 
         $data = [
             'id' => ['value' => $member_id->toString()],
@@ -107,8 +113,8 @@ class MemberTest extends TestCase
 
     public function test_toArray_fromArray_ラウンドトリップでデータが保持される(): void
     {
-        $member_id = MemberId::generate($this->generator);
-        $user_account_id = UserAccountId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
+        $user_account_id = $this->user_account_id_factory->create();
         $original_member = new Member($member_id, $user_account_id, Role::MEMBER);
 
         $array = $original_member->toArray();

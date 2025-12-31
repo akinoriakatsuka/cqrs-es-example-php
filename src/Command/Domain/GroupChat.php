@@ -17,13 +17,13 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 
 /**
  * GroupChat is an aggregate of a group chat.
@@ -89,16 +89,16 @@ class GroupChat
      * @param GroupChatId $id
      * @param GroupChatName $name
      * @param UserAccountId $executor_id
-     * @param UlidGenerator $generator
+     * @param MemberIdFactory $member_id_factory
      * @return GroupChatWithEventPair
      */
     public static function create(
         GroupChatId $id,
         GroupChatName $name,
         UserAccountId $executor_id,
-        UlidGenerator $generator
+        MemberIdFactory $member_id_factory
     ): GroupChatWithEventPair {
-        $members = Members::create($executor_id, $generator);
+        $members = Members::create($executor_id, $member_id_factory);
         $messages = Messages::create();
         $seq_nr = 1;
         $version = 1;
@@ -110,8 +110,7 @@ class GroupChat
             $name,
             $members,
             $seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($group_chat, $event);
@@ -200,14 +199,12 @@ class GroupChat
      *
      * @param GroupChatName $name
      * @param UserAccountId $executor_id
-     * @param UlidGenerator $generator
      * @return GroupChatWithEventPair
      * @throws \DomainException
      */
     public function rename(
         GroupChatName $name,
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -236,8 +233,7 @@ class GroupChat
             $new_state->id,
             $name,
             $new_state->seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);
@@ -252,13 +248,11 @@ class GroupChat
      * - The executorId is the administrator of the group chat
      *
      * @param UserAccountId $executor_id
-     * @param UlidGenerator $generator
      * @return GroupChatWithEventPair
      * @throws \DomainException
      */
     public function delete(
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -283,8 +277,7 @@ class GroupChat
         $event = GroupChatDeleted::create(
             $new_state->id,
             $new_state->seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);
@@ -303,7 +296,6 @@ class GroupChat
      * @param UserAccountId $user_account_id
      * @param Role $role
      * @param UserAccountId $executor_id
-     * @param UlidGenerator $generator
      * @return GroupChatWithEventPair
      * @throws \DomainException
      */
@@ -311,8 +303,7 @@ class GroupChat
         MemberId $member_id,
         UserAccountId $user_account_id,
         Role $role,
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -341,8 +332,7 @@ class GroupChat
             $new_state->id,
             $new_member,
             $new_state->seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);
@@ -350,8 +340,7 @@ class GroupChat
 
     public function removeMember(
         UserAccountId $user_account_id,
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -379,8 +368,7 @@ class GroupChat
             $new_state->id,
             $user_account_id,
             $new_state->seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);
@@ -389,8 +377,7 @@ class GroupChat
     public function postMessage(
         MessageId $message_id,
         string $text,
-        UserAccountId $sender_id,
-        UlidGenerator $generator
+        UserAccountId $sender_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -416,8 +403,7 @@ class GroupChat
             $new_state->id,
             $message,
             $new_state->seq_nr,
-            $sender_id,
-            $generator
+            $sender_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);
@@ -426,8 +412,7 @@ class GroupChat
     public function editMessage(
         MessageId $message_id,
         string $new_text,
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -453,8 +438,7 @@ class GroupChat
             $new_state->id,
             $edited_message,
             $new_state->seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);
@@ -462,8 +446,7 @@ class GroupChat
 
     public function deleteMessage(
         MessageId $message_id,
-        UserAccountId $executor_id,
-        UlidGenerator $generator
+        UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
             throw new \DomainException('The group chat is deleted');
@@ -488,8 +471,7 @@ class GroupChat
             $new_state->id,
             $message_id,
             $new_state->seq_nr,
-            $executor_id,
-            $generator
+            $executor_id
         );
 
         return new GroupChatWithEventPair($new_state, $event);

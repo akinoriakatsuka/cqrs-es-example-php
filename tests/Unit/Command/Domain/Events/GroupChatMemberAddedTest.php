@@ -8,6 +8,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
@@ -18,17 +19,19 @@ class GroupChatMemberAddedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
     private RobinvdvleutenUlidGenerator $generator;
+    private MemberIdFactory $member_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $member_id = MemberId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
         $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
@@ -37,8 +40,7 @@ class GroupChatMemberAddedTest extends TestCase
             $aggregate_id,
             $member,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatMemberAdded::class, $event);
@@ -52,7 +54,7 @@ class GroupChatMemberAddedTest extends TestCase
     public function test_toArrayでシリアライズできる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $member_id = MemberId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
         $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
@@ -61,8 +63,7 @@ class GroupChatMemberAddedTest extends TestCase
             $aggregate_id,
             $member,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -88,8 +89,7 @@ class GroupChatMemberAddedTest extends TestCase
             $aggregate_id,
             $member,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -111,8 +111,7 @@ class GroupChatMemberAddedTest extends TestCase
             $aggregate_id,
             $member,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

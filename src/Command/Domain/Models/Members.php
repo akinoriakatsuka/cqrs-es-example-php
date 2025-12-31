@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
-
 final readonly class Members
 {
     /**
@@ -18,11 +16,11 @@ final readonly class Members
 
     public static function create(
         UserAccountId $executor_user_account_id,
-        UlidGenerator $ulid_generator
+        MemberIdFactory $member_id_factory
     ): self {
         // 作成時にexecutorをADMINISTRATORとして追加
         $member = new Member(
-            MemberId::generate($ulid_generator),
+            $member_id_factory->create(),
             $executor_user_account_id,
             Role::ADMINISTRATOR
         );

@@ -8,19 +8,16 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatRenamedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
-    private RobinvdvleutenUlidGenerator $generator;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
-        $this->generator = new RobinvdvleutenUlidGenerator();
     }
 
     public function test_正常に生成できる(): void
@@ -33,8 +30,7 @@ class GroupChatRenamedTest extends TestCase
             $aggregate_id,
             $name,
             2,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatRenamed::class, $event);
@@ -53,8 +49,7 @@ class GroupChatRenamedTest extends TestCase
             $aggregate_id,
             $name,
             2,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -77,8 +72,7 @@ class GroupChatRenamedTest extends TestCase
             $aggregate_id,
             $name,
             2,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -98,8 +92,7 @@ class GroupChatRenamedTest extends TestCase
             $aggregate_id,
             $name,
             2,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

@@ -8,6 +8,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePoste
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
@@ -17,17 +18,19 @@ class GroupChatMessagePostedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
     private RobinvdvleutenUlidGenerator $generator;
+    private MessageIdFactory $message_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $message_id = MessageId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
         $sender_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
         $message = new Message($message_id, 'Test message', $sender_id);
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
@@ -36,8 +39,7 @@ class GroupChatMessagePostedTest extends TestCase
             $aggregate_id,
             $message,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $this->assertInstanceOf(GroupChatMessagePosted::class, $event);
@@ -51,7 +53,7 @@ class GroupChatMessagePostedTest extends TestCase
     public function test_toArrayでシリアライズできる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $message_id = MessageId::generate($this->generator);
+        $message_id = $this->message_id_factory->create();
         $sender_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
         $message = new Message($message_id, 'Test message', $sender_id);
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
@@ -60,8 +62,7 @@ class GroupChatMessagePostedTest extends TestCase
             $aggregate_id,
             $message,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $event->toArray();
@@ -87,8 +88,7 @@ class GroupChatMessagePostedTest extends TestCase
             $aggregate_id,
             $message,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $data = $original_event->toArray();
@@ -110,8 +110,7 @@ class GroupChatMessagePostedTest extends TestCase
             $aggregate_id,
             $message,
             1,
-            $executor_id,
-            $this->generator
+            $executor_id
         );
 
         $array = $original_event->toArray();

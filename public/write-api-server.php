@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL\Schema;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
@@ -54,6 +58,12 @@ $dynamodb_client = new DynamoDbClient($dynamodb_config);
 $validator = new RobinvdvleutenUlidValidator();
 $generator = new RobinvdvleutenUlidGenerator();
 
+// IDファクトリーの初期化
+$group_chat_id_factory = new GroupChatIdFactory($generator, $validator);
+$user_account_id_factory = new UserAccountIdFactory($generator, $validator);
+$member_id_factory = new MemberIdFactory($generator, $validator);
+$message_id_factory = new MessageIdFactory($generator, $validator);
+
 // EventStoreの初期化
 $event_serializer = new EventSerializer();
 $event_converter = new EventConverter($validator);
@@ -90,7 +100,13 @@ $j5_event_store = $j5_event_store
 
 $event_store = new DynamoDBEventStore($j5_event_store, $validator);
 $repository = new GroupChatRepository($event_store);
-$processor = new GroupChatCommandProcessor($repository, $validator, $generator);
+$processor = new GroupChatCommandProcessor(
+    $repository,
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $member_id_factory,
+    $message_id_factory
+);
 
 // CORS headers
 header('Access-Control-Allow-Origin: *');
