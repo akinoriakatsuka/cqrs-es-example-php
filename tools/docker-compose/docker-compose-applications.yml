@@ -5,6 +5,8 @@ services:
       context: ../../
       dockerfile: Dockerfile
     container_name: cqrs-es-example-php-app
+    volumes:
+      - ../../:/var/www/html
   write-api-server-php-fpm:
     build:
       context: ../../

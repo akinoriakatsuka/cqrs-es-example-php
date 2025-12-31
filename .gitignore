@@ -11,4 +11,6 @@ todo.md
 .idea/
 .DS_Store
 
+coverage
+
 .env

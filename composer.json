@@ -44,7 +44,8 @@
   },
   "scripts": {
     "test": "phpunit --testdox",
-    "test:coverage": "phpunit --testdox --coverage-text",
+    "test:coverage": "phpunit --testdox --coverage-text --colors",
+    "test:coverage:html": "phpunit --testdox --coverage-html coverage",
     "cs": "php-cs-fixer fix --allow-risky=yes --dry-run --diff",
     "cs:fix": "php-cs-fixer fix --allow-risky=yes",
     "fmt": "@cs:fix",
