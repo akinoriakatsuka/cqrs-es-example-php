@@ -4,30 +4,50 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-readonly class Member {
-    private MemberId $id;
-    private UserAccountId $userAccountId;
-    private MemberRole $role;
-
+final readonly class Member
+{
     public function __construct(
-        MemberId $id,
-        UserAccountId $userAccountId,
-        MemberRole $role
+        private MemberId $id,
+        private UserAccountId $user_account_id,
+        private Role $role
     ) {
-        $this->id = $id;
-        $this->userAccountId = $userAccountId;
-        $this->role = $role;
     }
 
-    public function getId(): MemberId {
+    public function getId(): MemberId
+    {
         return $this->id;
     }
 
-    public function getUserAccountId(): UserAccountId {
-        return $this->userAccountId;
+    public function getUserAccountId(): UserAccountId
+    {
+        return $this->user_account_id;
     }
 
-    public function getRole(): MemberRole {
+    public function getRole(): Role
+    {
         return $this->role;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->id->equals($other->id);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id->toArray(),
+            'user_account_id' => $this->user_account_id->toArray(),
+            'role' => $this->role->value,
+        ];
+    }
+
+    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
+    {
+        return new self(
+            MemberId::fromArray($data['id'], $validator),
+            UserAccountId::fromArray($data['user_account_id'], $validator),
+            Role::from((int)$data['role'])
+        );
     }
 }

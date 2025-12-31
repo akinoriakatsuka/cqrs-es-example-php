@@ -1,0 +1,103 @@
+--- a/src/Internal/EventStoreSupport.php
++++ b/src/Internal/EventStoreSupport.php
+@@ -124,18 +124,23 @@ final class EventStoreSupport {
+         $pkey = $this->keyResolver->resolvePartitionKey($event->getAggregateId(), $this->shardCount);
+         $skey = $this->keyResolver->resolveSortKey($event->getAggregateId(), $seqNr);
+         $payload = $this->snapshotSerializer->serialize($aggregate);
++
++        $item = $this->marshaler->marshalItem([
++            'pkey' => $pkey,
++            'skey' => $skey,
++            'aid' => $event->getAggregateId()->asString(),
++            'seq_nr' => $seqNr,
++            'version' => 1,
++            'ttl' => 0,
++        ]);
++
++        // payloadをBinary型として追加（Go版と互換性を保つため）
++        $item['payload'] = ['B' => $payload];
++
+         return [
+             'Put' => [
+                 'TableName' => $this->snapshotTableName,
+-                'Item' => $this->marshaler->marshalItem([
+-                    'pkey' => $pkey,
+-                    'skey' => $skey,
+-                    'aid' => $event->getAggregateId()->asString(),
+-                    'seq_nr' => $seqNr,
+-                    'payload' => $payload,
+-                    'version' => 1,
+-                    'ttl' => 0,
+-                ]),
++                'Item' => $item,
+                 'ConditionExpression' => 'attribute_not_exists(pkey) AND attribute_not_exists(skey)',
+             ],
+         ];
+@@ -184,10 +189,12 @@ final class EventStoreSupport {
+         ];
+         if ($aggregate !== null) {
+             $payload = $this->snapshotSerializer->serialize($aggregate);
+-            $update['UpdateExpression'] = 'SET #payload=:payload, #seq_nr=:seq_nr, #version=:after_version';
+-            $update['ExpressionAttributeNames']['#seq_nr'] = 'seq_nr';
+-            $update['ExpressionAttributeValues'][':seq_nr'] = $this->marshaler->marshalValue($seqNr);
+-            $update['ExpressionAttributeNames'][':payload'] = $this->marshaler->marshalValue($payload);
++            $update['Update']['UpdateExpression'] = 'SET #payload=:payload, #seq_nr=:seq_nr, #version=:after_version';
++            $update['Update']['ExpressionAttributeNames']['#seq_nr'] = 'seq_nr';
++            $update['Update']['ExpressionAttributeNames']['#payload'] = 'payload';
++            $update['Update']['ExpressionAttributeValues'][':seq_nr'] = $this->marshaler->marshalValue($seqNr);
++            // payloadをBinary型として設定（Go版と互換性を保つため）
++            $update['Update']['ExpressionAttributeValues'][':payload'] = ['B' => $payload];
+         }
+         return $update;
+     }
+@@ -210,17 +217,22 @@ final class EventStoreSupport {
+         $pkey = $this->keyResolver->resolvePartitionKey($event->getAggregateId(), $this->shardCount);
+         $skey = $this->keyResolver->resolveSortKey($event->getAggregateId(), $event->getSequenceNumber());
+         $payload = $this->eventSerializer->serialize($event);
++
++        $item = $this->marshaler->marshalItem([
++            'pkey' => $pkey,
++            'skey' => $skey,
++            'aid' => $event->getAggregateId()->asString(),
++            'seq_nr' => $event->getSequenceNumber(),
++            'occurred_at' => $event->getOccurredAt()->getTimestamp() * 1000,
++        ]);
++
++        // payloadをBinary型として追加（Go版と互換性を保つため）
++        $item['payload'] = ['B' => $payload];
++
+         return [
+             'Put' => [
+                 'TableName' => $this->journalTableName,
+-                'Item' => $this->marshaler->marshalItem([
+-                    'pkey' => $pkey,
+-                    'skey' => $skey,
+-                    'aid' => $event->getAggregateId()->asString(),
+-                    'seq_nr' => $event->getSequenceNumber(),
+-                    'payload' => $payload,
+-                    'occurred_at' => $event->getOccurredAt()->getTimestamp() * 1000,
+-                ]),
++                'Item' => $item,
+                 'ConditionExpression' => 'attribute_not_exists(pkey) AND attribute_not_exists(skey)',
+             ],
+         ];
+@@ -404,7 +416,8 @@ final class EventStoreSupport {
+         $items = $response->get('Items') ?? [];
+         if (is_iterable($items)) {
+             foreach ($items as $item) {
+-                $payload = $item['payload']['S'];
++                // payloadはBinary型として保存されている（Go版と互換性を保つため）
++                $payload = $item['payload']['B'];
+                 $result[] = $this->convertFromPayloadToEvent($payload);
+             }
+         }
+@@ -425,7 +438,8 @@ final class EventStoreSupport {
+             if (is_array($response['Items']) && isset($response['Items'][0])) {
+                 $item = $response['Items'][0];
+                 $version = $item['version']['N'];
+-                $payload = $item['payload']['S'];
++                // payloadはBinary型として保存されている（Go版と互換性を保つため）
++                $payload = $item['payload']['B'];
+                 $aggregate = $this->convertToSnapshot($payload);
+                 if ($aggregate instanceof Aggregate) {
+                     return $aggregate->withVersion((int)$version);

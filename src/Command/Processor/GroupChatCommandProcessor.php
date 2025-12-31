@@ -1,202 +1,277 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
-class GroupChatCommandProcessor {
-    public GroupChatRepository $repository;
-    public function __construct(GroupChatRepository $repository) {
-        $this->repository = $repository;
+class GroupChatCommandProcessor
+{
+    public function __construct(
+        private GroupChatRepository $repository,
+        private UlidValidator $validator,
+        private UlidGenerator $generator
+    ) {
     }
 
     public function createGroupChat(
-        GroupChatName $groupChatName,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChatWithEvent = GroupChat::create($groupChatName, $executorId);
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
-        return $groupChatWithEvent->getEvent();
+        string $name,
+        string $executor_id
+    ): string {
+        // プレフィックスを削除
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::generate($this->generator);
+        $group_chat_name = new GroupChatName($name);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約作成
+        $pair = GroupChat::create(
+            $id,
+            $group_chat_name,
+            $executor_user_account_id,
+            $this->generator
+        );
+
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
+
+        return $id->toString();
     }
 
     public function renameGroupChat(
-        GroupChatId $groupChatId,
-        GroupChatName $newName,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("GroupChat not found with ID: " . json_encode($groupChatId));
+        string $group_chat_id,
+        string $name,
+        string $executor_id
+    ): void {
+        // プレフィックスを削除
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $group_chat_name = new GroupChatName($name);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
-        $groupChatWithEvent = $groupChat->rename($newName, $executorId);
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
-        return $groupChatWithEvent->getEvent();
+
+        // リネーム
+        $pair = $group_chat->rename(
+            $group_chat_name,
+            $executor_user_account_id,
+            $this->generator
+        );
+
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
     }
 
-    /**
-     * Delete a group chat
-     *
-     * @param GroupChatId $groupChatId
-     * @param UserAccountId $executorId
-     * @return GroupChatEvent
-     * @throws \RuntimeException If group chat not found
-     */
     public function deleteGroupChat(
-        GroupChatId $groupChatId,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("Group chat not found");
+        string $group_chat_id,
+        string $executor_id
+    ): void {
+        // プレフィックスを削除
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
 
-        $groupChatWithEvent = $groupChat->delete($executorId);
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
+        // 削除
+        $pair = $group_chat->delete(
+            $executor_user_account_id,
+            $this->generator
+        );
 
-        return $groupChatWithEvent->getEvent();
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
     }
 
     public function addMember(
-        GroupChatId $groupChatId,
-        UserAccountId $userAccountId,
-        MemberRole $role,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("Group chat not found");
+        string $group_chat_id,
+        string $user_account_id,
+        string $role_string,
+        string $executor_id
+    ): void {
+        // プレフィックスを削除
+        $user_account_id_ulid = preg_replace('/^UserAccount-/', '', $user_account_id);
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $member_id = MemberId::generate($this->generator);
+        $user_account_id_obj = UserAccountId::fromString($user_account_id_ulid, $this->validator);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // ロールを文字列から変換
+        $role = match (strtoupper($role_string)) {
+            'ADMINISTRATOR' => Role::ADMINISTRATOR,
+            'MEMBER' => Role::MEMBER,
+            default => throw new \InvalidArgumentException("Invalid role: {$role_string}"),
+        };
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
 
-        $memberId = new MemberId();
-        $groupChatWithEvent = $groupChat->addMember(
-            $memberId,
-            $userAccountId,
+        // メンバー追加
+        $pair = $group_chat->addMember(
+            $member_id,
+            $user_account_id_obj,
             $role,
-            $executorId,
+            $executor_user_account_id,
+            $this->generator
         );
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 
-        return $groupChatWithEvent->getEvent();
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
     }
 
-    /**
-     * Remove a member from a group chat
-     *
-     * @param GroupChatId $groupChatId
-     * @param UserAccountId $memberUserAccountId
-     * @param UserAccountId $executorId
-     * @return GroupChatEvent
-     * @throws \RuntimeException If group chat not found
-     */
     public function removeMember(
-        GroupChatId $groupChatId,
-        UserAccountId $memberUserAccountId,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("Group chat not found");
+        string $group_chat_id,
+        string $user_account_id,
+        string $executor_id
+    ): void {
+        // プレフィックスを削除
+        $user_account_id_ulid = preg_replace('/^UserAccount-/', '', $user_account_id);
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $user_account_id_obj = UserAccountId::fromString($user_account_id_ulid, $this->validator);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
 
-        $groupChatWithEvent = $groupChat->removeMember(
-            $memberUserAccountId,
-            $executorId
+        // メンバー削除
+        $pair = $group_chat->removeMember(
+            $user_account_id_obj,
+            $executor_user_account_id,
+            $this->generator
         );
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 
-        return $groupChatWithEvent->getEvent();
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
     }
 
-    /**
-     * Post a message to a group chat
-     *
-     * @param GroupChatId $groupChatId
-     * @param Message $message
-     * @param UserAccountId $memberUserAccountId
-     * @return GroupChatEvent
-     * @throws \RuntimeException If group chat not found
-     */
-    public function postMessage(GroupChatId $groupChatId, Message $message, UserAccountId $memberUserAccountId): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("Group chat not found");
+    public function postMessage(
+        string $group_chat_id,
+        string $content,
+        string $executor_id
+    ): string {
+        // プレフィックスを削除
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $message_id = MessageId::generate($this->generator);
+        $sender_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
 
-        $groupChatWithEvent = $groupChat->postMessage(
-            $message->getId(),
-            $message,
-            $memberUserAccountId
+        // メッセージ投稿
+        $pair = $group_chat->postMessage(
+            $message_id,
+            $content,
+            $sender_id,
+            $this->generator
         );
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 
-        return $groupChatWithEvent->getEvent();
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
+
+        return $message_id->toString();
     }
 
-    /**
-     * Edit a message in a group chat
-     *
-     * @param GroupChatId $groupChatId
-     * @param MessageId $messageId
-     * @param string $newText
-     * @param UserAccountId $executorId
-     * @return GroupChatEvent
-     * @throws \RuntimeException If group chat not found
-     */
     public function editMessage(
-        GroupChatId $groupChatId,
-        MessageId $messageId,
-        string $newText,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("Group chat not found");
+        string $group_chat_id,
+        string $message_id,
+        string $content,
+        string $executor_id
+    ): void {
+        // プレフィックスを削除
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $message_id_obj = MessageId::fromString($message_id, $this->validator);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
 
-        $groupChatWithEvent = $groupChat->editMessage(
-            $messageId,
-            $newText,
-            $executorId
+        // メッセージ編集
+        $pair = $group_chat->editMessage(
+            $message_id_obj,
+            $content,
+            $executor_user_account_id,
+            $this->generator
         );
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 
-        return $groupChatWithEvent->getEvent();
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
     }
 
-    /**
-     * Delete a message from a group chat
-     *
-     * @param GroupChatId $groupChatId
-     * @param MessageId $messageId
-     * @param UserAccountId $executorId
-     * @return GroupChatEvent
-     * @throws \RuntimeException If group chat not found
-     */
     public function deleteMessage(
-        GroupChatId $groupChatId,
-        MessageId $messageId,
-        UserAccountId $executorId
-    ): GroupChatEvent {
-        $groupChat = $this->repository->findById($groupChatId);
-        if ($groupChat === null) {
-            throw new \RuntimeException("Group chat not found");
+        string $group_chat_id,
+        string $message_id,
+        string $executor_id
+    ): void {
+        // プレフィックスを削除
+        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
+
+        // 値オブジェクト生成
+        $id = GroupChatId::fromString($group_chat_id, $this->validator);
+        $message_id_obj = MessageId::fromString($message_id, $this->validator);
+        $executor_user_account_id = UserAccountId::fromString($executor_id_ulid, $this->validator);
+
+        // 集約取得
+        $group_chat = $this->repository->findById($id);
+        if ($group_chat === null) {
+            throw new \DomainException('Group chat not found');
         }
 
-        $groupChatWithEvent = $groupChat->deleteMessage(
-            $messageId,
-            $executorId
+        // メッセージ削除
+        $pair = $group_chat->deleteMessage(
+            $message_id_obj,
+            $executor_user_account_id,
+            $this->generator
         );
-        $this->repository->storeEventAndSnapshot($groupChatWithEvent->getEvent(), $groupChatWithEvent->getGroupChat());
 
-        return $groupChatWithEvent->getEvent();
+        // 保存
+        $this->repository->store($pair->getEvent(), $pair->getGroupChat());
     }
 }

@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, mbstring, json
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
       - name: Cache Composer packages
@@ -27,9 +32,13 @@ jobs:
         run: composer run lint
   test:
     runs-on: ubuntu-24.04
-    needs: lint
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, mbstring, json
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
       - name: Cache Composer packages
@@ -42,7 +51,64 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+      - name: Build Docker images
+        run: docker compose -f tools/docker-compose/docker-compose-databases.yml -f tools/docker-compose/docker-compose-applications.yml build
       - name: Run docker-compose
-        run: docker compose up -d
+        run: docker compose -f tools/docker-compose/docker-compose-databases.yml -f tools/docker-compose/docker-compose-applications.yml up -d
       - name: Run test suite
         run: composer run test
+  e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, mbstring, json
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl netcat-traditional
+      - name: Build Docker images
+        run: make docker-compose-build
+      - name: Start Docker containers
+        run: make docker-compose-up
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for services to be ready..."
+          for i in {1..30}; do
+            if nc -z localhost 38080 2>/dev/null; then
+              echo "Write API server port is open!"
+              break
+            fi
+            echo "Waiting for write-api-server... ($i/30)"
+            sleep 2
+          done
+          for i in {1..30}; do
+            if nc -z localhost 38082 2>/dev/null; then
+              echo "Read API server port is open!"
+              break
+            fi
+            echo "Waiting for read-api-server... ($i/30)"
+            sleep 2
+          done
+          echo "Additional wait for service initialization..."
+          sleep 10
+      - name: Run E2E tests
+        run: |
+          make verify-group-chat
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          docker compose -f tools/docker-compose/docker-compose-databases.yml -f tools/docker-compose/docker-compose-applications.yml logs --tail=100

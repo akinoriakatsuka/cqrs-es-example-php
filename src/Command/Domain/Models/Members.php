@@ -1,85 +1,93 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-readonly class Members {
-    /** @var array<Member> */
-    private array $values;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 
+final readonly class Members
+{
     /**
-     * @param array<Member> $values
+     * @param array<Member> $members
      */
-    public function __construct(array $values) {
-        $this->values = $values;
+    private function __construct(
+        private array $members
+    ) {
     }
 
-    public static function create(UserAccountId $userAccountId): Members {
-        $memberId = new MemberId();
+    public static function create(
+        UserAccountId $executor_user_account_id,
+        UlidGenerator $ulid_generator
+    ): self {
+        // 作成時にexecutorをADMINISTRATORとして追加
         $member = new Member(
-            $memberId,
-            $userAccountId,
-            MemberRole::ADMIN_ROLE
+            MemberId::generate($ulid_generator),
+            $executor_user_account_id,
+            Role::ADMINISTRATOR
         );
-        return new Members([$member]);
+
+        return new self([$member]);
     }
 
-    /**
-     * @return array<Member>
-     */
-    public function getValues(): array {
-        return $this->values;
-    }
-
-    /**
-     * @param UserAccountId $userAccountId
-     * @return Members
-     */
-    public function addMember(UserAccountId $userAccountId): Members {
-        $memberId = new MemberId();
-        $member = new Member(
-            $memberId,
-            $userAccountId,
-            MemberRole::MEMBER_ROLE
+    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
+    {
+        $members = array_map(
+            fn ($member_data) => Member::fromArray($member_data, $validator),
+            $data['values']
         );
-        $values = $this->values;
-        $values[] = $member;
-        return new Members($values);
+        return new self($members);
     }
 
-    /**
-     * @param UserAccountId $userAccountId
-     * @return Members
-     * @throws \RuntimeException If member not found
-     */
-    public function removeMember(UserAccountId $userAccountId): Members {
-        $newValues = [];
-        $found = false;
-
-        foreach ($this->values as $member) {
-            if (!$member->getUserAccountId()->equals($userAccountId)) {
-                $newValues[] = $member;
-            } else {
-                $found = true;
+    public function isMember(UserAccountId $user_account_id): bool
+    {
+        foreach ($this->members as $member) {
+            if ($member->getUserAccountId()->equals($user_account_id)) {
+                return true;
             }
+        }
+        return false;
+    }
+
+    public function isAdministrator(UserAccountId $user_account_id): bool
+    {
+        foreach ($this->members as $member) {
+            if ($member->getUserAccountId()->equals($user_account_id)) {
+                return $member->getRole()->isAdministrator();
+            }
+        }
+        return false;
+    }
+
+    public function addMember(Member $member): self
+    {
+        return new self([...$this->members, $member]);
+    }
+
+    public function removeMemberByUserAccountId(UserAccountId $user_account_id): self
+    {
+        $found = false;
+        $new_members = [];
+
+        foreach ($this->members as $member) {
+            if ($member->getUserAccountId()->equals($user_account_id)) {
+                $found = true;
+                continue;
+            }
+            $new_members[] = $member;
         }
 
         if (!$found) {
-            throw new \RuntimeException("Member not found with user account ID: " . $userAccountId->getValue());
+            throw new \DomainException('Member not found: ' . $user_account_id->toString());
         }
 
-        return new Members($newValues);
+        return new self($new_members);
     }
 
-    /**
-     * @param UserAccountId $userAccountId
-     * @return Member|null
-     */
-    public function findByUserAccountId(UserAccountId $userAccountId): Member|null {
-        foreach ($this->values as $member) {
-            if ($member->getUserAccountId()->equals($userAccountId)) {
-                return $member;
-            }
-        }
-        return null;
+    public function toArray(): array
+    {
+        return [
+            'values' => array_map(fn ($member) => $member->toArray(), $this->members),
+        ];
     }
 }

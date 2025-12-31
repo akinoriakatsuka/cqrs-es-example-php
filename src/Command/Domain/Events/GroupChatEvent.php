@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
-use J5ik2o\EventStoreAdapterPhp\Event;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+interface GroupChatEvent
+{
+    public function getId(): string;
 
-interface GroupChatEvent extends Event {
-    public function getAggregateId(): GroupChatId;
+    public function getTypeName(): string;
+
+    public function getAggregateId(): string;
+
+    public function getSeqNr(): int;
+
+    public function getOccurredAt(): int;
+
+    public function isCreated(): bool;
+
+    public function toArray(): array;
 }

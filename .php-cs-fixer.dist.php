@@ -1,22 +1,20 @@
 <?php
-/*
- * This document has been generated with
- * https://mlocati.github.io/php-cs-fixer-configurator/#version:3.12.0|configurator
- * you can change this configuration by importing this file.
- */
-$config = new \PhpCsFixer\Config();
+
+declare(strict_types=1);
+
+$finder = PhpCsFixer\Finder::create()
+    ->in(__DIR__ . '/src')
+    ->in(__DIR__ . '/tests');
+
+$config = new PhpCsFixer\Config();
 return $config
     ->setRules([
         '@PSR12' => true,
-        '@PHP81Migration' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'ordered_imports' => ['sort_algorithm' => 'alpha'],
         'no_unused_imports' => true,
-        'braces_position' => [
-            'classes_opening_brace' => 'same_line',
-            'functions_opening_brace' => 'same_line',
-            'anonymous_classes_opening_brace' => 'next_line_unless_newline_at_signature_end'
-        ],
+        'single_quote' => true,
+        'trailing_comma_in_multiline' => true,
+        'declare_strict_types' => true,
     ])
-    ->setFinder(PhpCsFixer\Finder::create()
-        ->exclude('vendor')
-        ->in(__DIR__)
-    );
+    ->setFinder($finder);

@@ -1,69 +1,68 @@
 {
-    "name": "akinoriakatsuka/event-store-adapter-php",
-    "description": "A example application for CQRS/Event Sourcing.",
-    "license": "MIT",
-    "type": "application",
-    "authors": [
-        {
-            "name": "Akinori Akatsuka",
-            "email": "akinoriakatsuka@gmail.com"
-        },
-        {
-            "name": "Junichi Kato",
-            "email": "j5ik2o@gmail.com"
-        }
-    ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/j5ik2o/event-store-adapter-php"
-        }
-    ],
-    "require": {
-        "php": ">= 8.2",
-        "aws/aws-sdk-php": "^3.283",
-        "j5ik2o/event-store-adapter-php": "dev-fix/in-memory",
-        "slim/slim": "^4.12",
-        "slim/psr7": "^1.6",
-        "psr/http-message": "^2.0",
-        "psr/http-server-handler": "^1.0",
-        "psr/http-server-middleware": "^1.0",
-        "webonyx/graphql-php": "^15.0",
-        "vlucas/phpdotenv": "^5.6"
+  "name": "akinoriakatsuka/event-store-adapter-php",
+  "description": "A example application for CQRS/Event Sourcing.",
+  "license": "MIT",
+  "type": "application",
+  "authors": [
+    {
+      "name": "Akinori Takigawa",
+      "email": "akinoriakatsuka@gmail.com"
     },
-    "autoload": {
-        "psr-4": {
-            "Akinoriakatsuka\\CqrsEsExamplePhp\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Akinoriakatsuka\\CqrsEsExamplePhp\\Tests\\": "tests/"
-        }
-    },
-    "require-dev": {
-        "robinvdvleuten/ulid": "^5.0",
-        "phpunit/phpunit": "^12.0",
-        "friendsofphp/php-cs-fixer": "^3.35",
-        "phpstan/phpstan": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "phpstan/extension-installer": "^1.0"
-    },
-    "scripts": {
-        "test": "phpunit --testdox --color tests",
-        "test:coverage": "phpunit --testdox --color --coverage-text tests",
-        "cs": "php-cs-fixer fix --dry-run",
-        "cs:fix": "php-cs-fixer fix",
-        "fmt": "composer run cs:fix",
-        "lint": "composer run cs && composer run phpstan",
-        "phpstan": "phpstan analyse --memory-limit=512M",
-        "setup:dynamodb": "php scripts/init-dynamodb.php",
-        "ci:setup": "composer run setup:dynamodb",
-        "ci:test": "composer run lint && composer run test"
-    },
-    "config": {
-        "allow-plugins": {
-            "phpstan/extension-installer": true
-        }
+    {
+      "name": "Junichi Kato",
+      "email": "j5ik2o@gmail.com"
     }
+  ],
+  "require": {
+    "php": "^8.4",
+    "aws/aws-sdk-php": "^3.0",
+    "cweagans/composer-patches": "^1.7",
+    "j5ik2o/event-store-adapter-php": "^1.0",
+    "monolog/monolog": "^3.9",
+    "psr/log": "^3.0",
+    "robinvdvleuten/ulid": "^5.0",
+    "slim/psr7": "^1.6",
+    "slim/slim": "^4.0",
+    "vlucas/phpdotenv": "^5.6",
+    "webonyx/graphql-php": "^15.0"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "mockery/mockery": "^1.6",
+    "phpstan/phpstan": "^2.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Akinoriakatsuka\\CqrsEsExamplePhp\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit --testdox",
+    "test:coverage": "phpunit --testdox --coverage-text",
+    "cs": "php-cs-fixer fix --allow-risky=yes --dry-run --diff",
+    "cs:fix": "php-cs-fixer fix --allow-risky=yes",
+    "fmt": "@cs:fix",
+    "phpstan": "phpstan analyse --memory-limit=2G",
+    "lint": ["@cs", "@phpstan"]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "allow-plugins": {
+      "cweagans/composer-patches": true
+    }
+  },
+  "extra": {
+    "patches": {
+      "j5ik2o/event-store-adapter-php": {
+        "Fix payload type to Binary for Go compatibility": "patches/event-store-adapter-php-binary-payload.patch"
+      }
+    }
+  }
 }

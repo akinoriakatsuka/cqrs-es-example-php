@@ -15,10 +15,16 @@
 
 ```bash
 # コンテナ起動
-docker compose up -d
+make docker-compose-build
+make docker-compose-up
+
+make docker-compose-down
 
 # アプリケーションコンテナ内でのコマンド実行
-docker compose exec app [コマンド]
+docker compose \
+    -f tools/docker-compose/docker-compose-databases.yml \
+    -f tools/docker-compose/docker-compose-applications.yml \
+    exec app [コマンド]
 ```
 
 ## 開発規約
@@ -27,26 +33,35 @@ docker compose exec app [コマンド]
 
 ```bash
 # コードフォーマット
-docker compose exec app composer cs:fix
+make fmt
 
 # 静的解析
-docker compose exec app composer phpstan
+make phpstan
 
 # リント（フォーマット + 静的解析）
-docker compose exec app composer lint
+make lint
 ```
 
 ### テスト実行
 
 ```bash
 # 全テスト実行
-docker compose exec app composer test
+docker compose \
+    -f tools/docker-compose/docker-compose-databases.yml \
+    -f tools/docker-compose/docker-compose-applications.yml \
+    exec app composer test
 
 # カバレッジ付きテスト
-docker compose exec app composer test:coverage
+docker compose \
+    -f tools/docker-compose/docker-compose-databases.yml \
+    -f tools/docker-compose/docker-compose-applications.yml \
+    exec app composer test:coverage
 
 # 特定のテストファイル実行
-docker compose exec app vendor/bin/phpunit tests/Path/To/TestFile.php --testdox
+docker compose \
+    -f tools/docker-compose/docker-compose-databases.yml \
+    -f tools/docker-compose/docker-compose-applications.yml \
+    exec app vendor/bin/phpunit tests/Path/To/TestFile.php --testdox
 ```
 
 ### 命名規則

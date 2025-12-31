@@ -1,95 +1,110 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-readonly class Messages {
-    /** @var array<Message> */
-    private array $values;
-
+final readonly class Messages
+{
     /**
-     * @param array<Message> $values
+     * @param array<Message> $messages
      */
-    public function __construct(array $values) {
-        $this->values = $values;
+    private function __construct(
+        private array $messages
+    ) {
     }
 
-    /**
-     * @return array<Message>
-     */
-    public function getValues(): array {
-        return $this->values;
+    public static function create(): self
+    {
+        return new self([]);
     }
 
-    /**
-     * Find a message by its ID
-     *
-     * @param MessageId $messageId
-     * @return Message|null
-     */
-    public function findById(MessageId $messageId): ?Message {
-        foreach ($this->values as $message) {
-            if ($message->getId()->equals($messageId)) {
+    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
+    {
+        $messages = array_map(
+            fn ($message_data) => Message::fromArray($message_data, $validator),
+            $data['values'] ?? []
+        );
+        return new self($messages);
+    }
+
+    public function add(Message $message): self
+    {
+        return new self([...$this->messages, $message]);
+    }
+
+    public function edit(MessageId $message_id, string $new_text, UserAccountId $executor): self
+    {
+        $found = false;
+        $new_messages = [];
+
+        foreach ($this->messages as $message) {
+            if ($message->getId()->equals($message_id)) {
+                $found = true;
+
+                // 送信者チェック
+                if (!$message->getSenderId()->equals($executor)) {
+                    throw new \DomainException(
+                        'Only the sender can edit the message: ' . $executor->toString()
+                    );
+                }
+
+                $new_messages[] = $message->withText($new_text);
+            } else {
+                $new_messages[] = $message;
+            }
+        }
+
+        if (!$found) {
+            throw new \DomainException('Message not found: ' . $message_id->toString());
+        }
+
+        return new self($new_messages);
+    }
+
+    public function remove(MessageId $message_id, UserAccountId $executor): self
+    {
+        $found = false;
+        $new_messages = [];
+
+        foreach ($this->messages as $message) {
+            if ($message->getId()->equals($message_id)) {
+                $found = true;
+
+                // 送信者チェック
+                if (!$message->getSenderId()->equals($executor)) {
+                    throw new \DomainException(
+                        'Only the sender can delete the message: ' . $executor->toString()
+                    );
+                }
+
+                // メッセージを除外（削除）
+                continue;
+            }
+            $new_messages[] = $message;
+        }
+
+        if (!$found) {
+            throw new \DomainException('Message not found: ' . $message_id->toString());
+        }
+
+        return new self($new_messages);
+    }
+
+    public function findById(MessageId $message_id): ?Message
+    {
+        foreach ($this->messages as $message) {
+            if ($message->getId()->equals($message_id)) {
                 return $message;
             }
         }
         return null;
     }
 
-    /**
-     * Edit a message
-     *
-     * @param MessageId $messageId
-     * @param string $newText
-     * @return Messages
-     * @throws \RuntimeException If message not found
-     */
-    public function editMessage(MessageId $messageId, string $newText): Messages {
-        $newValues = [];
-        $found = false;
-
-        foreach ($this->values as $message) {
-            if ($message->getId()->equals($messageId)) {
-                $newValues[] = new Message(
-                    $message->getId(),
-                    $newText,
-                    $message->getSenderId()
-                );
-                $found = true;
-            } else {
-                $newValues[] = $message;
-            }
-        }
-
-        if (!$found) {
-            throw new \RuntimeException("Message not found with ID: " . $messageId->getValue());
-        }
-
-        return new Messages($newValues);
-    }
-
-    /**
-     * Delete a message
-     *
-     * @param MessageId $messageId
-     * @return Messages
-     * @throws \RuntimeException If message not found
-     */
-    public function deleteMessage(MessageId $messageId): Messages {
-        $newValues = [];
-        $found = false;
-
-        foreach ($this->values as $message) {
-            if (!$message->getId()->equals($messageId)) {
-                $newValues[] = $message;
-            } else {
-                $found = true;
-            }
-        }
-
-        if (!$found) {
-            throw new \RuntimeException("Message not found with ID: " . $messageId->getValue());
-        }
-
-        return new Messages($newValues);
+    public function toArray(): array
+    {
+        return [
+            'values' => array_map(fn ($message) => $message->toArray(), $this->messages),
+        ];
     }
 }

@@ -1,26 +1,26 @@
-FROM php:8.5-fpm
+FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN docker-php-ext-install pdo_mysql
+
+# Install pcov for code coverage
+RUN pecl install pcov && docker-php-ext-enable pcov
+
+# Configure git to trust the mounted directory
+RUN git config --global --add safe.directory /var/www/html
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
-COPY . .
-
 RUN chown -R www-data:www-data /var/www/html
 
-# CI/CD用のセットアップスクリプトを実行可能にする
-RUN chmod +x scripts/init-dynamodb.php
+COPY composer.json composer.lock ./
+COPY patches ./patches/
+RUN composer install
 
-# CI環境でのDynamoDBテーブル初期化
-# 実際のCI環境では環境変数でDynamoDB接続情報を設定
-RUN if [ "$CI" = "true" ]; then \
-    echo "CI環境でのDynamoDBセットアップをスキップ（実行時に手動実行）"; \
-    fi
+COPY . .

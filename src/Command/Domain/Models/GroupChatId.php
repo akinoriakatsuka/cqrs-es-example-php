@@ -4,39 +4,49 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-use J5ik2o\EventStoreAdapterPhp\AggregateId;
-use Ulid\Ulid;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
-class GroupChatId implements AggregateId {
-    public const TYPE_NAME = "GroupChatId";
-    private readonly string $value;
-
-    public function __construct(?string $value = null) {
-        $this->value = $value ?? (string) Ulid::generate();
+final readonly class GroupChatId
+{
+    private function __construct(
+        private Ulid $id
+    ) {
     }
 
-    public function getTypeName(): string {
-        return self::TYPE_NAME;
+    public static function fromString(string $value, UlidValidator $validator): self
+    {
+        return new self(Ulid::fromString($value, $validator));
     }
 
-    public function getValue(): string {
-        return $this->value;
+    public static function generate(UlidGenerator $generator): self
+    {
+        return new self(Ulid::generate($generator));
     }
 
-    public function asString(): string {
-        return $this->value;
+    public function equals(self $other): bool
+    {
+        return $this->id->equals($other->id);
     }
 
-    public function equals(AggregateId $other): bool {
-        return $other instanceof self && $this->value === $other->value;
+    public function toString(): string
+    {
+        return $this->id->toString();
     }
 
-    /**
-     * @return array<string, string>
-     */
-    public function jsonSerialize(): array {
-        return [
-            "value" => $this->value,
-        ];
+    public function __toString(): string
+    {
+        return $this->id->toString();
+    }
+
+    public function toArray(): array
+    {
+        return ['value' => $this->id->toString()];
+    }
+
+    public static function fromArray(array $data, UlidValidator $validator): self
+    {
+        return self::fromString($data['value'], $validator);
     }
 }

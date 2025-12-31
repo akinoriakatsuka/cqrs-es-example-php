@@ -1,37 +1,58 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-readonly class Message {
-    private MessageId $id;
-    private string $text;
-    private UserAccountId $senderId;
-
+final readonly class Message
+{
     public function __construct(
-        MessageId $id,
-        string $text,
-        UserAccountId $senderId
+        private MessageId $id,
+        private string $text,
+        private UserAccountId $sender_id
     ) {
-        $this->id = $id;
-        $this->text = $text;
-        $this->senderId = $senderId;
     }
 
-    public function getId(): MessageId {
+    public function getId(): MessageId
+    {
         return $this->id;
     }
 
-    public function getText(): string {
+    public function getText(): string
+    {
         return $this->text;
     }
 
-    public function getSenderId(): UserAccountId {
-        return $this->senderId;
+    public function getSenderId(): UserAccountId
+    {
+        return $this->sender_id;
     }
 
-    public function equals(Message $other): bool {
-        return $this->id->equals($other->getId())
-            && $this->text === $other->getText()
-            && $this->senderId->equals($other->getSenderId());
+    public function withText(string $new_text): self
+    {
+        return new self($this->id, $new_text, $this->sender_id);
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->id->equals($other->id);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id->toArray(),
+            'text' => $this->text,
+            'sender_id' => $this->sender_id->toArray(),
+        ];
+    }
+
+    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
+    {
+        return new self(
+            MessageId::fromArray($data['id'], $validator),
+            $data['text'],
+            UserAccountId::fromArray($data['sender_id'], $validator)
+        );
     }
 }

@@ -1,80 +1,97 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberRole;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use DateTimeImmutable;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
-readonly class GroupChatMemberAdded implements GroupChatEvent {
-    private string $id;
-    private GroupChatId $aggregateId;
-    private Member $member;
-    private int $sequenceNumber;
-    private UserAccountId $executorId;
-    private DateTimeImmutable $occurredAt;
+final readonly class GroupChatMemberAdded implements GroupChatEvent
+{
     public function __construct(
-        string $id,
-        GroupChatId $aggregateId,
-        MemberId $memberId,
-        UserAccountId $userAccountId,
-        MemberRole $role,
-        UserAccountId $executorId,
-        int $sequenceNumber,
-        DateTimeImmutable $occurredAt
+        private string $id,
+        private GroupChatId $aggregate_id,
+        private Member $member,
+        private int $seq_nr,
+        private UserAccountId $executor_id,
+        private int $occurred_at
     ) {
-        $this->id = $id;
-        $this->aggregateId = $aggregateId;
-        $this->member = new Member($memberId, $userAccountId, $role);
-        $this->sequenceNumber = $sequenceNumber;
-        $this->executorId = $executorId;
-        $this->occurredAt = $occurredAt;
     }
 
-    public function getId(): string {
+    public static function create(
+        GroupChatId $aggregate_id,
+        Member $member,
+        int $seq_nr,
+        UserAccountId $executor_id,
+        UlidGenerator $generator
+    ): self {
+        $ulid = \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid::generate($generator);
+        $id = $ulid->toString();
+        $occurred_at = (int)(microtime(true) * 1000);
+        return new self($id, $aggregate_id, $member, $seq_nr, $executor_id, $occurred_at);
+    }
+
+    public function getId(): string
+    {
         return $this->id;
     }
 
-    public function getTypeName(): string {
-        return "GroupChatMemberAdded";
+    public function getTypeName(): string
+    {
+        return 'GroupChatMemberAdded';
     }
 
-    public function getSequenceNumber(): int {
-        return $this->sequenceNumber;
+    public function getAggregateId(): string
+    {
+        return $this->aggregate_id->toString();
     }
 
-    public function isCreated(): bool {
-        return false;
+    public function getSeqNr(): int
+    {
+        return $this->seq_nr;
     }
 
-    public function getOccurredAt(): DateTimeImmutable {
-        return $this->occurredAt;
-    }
-
-    public function getAggregateId(): GroupChatId {
-        return $this->aggregateId;
-    }
-
-    public function getMember(): Member {
+    public function getMember(): Member
+    {
         return $this->member;
     }
 
-    public function getExecutorId(): UserAccountId {
-        return $this->executorId;
+    public function getOccurredAt(): int
+    {
+        return $this->occurred_at;
     }
 
-    public function jsonSerialize(): mixed {
+    public function isCreated(): bool
+    {
+        return false;
+    }
+
+    public function toArray(): array
+    {
         return [
+            'type_name' => $this->getTypeName(),
             'id' => $this->id,
-            'typeName' => $this->getTypeName(),
-            'aggregateId' => $this->aggregateId,
-            'member' => $this->member,
-            'sequenceNumber' => $this->sequenceNumber,
-            'executorId' => $this->executorId,
-            'occurredAt' => $this->occurredAt,
+            'aggregate_id' => $this->aggregate_id->toArray(),
+            'member' => $this->member->toArray(),
+            'executor_id' => $this->executor_id->toArray(),
+            'seq_nr' => $this->seq_nr,
+            'occurred_at' => $this->occurred_at,
         ];
+    }
+
+    public static function fromArray(array $data, UlidValidator $validator): self
+    {
+        return new self(
+            $data['id'],
+            GroupChatId::fromArray($data['aggregate_id'], $validator),
+            Member::fromArray($data['member'], $validator),
+            $data['seq_nr'],
+            UserAccountId::fromArray($data['executor_id'], $validator),
+            $data['occurred_at']
+        );
     }
 }
