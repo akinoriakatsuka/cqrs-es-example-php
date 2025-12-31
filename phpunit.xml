@@ -25,5 +25,8 @@
         <include>
             <directory>src</directory>
         </include>
+        <exclude>
+            <directory>src/Query/InterfaceAdaptor/GraphQL</directory>
+        </exclude>
     </source>
 </phpunit>

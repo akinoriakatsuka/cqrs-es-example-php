@@ -370,8 +370,8 @@ class GroupChatTest extends TestCase
         $this->assertEquals(1, $group_chat->getSeqNr());
         $this->assertEquals(1, $group_chat->getVersion());
         $this->assertFalse($group_chat->isDeleted());
-        $this->assertNotNull($group_chat->getMembers());
-        $this->assertNotNull($group_chat->getMessages());
+        $this->assertInstanceOf(Members::class, $group_chat->getMembers());
+        $this->assertInstanceOf(Messages::class, $group_chat->getMessages());
     }
 
     public function test_fromSnapshot_スナップショットから復元できる(): void

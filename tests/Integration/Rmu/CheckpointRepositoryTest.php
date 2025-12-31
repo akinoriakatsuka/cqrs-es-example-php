@@ -2,42 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Rmu;
+namespace Tests\Integration\Rmu;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\CheckpointRepository;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models\Checkpoint;
 use PDO;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\IntegrationTestCase;
 
-class CheckpointRepositoryTest extends TestCase
+class CheckpointRepositoryTest extends IntegrationTestCase
 {
-    private PDO $pdo;
     private CheckpointRepository $repository;
 
     protected function setUp(): void
     {
-        // インメモリSQLiteを使用
-        $this->pdo = new PDO('sqlite::memory:');
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // テーブル作成
-        $this->pdo->exec('
-            CREATE TABLE rmu_checkpoint (
-                shard_id TEXT PRIMARY KEY,
-                sequence_number TEXT NOT NULL,
-                stream_arn TEXT NOT NULL,
-                last_processed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )
-        ');
+        parent::setUp();
 
         $this->repository = new CheckpointRepository($this->pdo);
-    }
-
-    protected function tearDown(): void
-    {
-        // SQLiteの接続を明示的に閉じる（不要だが念のため）
-        unset($this->pdo);
     }
 
     public function test_loadByShard_初期状態ではnullを返す(): void

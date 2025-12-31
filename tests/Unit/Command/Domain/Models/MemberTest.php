@@ -81,7 +81,6 @@ class MemberTest extends TestCase
 
         $array = $member->toArray();
 
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('id', $array);
         $this->assertArrayHasKey('user_account_id', $array);
         $this->assertArrayHasKey('role', $array);

@@ -80,7 +80,6 @@ class MessageTest extends TestCase
 
         $array = $message->toArray();
 
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('id', $array);
         $this->assertArrayHasKey('text', $array);
         $this->assertArrayHasKey('sender_id', $array);

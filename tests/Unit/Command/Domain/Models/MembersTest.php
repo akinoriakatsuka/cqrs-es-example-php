@@ -136,7 +136,6 @@ class MembersTest extends TestCase
 
         $array = $members->toArray();
 
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('values', $array);
         $this->assertCount(1, $array['values']);
     }

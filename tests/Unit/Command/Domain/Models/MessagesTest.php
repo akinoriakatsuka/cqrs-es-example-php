@@ -149,7 +149,6 @@ class MessagesTest extends TestCase
         $messages_with_message = $messages->add($message);
         $array = $messages_with_message->toArray();
 
-        $this->assertIsArray($array);
         $this->assertArrayHasKey('values', $array);
         $this->assertCount(1, $array['values']);
         $this->assertEquals('Test Message', $array['values'][0]['text']);
