@@ -34,11 +34,11 @@ class MemberQueryRepositoryTest extends IntegrationTestCase
         // 取得
         $member = $this->repository->findByGroupChatIdAndUserAccountId($group_chat_id, $user_account_id);
 
-        $this->assertIsArray($member);
-        $this->assertEquals($member_id, $member['id']);
-        $this->assertEquals($group_chat_id, $member['group_chat_id']);
-        $this->assertEquals($user_account_id, $member['user_account_id']);
-        $this->assertEquals('MEMBER', $member['role']);
+        $this->assertNotNull($member);
+        $this->assertEquals($member_id, $member->id);
+        $this->assertEquals($group_chat_id, $member->group_chat_id);
+        $this->assertEquals($user_account_id, $member->user_account_id);
+        $this->assertEquals('MEMBER', $member->role);
     }
 
     public function test_findByGroupChatIdAndUserAccountId_メンバーが存在しない場合はnullを返す(): void
@@ -70,9 +70,9 @@ class MemberQueryRepositoryTest extends IntegrationTestCase
         $members = $this->repository->findByGroupChatId($group_chat_id, $requester_user_id);
 
         $this->assertCount(3, $members);
-        $this->assertEquals($requester_user_id, $members[0]['user_account_id']);
-        $this->assertEquals($user_2_id, $members[1]['user_account_id']);
-        $this->assertEquals($user_3_id, $members[2]['user_account_id']);
+        $this->assertEquals($requester_user_id, $members[0]->user_account_id);
+        $this->assertEquals($user_2_id, $members[1]->user_account_id);
+        $this->assertEquals($user_3_id, $members[2]->user_account_id);
     }
 
     public function test_findByGroupChatId_メンバーでない場合は空配列を返す(): void
@@ -108,9 +108,9 @@ class MemberQueryRepositoryTest extends IntegrationTestCase
         $members = $this->repository->findByGroupChatId($group_chat_id, $user_1_id);
 
         $this->assertCount(3, $members);
-        $this->assertEquals($user_1_id, $members[0]['user_account_id']);
-        $this->assertEquals($user_2_id, $members[1]['user_account_id']);
-        $this->assertEquals($user_3_id, $members[2]['user_account_id']);
+        $this->assertEquals($user_1_id, $members[0]->user_account_id);
+        $this->assertEquals($user_2_id, $members[1]->user_account_id);
+        $this->assertEquals($user_3_id, $members[2]->user_account_id);
     }
 
     public function test_findByGroupChatId_グループチャットが存在しない場合は空配列を返す(): void

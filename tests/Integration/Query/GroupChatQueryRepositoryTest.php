@@ -34,10 +34,10 @@ class GroupChatQueryRepositoryTest extends IntegrationTestCase
         // 取得
         $group_chat = $this->repository->findById($group_chat_id, $user_account_id);
 
-        $this->assertIsArray($group_chat);
-        $this->assertEquals($group_chat_id, $group_chat['id']);
-        $this->assertEquals('Test Group Chat', $group_chat['name']);
-        $this->assertEquals(0, $group_chat['disabled']);
+        $this->assertNotNull($group_chat);
+        $this->assertEquals($group_chat_id, $group_chat->id);
+        $this->assertEquals('Test Group Chat', $group_chat->name);
+        $this->assertEquals(0, $group_chat->disabled);
     }
 
     public function test_findById_メンバーでない場合はnullを返す(): void
@@ -104,8 +104,8 @@ class GroupChatQueryRepositoryTest extends IntegrationTestCase
         $group_chats = $this->repository->findByUserAccountId($user_account_id);
 
         $this->assertCount(2, $group_chats);
-        $this->assertEquals('Group 1', $group_chats[0]['name']);
-        $this->assertEquals('Group 2', $group_chats[1]['name']);
+        $this->assertEquals('Group 1', $group_chats[0]->name);
+        $this->assertEquals('Group 2', $group_chats[1]->name);
     }
 
     public function test_findByUserAccountId_所属するグループがない場合は空配列を返す(): void
@@ -137,7 +137,7 @@ class GroupChatQueryRepositoryTest extends IntegrationTestCase
         $group_chats = $this->repository->findByUserAccountId($user_account_id);
 
         $this->assertCount(1, $group_chats);
-        $this->assertEquals('Group 2', $group_chats[0]['name']);
+        $this->assertEquals('Group 2', $group_chats[0]->name);
     }
 
     public function test_findByUserAccountId_created_at昇順で取得できる(): void
@@ -162,8 +162,8 @@ class GroupChatQueryRepositoryTest extends IntegrationTestCase
         $group_chats = $this->repository->findByUserAccountId($user_account_id);
 
         $this->assertCount(3, $group_chats);
-        $this->assertEquals('Group 1', $group_chats[0]['name']);
-        $this->assertEquals('Group 2', $group_chats[1]['name']);
-        $this->assertEquals('Group 3', $group_chats[2]['name']);
+        $this->assertEquals('Group 1', $group_chats[0]->name);
+        $this->assertEquals('Group 2', $group_chats[1]->name);
+        $this->assertEquals('Group 3', $group_chats[2]->name);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\Domain\ReadModel\MessageReadModel;
 use PDO;
 
 class MessageQueryRepository
@@ -18,9 +19,9 @@ class MessageQueryRepository
      *
      * @param string $message_id メッセージID
      * @param string $user_account_id リクエスターのユーザーアカウントID
-     * @return array|null メッセージ情報、またはnull（存在しない、メンバーでない、削除済みの場合）
+     * @return MessageReadModel|null メッセージ情報、またはnull（存在しない、メンバーでない、削除済みの場合）
      */
-    public function findById(string $message_id, string $user_account_id): ?array
+    public function findById(string $message_id, string $user_account_id): ?MessageReadModel
     {
         $sql = <<<SQL
             SELECT msg.*
@@ -40,7 +41,7 @@ class MessageQueryRepository
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result ?: null;
+        return $result ? MessageReadModel::fromArray($result) : null;
     }
 
     /**
@@ -48,7 +49,7 @@ class MessageQueryRepository
      *
      * @param string $group_chat_id グループチャットID
      * @param string $user_account_id リクエスターのユーザーアカウントID
-     * @return array メッセージの配列（リクエスターがメンバーでない場合は空配列）
+     * @return MessageReadModel[] メッセージの配列（リクエスターがメンバーでない場合は空配列）
      */
     public function findByGroupChatId(string $group_chat_id, string $user_account_id): array
     {
@@ -86,6 +87,11 @@ class MessageQueryRepository
             'group_chat_id' => $group_chat_id,
         ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(
+            fn (array $data) => MessageReadModel::fromArray($data),
+            $results
+        );
     }
 }

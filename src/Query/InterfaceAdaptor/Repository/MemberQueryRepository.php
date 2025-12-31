@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\Domain\ReadModel\MemberReadModel;
 use PDO;
 
 class MemberQueryRepository
@@ -18,12 +19,12 @@ class MemberQueryRepository
      *
      * @param string $group_chat_id グループチャットID
      * @param string $user_account_id 取得対象のユーザーアカウントID
-     * @return array|null メンバー情報、またはnull（存在しない場合）
+     * @return MemberReadModel|null メンバー情報、またはnull（存在しない場合）
      */
     public function findByGroupChatIdAndUserAccountId(
         string $group_chat_id,
         string $user_account_id
-    ): ?array {
+    ): ?MemberReadModel {
         $sql = <<<SQL
             SELECT m.*
             FROM members m
@@ -40,7 +41,7 @@ class MemberQueryRepository
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result ?: null;
+        return $result ? MemberReadModel::fromArray($result) : null;
     }
 
     /**
@@ -48,7 +49,7 @@ class MemberQueryRepository
      *
      * @param string $group_chat_id グループチャットID
      * @param string $requester_user_account_id リクエスターのユーザーアカウントID
-     * @return array メンバーの配列（リクエスターがメンバーでない場合は空配列）
+     * @return MemberReadModel[] メンバーの配列（リクエスターがメンバーでない場合は空配列）
      */
     public function findByGroupChatId(
         string $group_chat_id,
@@ -87,6 +88,11 @@ class MemberQueryRepository
             'group_chat_id' => $group_chat_id,
         ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(
+            fn (array $data) => MemberReadModel::fromArray($data),
+            $results
+        );
     }
 }
