@@ -28,6 +28,14 @@ final readonly class Members
         return new self([$member]);
     }
 
+    /**
+     * @param array<Member> $members
+     */
+    public static function fromMembers(array $members): self
+    {
+        return new self($members);
+    }
+
 
     public static function fromArrayWithFactories(
         array $data,

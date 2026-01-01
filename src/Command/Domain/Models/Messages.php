@@ -19,6 +19,14 @@ final readonly class Messages
         return new self([]);
     }
 
+    /**
+     * @param array<Message> $messages
+     */
+    public static function fromMessages(array $messages): self
+    {
+        return new self($messages);
+    }
+
 
     public static function fromArrayWithFactories(
         array $data,
