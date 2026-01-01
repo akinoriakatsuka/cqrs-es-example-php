@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
@@ -78,5 +79,22 @@ final readonly class GroupChatMessageEdited implements GroupChatEvent
             'seq_nr' => $this->seq_nr,
             'occurred_at' => $this->occurred_at,
         ];
+    }
+
+    public function applyTo(GroupChat $aggregate): GroupChat
+    {
+        return GroupChat::fromSnapshot(
+            $aggregate->getId(),
+            $aggregate->getName(),
+            $aggregate->getMembers(),
+            $aggregate->getMessages()->edit(
+                $this->message->getId(),
+                $this->message->getText(),
+                $this->message->getSenderId()
+            ),
+            $this->seq_nr,
+            $aggregate->getVersion() + 1,
+            $aggregate->isDeleted()
+        );
     }
 }
