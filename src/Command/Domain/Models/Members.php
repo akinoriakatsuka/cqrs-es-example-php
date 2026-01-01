@@ -37,6 +37,9 @@ final readonly class Members
     }
 
 
+    /**
+     * @deprecated Use MembersFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         UserAccountIdFactory $userAccountIdFactory,

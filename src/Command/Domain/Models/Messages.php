@@ -28,6 +28,9 @@ final readonly class Messages
     }
 
 
+    /**
+     * @deprecated Use MessagesFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         UserAccountIdFactory $userAccountIdFactory,

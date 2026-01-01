@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 
 final readonly class GroupChatDeleted implements GroupChatEvent
 {
@@ -23,7 +26,7 @@ final readonly class GroupChatDeleted implements GroupChatEvent
         int $seq_nr,
         UserAccountId $executor_id
     ): self {
-        $ulid = \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid::generate();
+        $ulid = Ulid::generate();
         $id = $ulid->toString();
         $occurred_at = (int)(microtime(true) * 1000);
         return new self($id, $aggregate_id, $seq_nr, $executor_id, $occurred_at);
@@ -72,10 +75,13 @@ final readonly class GroupChatDeleted implements GroupChatEvent
     }
 
 
+    /**
+     * @deprecated Use GroupChatDeletedFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory $userAccountIdFactory
+        GroupChatIdFactory $groupChatIdFactory,
+        UserAccountIdFactory $userAccountIdFactory
     ): self {
         return new self(
             $data['id'],

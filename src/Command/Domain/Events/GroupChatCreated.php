@@ -100,6 +100,9 @@ final readonly class GroupChatCreated implements GroupChatEvent
     }
 
 
+    /**
+     * @deprecated Use GroupChatCreatedFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         GroupChatIdFactory $groupChatIdFactory,

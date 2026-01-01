@@ -84,6 +84,9 @@ final readonly class GroupChatRenamed implements GroupChatEvent
     }
 
 
+    /**
+     * @deprecated Use GroupChatRenamedFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         GroupChatIdFactory $groupChatIdFactory,

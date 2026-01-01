@@ -81,6 +81,9 @@ final readonly class GroupChatMessagePosted implements GroupChatEvent
     }
 
 
+    /**
+     * @deprecated Use GroupChatMessagePostedFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,

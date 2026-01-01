@@ -81,6 +81,9 @@ final readonly class GroupChatMemberAdded implements GroupChatEvent
     }
 
 
+    /**
+     * @deprecated Use GroupChatMemberAddedFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,

@@ -81,6 +81,9 @@ final readonly class GroupChatMessageDeleted implements GroupChatEvent
     }
 
 
+    /**
+     * @deprecated Use GroupChatMessageDeletedFactory::fromArray() instead
+     */
     public static function fromArrayWithFactories(
         array $data,
         \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
