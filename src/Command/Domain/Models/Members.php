@@ -45,8 +45,9 @@ final readonly class Members
         UserAccountIdFactory $userAccountIdFactory,
         MemberIdFactory $memberIdFactory
     ): self {
+        $memberFactory = new MemberFactory($userAccountIdFactory, $memberIdFactory);
         $members = array_map(
-            fn ($member_data) => Member::fromArrayWithFactories($member_data, $userAccountIdFactory, $memberIdFactory),
+            fn ($member_data) => $memberFactory->fromArray($member_data),
             $data['values']
         );
         return new self($members);

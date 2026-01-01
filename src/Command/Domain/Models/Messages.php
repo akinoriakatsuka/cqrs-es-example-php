@@ -36,8 +36,9 @@ final readonly class Messages
         UserAccountIdFactory $userAccountIdFactory,
         MessageIdFactory $messageIdFactory
     ): self {
+        $messageFactory = new MessageFactory($userAccountIdFactory, $messageIdFactory);
         $messages = array_map(
-            fn ($message_data) => Message::fromArrayWithFactories($message_data, $userAccountIdFactory, $messageIdFactory),
+            fn ($message_data) => $messageFactory->fromArray($message_data),
             $data['values'] ?? []
         );
         return new self($messages);

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MembersFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
@@ -19,6 +21,7 @@ class MembersTest extends TestCase
     private RobinvdvleutenUlidValidator $validator;
     private UserAccountIdFactory $user_account_id_factory;
     private MemberIdFactory $member_id_factory;
+    private MembersFactory $members_factory;
 
     protected function setUp(): void
     {
@@ -26,6 +29,8 @@ class MembersTest extends TestCase
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
         $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
+        $member_factory = new MemberFactory($this->user_account_id_factory, $this->member_id_factory);
+        $this->members_factory = new MembersFactory($member_factory);
     }
 
     public function test_create_初期メンバーとして管理者が追加される(): void
@@ -159,11 +164,7 @@ class MembersTest extends TestCase
             ],
         ];
 
-        $members = Members::fromArrayWithFactories(
-            $data,
-            $this->user_account_id_factory,
-            $this->member_id_factory
-        );
+        $members = $this->members_factory->fromArray($data);
 
         $this->assertTrue($members->isMember($admin_id));
         $this->assertTrue($members->isAdministrator($admin_id));
@@ -175,11 +176,7 @@ class MembersTest extends TestCase
         $original_members = Members::create($admin_id, $this->member_id_factory);
 
         $array = $original_members->toArray();
-        $restored_members = Members::fromArrayWithFactories(
-            $array,
-            $this->user_account_id_factory,
-            $this->member_id_factory
-        );
+        $restored_members = $this->members_factory->fromArray($array);
 
         $this->assertTrue($restored_members->isMember($admin_id));
         $this->assertTrue($restored_members->isAdministrator($admin_id));

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
@@ -17,6 +18,7 @@ class MessageTest extends TestCase
     private RobinvdvleutenUlidValidator $validator;
     private MessageIdFactory $message_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private MessageFactory $message_factory;
 
     protected function setUp(): void
     {
@@ -24,6 +26,7 @@ class MessageTest extends TestCase
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $this->message_factory = new MessageFactory($this->user_account_id_factory, $this->message_id_factory);
     }
 
     public function test_constructor_正常に生成できる(): void
@@ -101,11 +104,7 @@ class MessageTest extends TestCase
             'sender_id' => ['value' => $sender_id->toString()],
         ];
 
-        $message = Message::fromArrayWithFactories(
-            $data,
-            $this->user_account_id_factory,
-            $this->message_id_factory
-        );
+        $message = $this->message_factory->fromArray($data);
 
         $this->assertEquals($message_id->toString(), $message->getId()->toString());
         $this->assertEquals('Restored Message', $message->getText());
@@ -119,11 +118,7 @@ class MessageTest extends TestCase
         $original_message = new Message($message_id, 'Round Trip Test', $sender_id);
 
         $array = $original_message->toArray();
-        $restored_message = Message::fromArrayWithFactories(
-            $array,
-            $this->user_account_id_factory,
-            $this->message_id_factory
-        );
+        $restored_message = $this->message_factory->fromArray($array);
 
         $this->assertTrue($original_message->equals($restored_message));
         $this->assertEquals($original_message->getText(), $restored_message->getText());

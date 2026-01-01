@@ -79,24 +79,4 @@ final readonly class GroupChatMemberAdded implements GroupChatEvent
             'occurred_at' => $this->occurred_at,
         ];
     }
-
-
-    /**
-     * @deprecated Use GroupChatMemberAddedFactory::fromArray() instead
-     */
-    public static function fromArrayWithFactories(
-        array $data,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory $userAccountIdFactory,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory $memberIdFactory
-    ): self {
-        return new self(
-            $data['id'],
-            $groupChatIdFactory->fromArray($data['aggregate_id']),
-            Member::fromArrayWithFactories($data['member'], $userAccountIdFactory, $memberIdFactory),
-            $data['seq_nr'],
-            $userAccountIdFactory->fromArray($data['executor_id']),
-            $data['occurred_at']
-        );
-    }
 }

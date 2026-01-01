@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAddedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
@@ -21,6 +23,7 @@ class GroupChatMemberAddedTest extends TestCase
     private GroupChatIdFactory $group_chat_id_factory;
     private MemberIdFactory $member_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private GroupChatMemberAddedFactory $group_chat_member_added_factory;
 
     protected function setUp(): void
     {
@@ -29,6 +32,12 @@ class GroupChatMemberAddedTest extends TestCase
         $this->group_chat_id_factory = new GroupChatIdFactory($this->generator, $this->validator);
         $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $member_factory = new MemberFactory($this->user_account_id_factory, $this->member_id_factory);
+        $this->group_chat_member_added_factory = new GroupChatMemberAddedFactory(
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $member_factory
+        );
     }
 
     public function test_正常に生成できる(): void
@@ -96,12 +105,7 @@ class GroupChatMemberAddedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatMemberAdded::fromArrayWithFactories(
-            $data,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory,
-            $this->member_id_factory
-        );
+        $event = $this->group_chat_member_added_factory->fromArray($data);
 
         $this->assertInstanceOf(GroupChatMemberAdded::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -123,12 +127,7 @@ class GroupChatMemberAddedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatMemberAdded::fromArrayWithFactories(
-            $array,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory,
-            $this->member_id_factory
-        );
+        $restored_event = $this->group_chat_member_added_factory->fromArray($array);
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());

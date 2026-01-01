@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
@@ -20,6 +21,7 @@ class MemberTest extends TestCase
     private RobinvdvleutenUlidValidator $validator;
     private MemberIdFactory $member_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private MemberFactory $member_factory;
 
     protected function setUp(): void
     {
@@ -27,6 +29,7 @@ class MemberTest extends TestCase
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $this->member_factory = new MemberFactory($this->user_account_id_factory, $this->member_id_factory);
     }
 
     public function test_constructor_正常に生成できる(): void
@@ -104,11 +107,7 @@ class MemberTest extends TestCase
             'role' => 1, // Role::ADMINISTRATOR->value
         ];
 
-        $member = Member::fromArrayWithFactories(
-            $data,
-            $this->user_account_id_factory,
-            $this->member_id_factory
-        );
+        $member = $this->member_factory->fromArray($data);
 
         $this->assertEquals($member_id->toString(), $member->getId()->toString());
         $this->assertEquals($user_account_id->toString(), $member->getUserAccountId()->toString());
@@ -122,11 +121,7 @@ class MemberTest extends TestCase
         $original_member = new Member($member_id, $user_account_id, Role::MEMBER);
 
         $array = $original_member->toArray();
-        $restored_member = Member::fromArrayWithFactories(
-            $array,
-            $this->user_account_id_factory,
-            $this->member_id_factory
-        );
+        $restored_member = $this->member_factory->fromArray($array);
 
         $this->assertTrue($original_member->equals($restored_member));
         $this->assertEquals(

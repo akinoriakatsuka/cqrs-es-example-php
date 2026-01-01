@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeleted;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeletedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
@@ -19,6 +20,7 @@ class GroupChatMessageDeletedTest extends TestCase
     private GroupChatIdFactory $group_chat_id_factory;
     private MessageIdFactory $message_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private GroupChatMessageDeletedFactory $group_chat_message_deleted_factory;
 
     protected function setUp(): void
     {
@@ -27,6 +29,11 @@ class GroupChatMessageDeletedTest extends TestCase
         $this->group_chat_id_factory = new GroupChatIdFactory($this->generator, $this->validator);
         $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $this->group_chat_message_deleted_factory = new GroupChatMessageDeletedFactory(
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
     }
 
     public function test_正常に生成できる(): void
@@ -88,12 +95,7 @@ class GroupChatMessageDeletedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatMessageDeleted::fromArrayWithFactories(
-            $data,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory,
-            $this->message_id_factory
-        );
+        $event = $this->group_chat_message_deleted_factory->fromArray($data);
 
         $this->assertInstanceOf(GroupChatMessageDeleted::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -113,12 +115,7 @@ class GroupChatMessageDeletedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatMessageDeleted::fromArrayWithFactories(
-            $array,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory,
-            $this->message_id_factory
-        );
+        $restored_event = $this->group_chat_message_deleted_factory->fromArray($array);
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());
