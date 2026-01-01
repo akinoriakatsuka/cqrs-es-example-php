@@ -11,7 +11,7 @@ use Exception;
  *
  * @template T
  */
-final class Result
+final readonly class Result
 {
     private bool $is_ok;
 
@@ -19,8 +19,8 @@ final class Result
      * @param T|null $value
      */
     private function __construct(
-        private readonly mixed $value,
-        private readonly ?Exception $error
+        private mixed $value,
+        private ?Exception $error
     ) {
         $this->is_ok = $error === null;
     }

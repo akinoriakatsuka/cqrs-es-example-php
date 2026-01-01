@@ -13,7 +13,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
  *
  * @extends Pair<GroupChat, GroupChatEvent>
  */
-class GroupChatWithEventPair extends Pair
+final readonly class GroupChatWithEventPair extends Pair
 {
     /**
      * @param GroupChat $group_chat

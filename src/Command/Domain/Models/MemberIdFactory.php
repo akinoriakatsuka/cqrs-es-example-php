@@ -7,10 +7,11 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
+use InvalidArgumentException;
 
-final class MemberIdFactory
+final readonly class MemberIdFactory
 {
-    private const TYPE_PREFIX = 'Member';
+    private const string TYPE_PREFIX = 'Member';
 
     public function __construct(
         private UlidGenerator $generator,
@@ -40,7 +41,7 @@ final class MemberIdFactory
     {
         // 配列から値を取得
         if (!isset($data['value'])) {
-            throw new \InvalidArgumentException('value is required');
+            throw new InvalidArgumentException('value is required');
         }
 
         return $this->fromString($data['value']);

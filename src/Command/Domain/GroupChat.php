@@ -24,12 +24,13 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use DomainException;
 
 /**
  * GroupChat is an aggregate of a group chat.
  * This corresponds to Go's GroupChat struct in pkg/command/domain/group_chat.go
  */
-readonly class GroupChat
+final readonly class GroupChat
 {
     private function __construct(
         private GroupChatId   $id,
@@ -39,7 +40,8 @@ readonly class GroupChat
         private int           $seq_nr,
         private int           $version,
         private bool          $deleted,
-    ){}
+    ) {
+    }
 
     /**
      * fromSnapshot reconstructs a GroupChat from snapshot data.
@@ -184,23 +186,23 @@ readonly class GroupChat
      * @param GroupChatName $name
      * @param UserAccountId $executor_id
      * @return GroupChatWithEventPair
-     * @throws \DomainException
+     * @throws DomainException
      */
     public function rename(
         GroupChatName $name,
         UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if (!$this->members->isMember($executor_id)) {
-            throw new \DomainException('The executorId is not the member of the group chat');
+            throw new DomainException('The executorId is not the member of the group chat');
         }
         if (!$this->members->isAdministrator($executor_id)) {
-            throw new \DomainException('The executorId is not an administrator of the group chat');
+            throw new DomainException('The executorId is not an administrator of the group chat');
         }
         if ($this->name->equals($name)) {
-            throw new \DomainException('The name is already the same as the current name');
+            throw new DomainException('The name is already the same as the current name');
         }
 
         $new_state = new self(
@@ -233,19 +235,19 @@ readonly class GroupChat
      *
      * @param UserAccountId $executor_id
      * @return GroupChatWithEventPair
-     * @throws \DomainException
+     * @throws DomainException
      */
     public function delete(
         UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if (!$this->members->isMember($executor_id)) {
-            throw new \DomainException('The executorId is not the member of the group chat');
+            throw new DomainException('The executorId is not the member of the group chat');
         }
         if (!$this->members->isAdministrator($executor_id)) {
-            throw new \DomainException('The executorId is not an administrator of the group chat');
+            throw new DomainException('The executorId is not an administrator of the group chat');
         }
 
         $new_state = new self(
@@ -281,7 +283,7 @@ readonly class GroupChat
      * @param Role $role
      * @param UserAccountId $executor_id
      * @return GroupChatWithEventPair
-     * @throws \DomainException
+     * @throws DomainException
      */
     public function addMember(
         MemberId $member_id,
@@ -290,13 +292,13 @@ readonly class GroupChat
         UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if ($this->members->isMember($user_account_id)) {
-            throw new \DomainException('The userAccountId is already the member of the group chat');
+            throw new DomainException('The userAccountId is already the member of the group chat');
         }
         if (!$this->members->isAdministrator($executor_id)) {
-            throw new \DomainException('The executorId is not the administrator of the group chat');
+            throw new DomainException('The executorId is not the administrator of the group chat');
         }
 
         $new_member = new Member($member_id, $user_account_id, $role);
@@ -327,13 +329,13 @@ readonly class GroupChat
         UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if (!$this->members->isMember($user_account_id)) {
-            throw new \DomainException('The userAccountId is not a member of the group chat');
+            throw new DomainException('The userAccountId is not a member of the group chat');
         }
         if (!$this->members->isAdministrator($executor_id)) {
-            throw new \DomainException('The executorId is not the administrator of the group chat');
+            throw new DomainException('The executorId is not the administrator of the group chat');
         }
 
         $new_members = $this->members->removeMemberByUserAccountId($user_account_id);
@@ -364,10 +366,10 @@ readonly class GroupChat
         UserAccountId $sender_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if (!$this->members->isMember($sender_id)) {
-            throw new \DomainException('The senderId is not a member of the group chat');
+            throw new DomainException('The senderId is not a member of the group chat');
         }
 
         $message = new Message($message_id, $text, $sender_id);
@@ -399,10 +401,10 @@ readonly class GroupChat
         UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if (!$this->members->isMember($executor_id)) {
-            throw new \DomainException('The executorId is not a member of the group chat');
+            throw new DomainException('The executorId is not a member of the group chat');
         }
 
         $new_messages = $this->messages->edit($message_id, $new_text, $executor_id);
@@ -433,10 +435,10 @@ readonly class GroupChat
         UserAccountId $executor_id
     ): GroupChatWithEventPair {
         if ($this->deleted) {
-            throw new \DomainException('The group chat is deleted');
+            throw new DomainException('The group chat is deleted');
         }
         if (!$this->members->isMember($executor_id)) {
-            throw new \DomainException('The executorId is not a member of the group chat');
+            throw new DomainException('The executorId is not a member of the group chat');
         }
 
         $new_messages = $this->messages->remove($message_id, $executor_id);
