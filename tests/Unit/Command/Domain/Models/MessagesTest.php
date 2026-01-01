@@ -173,7 +173,11 @@ class MessagesTest extends TestCase
             ],
         ];
 
-        $messages = Messages::fromArray($data, $this->validator);
+        $messages = Messages::fromArrayWithFactories(
+            $data,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
 
         $found = $messages->findById($message_id);
         $this->assertNotNull($found);
@@ -184,7 +188,11 @@ class MessagesTest extends TestCase
     {
         $data = ['values' => []];
 
-        $messages = Messages::fromArray($data, $this->validator);
+        $messages = Messages::fromArrayWithFactories(
+            $data,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
 
         $this->assertInstanceOf(Messages::class, $messages);
     }

@@ -10,7 +10,6 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatRenamed implements GroupChatEvent
 {
@@ -84,20 +83,6 @@ final readonly class GroupChatRenamed implements GroupChatEvent
         ];
     }
 
-    /**
-     * @deprecated Use fromArrayWithFactories() instead. This method will be removed in future versions.
-     */
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        return new self(
-            $data['id'],
-            GroupChatId::fromArray($data['aggregate_id'], $validator),
-            GroupChatName::fromArray($data['name']),
-            $data['seq_nr'],
-            UserAccountId::fromArray($data['executor_id'], $validator),
-            $data['occurred_at']
-        );
-    }
 
     public static function fromArrayWithFactories(
         array $data,

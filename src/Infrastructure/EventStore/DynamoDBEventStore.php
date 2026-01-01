@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use J5ik2o\EventStoreAdapterPhp\EventStore as J5EventStore;
 
 class DynamoDBEventStore implements EventStore
 {
+    private GroupChatIdFactory $group_chat_id_factory;
+
     public function __construct(
         private J5EventStore $j5_event_store,
         private UlidValidator $validator
     ) {
+        $this->group_chat_id_factory = new GroupChatIdFactory(
+            new RobinvdvleutenUlidGenerator(),
+            $validator
+        );
     }
 
     public function persistEvent(
@@ -61,7 +69,7 @@ class DynamoDBEventStore implements EventStore
         int $since_seq_nr = 0
     ): array {
         // AggregateIdを作成
-        $group_chat_id = \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId::fromString($aggregate_id, $this->validator);
+        $group_chat_id = $this->group_chat_id_factory->fromString($aggregate_id);
         $aggregate_id_adapter = new GroupChatIdAdapter($group_chat_id);
 
         // イベントを取得
@@ -85,7 +93,7 @@ class DynamoDBEventStore implements EventStore
     public function getLatestSnapshotById(string $aggregate_id): ?\Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat
     {
         // AggregateIdを作成
-        $group_chat_id = \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId::fromString($aggregate_id, $this->validator);
+        $group_chat_id = $this->group_chat_id_factory->fromString($aggregate_id);
         $aggregate_id_adapter = new GroupChatIdAdapter($group_chat_id);
 
         // スナップショットを取得

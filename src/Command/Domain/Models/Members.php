@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
-
 final readonly class Members
 {
     /**
@@ -30,17 +28,6 @@ final readonly class Members
         return new self([$member]);
     }
 
-    /**
-     * @deprecated Use fromArrayWithFactories() instead. This method will be removed in future versions.
-     */
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        $members = array_map(
-            fn ($member_data) => Member::fromArray($member_data, $validator),
-            $data['values']
-        );
-        return new self($members);
-    }
 
     public static function fromArrayWithFactories(
         array $data,

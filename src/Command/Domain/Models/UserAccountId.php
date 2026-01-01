@@ -72,11 +72,4 @@ final readonly class UserAccountId
         return ['value' => $this->id->toString()];
     }
 
-    /**
-     * @deprecated Use UserAccountIdFactory::fromArray() instead. This method will be removed in future versions.
-     */
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        return self::fromString($data['value'], $validator);
-    }
 }

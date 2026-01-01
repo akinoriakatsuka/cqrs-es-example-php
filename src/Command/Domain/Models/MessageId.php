@@ -72,11 +72,4 @@ final readonly class MessageId
         return ['value' => $this->id->toString()];
     }
 
-    /**
-     * @deprecated Use MessageIdFactory::fromArray() instead. This method will be removed in future versions.
-     */
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        return self::fromString($data['value'], $validator);
-    }
 }

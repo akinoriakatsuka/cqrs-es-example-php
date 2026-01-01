@@ -88,7 +88,12 @@ class GroupChatMessageDeletedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatMessageDeleted::fromArray($data, $this->validator);
+        $event = GroupChatMessageDeleted::fromArrayWithFactories(
+            $data,
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
 
         $this->assertInstanceOf(GroupChatMessageDeleted::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -108,7 +113,12 @@ class GroupChatMessageDeletedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatMessageDeleted::fromArray($array, $this->validator);
+        $restored_event = GroupChatMessageDeleted::fromArrayWithFactories(
+            $array,
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());

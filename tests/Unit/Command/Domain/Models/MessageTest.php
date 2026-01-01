@@ -101,7 +101,11 @@ class MessageTest extends TestCase
             'sender_id' => ['value' => $sender_id->toString()],
         ];
 
-        $message = Message::fromArray($data, $this->validator);
+        $message = Message::fromArrayWithFactories(
+            $data,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
 
         $this->assertEquals($message_id->toString(), $message->getId()->toString());
         $this->assertEquals('Restored Message', $message->getText());
@@ -115,7 +119,11 @@ class MessageTest extends TestCase
         $original_message = new Message($message_id, 'Round Trip Test', $sender_id);
 
         $array = $original_message->toArray();
-        $restored_message = Message::fromArray($array, $this->validator);
+        $restored_message = Message::fromArrayWithFactories(
+            $array,
+            $this->user_account_id_factory,
+            $this->message_id_factory
+        );
 
         $this->assertTrue($original_message->equals($restored_message));
         $this->assertEquals($original_message->getText(), $restored_message->getText());

@@ -94,7 +94,13 @@ class GroupChatCreatedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatCreated::fromArray($data, $this->validator);
+        $event = GroupChatCreated::fromArrayWithFactories(
+            $data,
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $this->member_id_factory,
+            $this->validator
+        );
 
         $this->assertInstanceOf(GroupChatCreated::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -116,7 +122,13 @@ class GroupChatCreatedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatCreated::fromArray($array, $this->validator);
+        $restored_event = GroupChatCreated::fromArrayWithFactories(
+            $array,
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $this->member_id_factory,
+            $this->validator
+        );
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());

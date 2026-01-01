@@ -72,11 +72,4 @@ final readonly class MemberId
         return ['value' => $this->id->toString()];
     }
 
-    /**
-     * @deprecated Use MemberIdFactory::fromArray() instead. This method will be removed in future versions.
-     */
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        return self::fromString($data['value'], $validator);
-    }
 }

@@ -99,21 +99,6 @@ final readonly class GroupChatCreated implements GroupChatEvent
         ];
     }
 
-    /**
-     * @deprecated Use fromArrayWithFactories() instead. This method will be removed in future versions.
-     */
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        return new self(
-            $data['id'],
-            GroupChatId::fromArray($data['aggregate_id'], $validator),
-            GroupChatName::fromArray($data['name']),
-            Members::fromArray($data['members'], $validator),
-            $data['seq_nr'],
-            UserAccountId::fromArray($data['executor_id'], $validator),
-            $data['occurred_at']
-        );
-    }
 
     public static function fromArrayWithFactories(
         array $data,
