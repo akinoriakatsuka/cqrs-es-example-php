@@ -35,12 +35,12 @@ class MessageQueryRepositoryTest extends IntegrationTestCase
         // 取得
         $message = $this->repository->findById($message_id, $user_account_id);
 
-        $this->assertIsArray($message);
-        $this->assertEquals($message_id, $message['id']);
-        $this->assertEquals($group_chat_id, $message['group_chat_id']);
-        $this->assertEquals($user_account_id, $message['user_account_id']);
-        $this->assertEquals('Hello World', $message['text']);
-        $this->assertEquals(0, $message['disabled']);
+        $this->assertNotNull($message);
+        $this->assertEquals($message_id, $message->id);
+        $this->assertEquals($group_chat_id, $message->group_chat_id);
+        $this->assertEquals($user_account_id, $message->user_account_id);
+        $this->assertEquals('Hello World', $message->text);
+        $this->assertEquals(0, $message->disabled);
     }
 
     public function test_findById_メンバーでない場合はnullを返す(): void
@@ -107,9 +107,9 @@ class MessageQueryRepositoryTest extends IntegrationTestCase
         $messages = $this->repository->findByGroupChatId($group_chat_id, $user_account_id);
 
         $this->assertCount(3, $messages);
-        $this->assertEquals('Message 1', $messages[0]['text']);
-        $this->assertEquals('Message 2', $messages[1]['text']);
-        $this->assertEquals('Message 3', $messages[2]['text']);
+        $this->assertEquals('Message 1', $messages[0]->text);
+        $this->assertEquals('Message 2', $messages[1]->text);
+        $this->assertEquals('Message 3', $messages[2]->text);
     }
 
     public function test_findByGroupChatId_メンバーでない場合は空配列を返す(): void
@@ -152,8 +152,8 @@ class MessageQueryRepositoryTest extends IntegrationTestCase
         $messages = $this->repository->findByGroupChatId($group_chat_id, $user_account_id);
 
         $this->assertCount(2, $messages);
-        $this->assertEquals('Message 1', $messages[0]['text']);
-        $this->assertEquals('Message 3', $messages[1]['text']);
+        $this->assertEquals('Message 1', $messages[0]->text);
+        $this->assertEquals('Message 3', $messages[1]->text);
     }
 
     public function test_findByGroupChatId_created_at昇順で取得できる(): void
@@ -175,9 +175,9 @@ class MessageQueryRepositoryTest extends IntegrationTestCase
         $messages = $this->repository->findByGroupChatId($group_chat_id, $user_account_id);
 
         $this->assertCount(3, $messages);
-        $this->assertEquals('Message 1', $messages[0]['text']);
-        $this->assertEquals('Message 2', $messages[1]['text']);
-        $this->assertEquals('Message 3', $messages[2]['text']);
+        $this->assertEquals('Message 1', $messages[0]->text);
+        $this->assertEquals('Message 2', $messages[1]->text);
+        $this->assertEquals('Message 3', $messages[2]->text);
     }
 
     public function test_findByGroupChatId_グループチャットが存在しない場合は空配列を返す(): void

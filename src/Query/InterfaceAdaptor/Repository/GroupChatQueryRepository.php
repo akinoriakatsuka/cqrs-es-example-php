@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\Domain\ReadModel\GroupChatReadModel;
 use PDO;
 
 class GroupChatQueryRepository
@@ -18,9 +19,9 @@ class GroupChatQueryRepository
      *
      * @param string $group_chat_id グループチャットID
      * @param string $user_account_id リクエスターのユーザーアカウントID
-     * @return array|null グループチャット情報、またはnull（存在しない、またはメンバーでない場合）
+     * @return GroupChatReadModel|null グループチャット情報、またはnull（存在しない、またはメンバーでない場合）
      */
-    public function findById(string $group_chat_id, string $user_account_id): ?array
+    public function findById(string $group_chat_id, string $user_account_id): ?GroupChatReadModel
     {
         $sql = <<<SQL
             SELECT gc.*
@@ -40,14 +41,14 @@ class GroupChatQueryRepository
 
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $result ?: null;
+        return $result ? GroupChatReadModel::fromArray($result) : null;
     }
 
     /**
      * ユーザーが所属するグループチャット一覧を取得
      *
      * @param string $user_account_id ユーザーアカウントID
-     * @return array グループチャットの配列
+     * @return GroupChatReadModel[] グループチャットの配列
      */
     public function findByUserAccountId(string $user_account_id): array
     {
@@ -65,6 +66,11 @@ class GroupChatQueryRepository
             'user_account_id' => $user_account_id,
         ]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(
+            fn (array $data) => GroupChatReadModel::fromArray($data),
+            $results
+        );
     }
 }
