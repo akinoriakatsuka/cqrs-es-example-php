@@ -80,7 +80,7 @@ class GroupChatMemberAddedTest extends TestCase
     public function test_fromArrayでデシリアライズできる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $member_id = MemberId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
         $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
@@ -102,7 +102,7 @@ class GroupChatMemberAddedTest extends TestCase
     public function test_ラウンドトリップでデータが保持される(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $member_id = MemberId::generate($this->generator);
+        $member_id = $this->member_id_factory->create();
         $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
         $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);

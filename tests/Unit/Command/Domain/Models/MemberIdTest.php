@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
@@ -15,17 +16,19 @@ class MemberIdTest extends TestCase
 {
     private UlidValidator $validator;
     private UlidGenerator $generator;
+    private MemberIdFactory $factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->factory = new MemberIdFactory($this->generator, $this->validator);
     }
 
     public function test_fromString_ULID形式の文字列で生成できる(): void
     {
         $ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $id = MemberId::fromString($ulid, $this->validator);
+        $id = $this->factory->fromString($ulid);
 
         $this->assertInstanceOf(MemberId::class, $id);
         $this->assertEquals($ulid, $id->toString());
@@ -34,9 +37,9 @@ class MemberIdTest extends TestCase
     public function test_fromString_等価性判定が正しく動作する(): void
     {
         $ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $id1 = MemberId::fromString($ulid, $this->validator);
-        $id2 = MemberId::fromString($ulid, $this->validator);
-        $id3 = MemberId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $id1 = $this->factory->fromString($ulid);
+        $id2 = $this->factory->fromString($ulid);
+        $id3 = $this->factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
 
         $this->assertTrue($id1->equals($id2));
         $this->assertFalse($id1->equals($id3));
@@ -45,7 +48,7 @@ class MemberIdTest extends TestCase
     public function test_fromString_toStringで文字列に変換できる(): void
     {
         $ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $id = MemberId::fromString($ulid, $this->validator);
+        $id = $this->factory->fromString($ulid);
 
         $this->assertEquals($ulid, $id->toString());
         $this->assertEquals('Member-' . $ulid, (string)$id);
@@ -57,7 +60,7 @@ class MemberIdTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid ULID format');
 
-        MemberId::fromString('invalid-ulid', $this->validator);
+        $this->factory->fromString('invalid-ulid');
     }
 
     public function test_fromString_空文字でエラーになる(): void
@@ -65,12 +68,12 @@ class MemberIdTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('ULID cannot be empty');
 
-        MemberId::fromString('', $this->validator);
+        $this->factory->fromString('');
     }
 
     public function test_generate_ジェネレーターで生成できる(): void
     {
-        $id = MemberId::generate($this->generator);
+        $id = $this->factory->create();
 
         $this->assertInstanceOf(MemberId::class, $id);
         $this->assertNotEmpty($id->toString());
@@ -89,7 +92,8 @@ class MemberIdTest extends TestCase
             }
         };
 
-        $id = MemberId::generate($generator);
+        $factory = new MemberIdFactory($generator, $this->validator);
+        $id = $factory->create();
 
         $this->assertEquals($custom_ulid, $id->toString());
     }
@@ -103,7 +107,8 @@ class MemberIdTest extends TestCase
             }
         };
 
-        $id = MemberId::fromString('custom-valid', $validator);
+        $factory = new MemberIdFactory($this->generator, $validator);
+        $id = $factory->fromString('custom-valid');
 
         $this->assertEquals('CUSTOM-VALID', $id->toString());
     }
@@ -120,6 +125,7 @@ class MemberIdTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid ULID format');
 
-        MemberId::fromString('any-value', $validator);
+        $factory = new MemberIdFactory($this->generator, $validator);
+        $factory->fromString('any-value');
     }
 }
