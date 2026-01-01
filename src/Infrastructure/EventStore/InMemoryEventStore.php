@@ -7,6 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 
 class InMemoryEventStore implements EventStore
 {
@@ -146,7 +147,17 @@ class InMemoryEventStore implements EventStore
         if (!$created_event instanceof GroupChatCreated) {
             throw new \RuntimeException('First event must be GroupChatCreated');
         }
-        $aggregate = GroupChat::fromEvent($created_event);
+
+        // Use fromSnapshot to reconstruct from the created event
+        $aggregate = GroupChat::fromSnapshot(
+            $created_event->getAggregateIdAsObject(),
+            $created_event->getName(),
+            $created_event->getMembers(),
+            Messages::create(),
+            $created_event->getSeqNr(),
+            1, // version
+            false // deleted
+        );
 
         // Apply remaining events
         foreach ($events as $event) {

@@ -478,25 +478,6 @@ class GroupChat
     }
 
     /**
-     * Create a GroupChat from a created event
-     *
-     * @param GroupChatCreated $event
-     * @return self
-     */
-    public static function fromEvent(GroupChatCreated $event): self
-    {
-        return self::fromSnapshot(
-            $event->getAggregateIdAsObject(),
-            $event->getName(),
-            $event->getMembers(),
-            Messages::create(),
-            $event->getSeqNr(),
-            1,
-            false
-        );
-    }
-
-    /**
      * ApplyEvent applies an event to the aggregate to produce a new state.
      * This corresponds to Go's: func (g *GroupChat) ApplyEvent(event esa.Event) GroupChat
      *
