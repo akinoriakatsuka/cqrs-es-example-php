@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 
@@ -93,5 +95,18 @@ final readonly class GroupChatCreated implements GroupChatEvent
             'seq_nr' => $this->seq_nr,
             'occurred_at' => $this->occurred_at,
         ];
+    }
+
+    public function applyTo(GroupChat $aggregate): GroupChat
+    {
+        return GroupChat::fromSnapshot(
+            $this->aggregate_id,
+            $this->name,
+            $this->members,
+            Messages::create(),
+            $this->seq_nr,
+            1,
+            false
+        );
     }
 }
