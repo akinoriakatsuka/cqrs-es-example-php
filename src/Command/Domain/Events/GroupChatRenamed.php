@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 
 final readonly class GroupChatRenamed implements GroupChatEvent
@@ -81,24 +79,5 @@ final readonly class GroupChatRenamed implements GroupChatEvent
             'seq_nr' => $this->seq_nr,
             'occurred_at' => $this->occurred_at,
         ];
-    }
-
-
-    /**
-     * @deprecated Use GroupChatRenamedFactory::fromArray() instead
-     */
-    public static function fromArrayWithFactories(
-        array $data,
-        GroupChatIdFactory $groupChatIdFactory,
-        UserAccountIdFactory $userAccountIdFactory
-    ): self {
-        return new self(
-            $data['id'],
-            $groupChatIdFactory->fromArray($data['aggregate_id']),
-            GroupChatName::fromArray($data['name']),
-            $data['seq_nr'],
-            $userAccountIdFactory->fromArray($data['executor_id']),
-            $data['occurred_at']
-        );
     }
 }

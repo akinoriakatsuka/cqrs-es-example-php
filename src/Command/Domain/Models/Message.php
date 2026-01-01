@@ -46,20 +46,4 @@ final readonly class Message
             'sender_id' => $this->sender_id->toArray(),
         ];
     }
-
-
-    /**
-     * @deprecated Use MessageFactory::fromArray() instead
-     */
-    public static function fromArrayWithFactories(
-        array $data,
-        UserAccountIdFactory $userAccountIdFactory,
-        MessageIdFactory $messageIdFactory
-    ): self {
-        return new self(
-            $messageIdFactory->fromArray($data['id']),
-            $data['text'],
-            $userAccountIdFactory->fromArray($data['sender_id'])
-        );
-    }
 }

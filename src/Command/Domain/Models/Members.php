@@ -36,23 +36,6 @@ final readonly class Members
         return new self($members);
     }
 
-
-    /**
-     * @deprecated Use MembersFactory::fromArray() instead
-     */
-    public static function fromArrayWithFactories(
-        array $data,
-        UserAccountIdFactory $userAccountIdFactory,
-        MemberIdFactory $memberIdFactory
-    ): self {
-        $memberFactory = new MemberFactory($userAccountIdFactory, $memberIdFactory);
-        $members = array_map(
-            fn ($member_data) => $memberFactory->fromArray($member_data),
-            $data['values']
-        );
-        return new self($members);
-    }
-
     public function isMember(UserAccountId $user_account_id): bool
     {
         foreach ($this->members as $member) {
