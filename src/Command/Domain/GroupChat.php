@@ -29,33 +29,17 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
  * GroupChat is an aggregate of a group chat.
  * This corresponds to Go's GroupChat struct in pkg/command/domain/group_chat.go
  */
-class GroupChat
+readonly class GroupChat
 {
-    private GroupChatId $id;
-    private GroupChatName $name;
-    private Members $members;
-    private Messages $messages;
-    private int $seq_nr;
-    private int $version;
-    private bool $deleted;
-
     private function __construct(
-        GroupChatId $id,
-        GroupChatName $name,
-        Members $members,
-        Messages $messages,
-        int $seq_nr,
-        int $version,
-        bool $deleted
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->members = $members;
-        $this->messages = $messages;
-        $this->seq_nr = $seq_nr;
-        $this->version = $version;
-        $this->deleted = $deleted;
-    }
+        private GroupChatId   $id,
+        private GroupChatName $name,
+        private Members       $members,
+        private Messages      $messages,
+        private int           $seq_nr,
+        private int           $version,
+        private bool          $deleted,
+    ){}
 
     /**
      * fromSnapshot reconstructs a GroupChat from snapshot data.
