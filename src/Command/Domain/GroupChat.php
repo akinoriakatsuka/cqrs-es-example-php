@@ -500,92 +500,16 @@ class GroupChat
      * ApplyEvent applies an event to the aggregate to produce a new state.
      * This corresponds to Go's: func (g *GroupChat) ApplyEvent(event esa.Event) GroupChat
      *
+     * Uses the Visitor pattern to implement the Open/Closed Principle:
+     * - Open for extension: New event types can be added without modifying this method
+     * - Closed for modification: This method doesn't need to change when new events are added
+     *
      * @param GroupChatEvent $event
      * @return self
      */
     public function applyEvent(GroupChatEvent $event): self
     {
-        return match (get_class($event)) {
-            GroupChatCreated::class => self::fromSnapshot(
-                $event->getAggregateIdAsObject(),
-                $event->getName(),
-                $event->getMembers(),
-                Messages::create(),
-                $event->getSeqNr(),
-                1,
-                false
-            ),
-            GroupChatRenamed::class => new self(
-                $this->id,
-                $event->getName(),
-                $this->members,
-                $this->messages,
-                $event->getSeqNr(),
-                $this->version + 1,
-                $this->deleted
-            ),
-            GroupChatDeleted::class => new self(
-                $this->id,
-                $this->name,
-                $this->members,
-                $this->messages,
-                $event->getSeqNr(),
-                $this->version + 1,
-                true
-            ),
-            GroupChatMemberAdded::class => new self(
-                $this->id,
-                $this->name,
-                $this->members->addMember($event->getMember()),
-                $this->messages,
-                $event->getSeqNr(),
-                $this->version + 1,
-                $this->deleted
-            ),
-            GroupChatMemberRemoved::class => new self(
-                $this->id,
-                $this->name,
-                $this->members->removeMemberByUserAccountId($event->getUserAccountId()),
-                $this->messages,
-                $event->getSeqNr(),
-                $this->version + 1,
-                $this->deleted
-            ),
-            GroupChatMessagePosted::class => new self(
-                $this->id,
-                $this->name,
-                $this->members,
-                $this->messages->add($event->getMessage()),
-                $event->getSeqNr(),
-                $this->version + 1,
-                $this->deleted
-            ),
-            GroupChatMessageEdited::class => new self(
-                $this->id,
-                $this->name,
-                $this->members,
-                $this->messages->edit(
-                    $event->getMessage()->getId(),
-                    $event->getMessage()->getText(),
-                    $event->getMessage()->getSenderId()
-                ),
-                $event->getSeqNr(),
-                $this->version + 1,
-                $this->deleted
-            ),
-            GroupChatMessageDeleted::class => new self(
-                $this->id,
-                $this->name,
-                $this->members,
-                $this->messages->remove(
-                    $event->getMessageId(),
-                    $this->messages->findById($event->getMessageId())->getSenderId()
-                ),
-                $event->getSeqNr(),
-                $this->version + 1,
-                $this->deleted
-            ),
-            default => $this,
-        };
+        $visitor = new GroupChatEventVisitorImpl();
+        return $event->accept($visitor, $this);
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChatEventVisitor;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
@@ -70,5 +72,13 @@ final readonly class GroupChatDeleted implements GroupChatEvent
             'seq_nr' => $this->seq_nr,
             'occurred_at' => $this->occurred_at,
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function accept(GroupChatEventVisitor $visitor, GroupChat $aggregate): GroupChat
+    {
+        return $visitor->visitDeleted($this, $aggregate);
     }
 }
