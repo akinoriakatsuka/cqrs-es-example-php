@@ -12,13 +12,11 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 
 class SnapshotConverter
 {
     public function __construct(
-        private UlidValidator $validator,
         private GroupChatIdFactory $groupChatIdFactory,
         private UserAccountIdFactory $userAccountIdFactory,
         private MemberIdFactory $memberIdFactory,

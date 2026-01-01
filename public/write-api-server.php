@@ -75,7 +75,6 @@ $event_converter = new EventConverter(
 );
 $snapshot_serializer = new SnapshotSerializer();
 $snapshot_converter = new SnapshotConverter(
-    $validator,
     $group_chat_id_factory,
     $user_account_id_factory,
     $member_id_factory,
