@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Command\Domain\Events;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMemberAddedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAddedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MemberFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MemberIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;

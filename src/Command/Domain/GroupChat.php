@@ -13,11 +13,11 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDelet
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdited;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;

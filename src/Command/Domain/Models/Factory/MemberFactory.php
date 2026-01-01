@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory;
+
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
 
 final readonly class MemberFactory
 {

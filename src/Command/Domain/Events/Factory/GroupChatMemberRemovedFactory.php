@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\UserAccountIdFactory;
 
 final readonly class GroupChatMemberRemovedFactory
 {
@@ -14,7 +15,6 @@ final readonly class GroupChatMemberRemovedFactory
         private UserAccountIdFactory $userAccountIdFactory
     ) {
     }
-
     public function fromArray(array $data): GroupChatMemberRemoved
     {
         return new GroupChatMemberRemoved(

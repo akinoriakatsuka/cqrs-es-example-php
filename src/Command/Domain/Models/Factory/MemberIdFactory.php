@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
+namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory;
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;

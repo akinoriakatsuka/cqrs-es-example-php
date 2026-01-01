@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MembersFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MessagesFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MembersFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessagesFactory;
 use J5ik2o\EventStoreAdapterPhp\Aggregate;
 
 class SnapshotConverter
