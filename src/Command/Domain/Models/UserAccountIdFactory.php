@@ -8,9 +8,9 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
-final class UserAccountIdFactory
+final readonly class UserAccountIdFactory
 {
-    private const TYPE_PREFIX = 'UserAccount';
+    private const string TYPE_PREFIX = 'UserAccount';
 
     public function __construct(
         private UlidGenerator $generator,

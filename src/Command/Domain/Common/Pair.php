@@ -9,15 +9,15 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Common;
  * @template T1
  * @template T2
  */
-class Pair
+readonly class Pair
 {
     /**
      * @param T1 $first
      * @param T2 $second
      */
     public function __construct(
-        private readonly mixed $first,
-        private readonly mixed $second
+        private mixed $first,
+        private mixed $second
     ) {
     }
 

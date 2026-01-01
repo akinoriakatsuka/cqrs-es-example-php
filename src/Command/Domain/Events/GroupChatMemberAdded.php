@@ -8,6 +8,7 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\GroupChat;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 
 final readonly class GroupChatMemberAdded implements GroupChatEvent
 {
@@ -27,7 +28,7 @@ final readonly class GroupChatMemberAdded implements GroupChatEvent
         int $seq_nr,
         UserAccountId $executor_id
     ): self {
-        $ulid = \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid::generate();
+        $ulid = Ulid::generate();
         $id = $ulid->toString();
         $occurred_at = (int)(microtime(true) * 1000);
         return new self($id, $aggregate_id, $member, $seq_nr, $executor_id, $occurred_at);
