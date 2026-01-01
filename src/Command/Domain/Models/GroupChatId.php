@@ -10,6 +10,8 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatId
 {
+    private const TYPE_PREFIX = 'GroupChat';
+
     private function __construct(
         private Ulid $id
     ) {
@@ -17,6 +19,10 @@ final readonly class GroupChatId
 
     public static function fromString(string $value, UlidValidator $validator): self
     {
+        // プレフィックスが付いている場合は削除
+        if (str_starts_with($value, self::TYPE_PREFIX . '-')) {
+            $value = substr($value, strlen(self::TYPE_PREFIX) + 1);
+        }
         return new self(Ulid::fromString($value, $validator));
     }
 
@@ -35,9 +41,19 @@ final readonly class GroupChatId
         return $this->id->toString();
     }
 
+    public function asString(): string
+    {
+        return self::TYPE_PREFIX . '-' . $this->id->toString();
+    }
+
+    public function getTypeName(): string
+    {
+        return self::TYPE_PREFIX;
+    }
+
     public function __toString(): string
     {
-        return $this->id->toString();
+        return $this->asString();
     }
 
     public function toArray(): array

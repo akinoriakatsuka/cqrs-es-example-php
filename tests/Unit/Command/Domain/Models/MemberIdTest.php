@@ -48,7 +48,8 @@ class MemberIdTest extends TestCase
         $id = MemberId::fromString($ulid, $this->validator);
 
         $this->assertEquals($ulid, $id->toString());
-        $this->assertEquals($ulid, (string)$id);
+        $this->assertEquals('Member-' . $ulid, (string)$id);
+        $this->assertEquals('Member-' . $ulid, $id->asString());
     }
 
     public function test_fromString_無効なULID形式でエラーになる(): void

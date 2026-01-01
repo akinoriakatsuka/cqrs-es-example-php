@@ -48,7 +48,8 @@ class GroupChatIdTest extends TestCase
         $id = GroupChatId::fromString($ulid, $this->validator);
 
         $this->assertEquals($ulid, $id->toString());
-        $this->assertEquals($ulid, (string)$id);
+        $this->assertEquals('GroupChat-' . $ulid, (string)$id);
+        $this->assertEquals('GroupChat-' . $ulid, $id->asString());
     }
 
     public function test_fromString_無効なULID形式でエラーになる(): void

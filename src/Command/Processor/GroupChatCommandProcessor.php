@@ -28,13 +28,10 @@ class GroupChatCommandProcessor
         string $name,
         string $executor_id
     ): string {
-        // プレフィックスを削除
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->create();
         $group_chat_name = new GroupChatName($name);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約作成
         $pair = GroupChat::create(
@@ -55,13 +52,10 @@ class GroupChatCommandProcessor
         string $name,
         string $executor_id
     ): void {
-        // プレフィックスを削除
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
         $group_chat_name = new GroupChatName($name);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -83,12 +77,9 @@ class GroupChatCommandProcessor
         string $group_chat_id,
         string $executor_id
     ): void {
-        // プレフィックスを削除
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -109,15 +100,11 @@ class GroupChatCommandProcessor
         string $role_string,
         string $executor_id
     ): void {
-        // プレフィックスを削除
-        $user_account_id_ulid = preg_replace('/^UserAccount-/', '', $user_account_id);
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
         $member_id = $this->member_id_factory->create();
-        $user_account_id_obj = $this->user_account_id_factory->fromString($user_account_id_ulid);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $user_account_id_obj = $this->user_account_id_factory->fromString($user_account_id);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // ロールを文字列から変換
         $role = match (strtoupper($role_string)) {
@@ -149,14 +136,10 @@ class GroupChatCommandProcessor
         string $user_account_id,
         string $executor_id
     ): void {
-        // プレフィックスを削除
-        $user_account_id_ulid = preg_replace('/^UserAccount-/', '', $user_account_id);
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
-        $user_account_id_obj = $this->user_account_id_factory->fromString($user_account_id_ulid);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $user_account_id_obj = $this->user_account_id_factory->fromString($user_account_id);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -179,13 +162,10 @@ class GroupChatCommandProcessor
         string $content,
         string $executor_id
     ): string {
-        // プレフィックスを削除
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
         $message_id = $this->message_id_factory->create();
-        $sender_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $sender_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -212,13 +192,10 @@ class GroupChatCommandProcessor
         string $content,
         string $executor_id
     ): void {
-        // プレフィックスを削除
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
         $message_id_obj = $this->message_id_factory->fromString($message_id);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
@@ -242,13 +219,10 @@ class GroupChatCommandProcessor
         string $message_id,
         string $executor_id
     ): void {
-        // プレフィックスを削除
-        $executor_id_ulid = preg_replace('/^UserAccount-/', '', $executor_id);
-
         // 値オブジェクト生成
         $id = $this->group_chat_id_factory->fromString($group_chat_id);
         $message_id_obj = $this->message_id_factory->fromString($message_id);
-        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id_ulid);
+        $executor_user_account_id = $this->user_account_id_factory->fromString($executor_id);
 
         // 集約取得
         $group_chat = $this->repository->findById($id);
