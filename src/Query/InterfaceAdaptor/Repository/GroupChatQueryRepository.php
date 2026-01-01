@@ -7,7 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 use Akinoriakatsuka\CqrsEsExamplePhp\Query\Domain\ReadModel\GroupChatReadModel;
 use PDO;
 
-class GroupChatQueryRepository
+class GroupChatQueryRepository implements GroupChatQueryRepositoryInterface
 {
     public function __construct(
         private PDO $pdo

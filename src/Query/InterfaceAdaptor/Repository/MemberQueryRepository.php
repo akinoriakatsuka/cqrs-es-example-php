@@ -7,7 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 use Akinoriakatsuka\CqrsEsExamplePhp\Query\Domain\ReadModel\MemberReadModel;
 use PDO;
 
-class MemberQueryRepository
+class MemberQueryRepository implements MemberQueryRepositoryInterface
 {
     public function __construct(
         private PDO $pdo

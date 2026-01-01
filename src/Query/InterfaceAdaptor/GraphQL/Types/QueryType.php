@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Types;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository\GroupChatQueryRepository;
-use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository\MemberQueryRepository;
-use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository\MessageQueryRepository;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository\GroupChatQueryRepositoryInterface;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository\MemberQueryRepositoryInterface;
+use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository\MessageQueryRepositoryInterface;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
-use PDO;
 
 class QueryType extends ObjectType
 {
     public function __construct(
-        PDO $pdo,
+        GroupChatQueryRepositoryInterface $group_chat_repo,
+        MemberQueryRepositoryInterface $member_repo,
+        MessageQueryRepositoryInterface $message_repo,
         GroupChatType $group_chat_type,
         MemberType $member_type,
         MessageType $message_type
     ) {
-        $group_chat_repo = new GroupChatQueryRepository($pdo);
-        $member_repo = new MemberQueryRepository($pdo);
-        $message_repo = new MessageQueryRepository($pdo);
 
         parent::__construct([
             'name' => 'Query',
