@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreatedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeletedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatCreatedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatDeletedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMemberAddedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMemberRemovedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMessageDeletedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMessageEditedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMessagePostedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatRenamedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAddedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemovedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeletedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEditedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePostedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamedFactory;
 
 class EventConverter
 {
