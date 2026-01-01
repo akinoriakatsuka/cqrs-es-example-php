@@ -66,9 +66,21 @@ $message_id_factory = new MessageIdFactory($generator, $validator);
 
 // EventStoreの初期化
 $event_serializer = new EventSerializer();
-$event_converter = new EventConverter($validator);
+$event_converter = new EventConverter(
+    $validator,
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $member_id_factory,
+    $message_id_factory
+);
 $snapshot_serializer = new SnapshotSerializer();
-$snapshot_converter = new SnapshotConverter($validator);
+$snapshot_converter = new SnapshotConverter(
+    $validator,
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $member_id_factory,
+    $message_id_factory
+);
 
 // EventConverter/SnapshotConverterをcallableに変換
 $event_converter_callable = function(array $data) use ($event_converter, $validator) {

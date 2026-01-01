@@ -47,12 +47,27 @@ final readonly class Message
         ];
     }
 
+    /**
+     * @deprecated Use fromArrayWithFactories() instead. This method will be removed in future versions.
+     */
     public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
     {
         return new self(
             MessageId::fromArray($data['id'], $validator),
             $data['text'],
             UserAccountId::fromArray($data['sender_id'], $validator)
+        );
+    }
+
+    public static function fromArrayWithFactories(
+        array $data,
+        UserAccountIdFactory $userAccountIdFactory,
+        MessageIdFactory $messageIdFactory
+    ): self {
+        return new self(
+            $messageIdFactory->fromArray($data['id']),
+            $data['text'],
+            $userAccountIdFactory->fromArray($data['sender_id'])
         );
     }
 }

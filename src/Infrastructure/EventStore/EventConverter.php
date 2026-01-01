@@ -13,12 +13,20 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDelet
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEdited;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamed;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 class EventConverter
 {
     public function __construct(
-        private UlidValidator $validator
+        private UlidValidator $validator,
+        private GroupChatIdFactory $groupChatIdFactory,
+        private UserAccountIdFactory $userAccountIdFactory,
+        private MemberIdFactory $memberIdFactory,
+        private MessageIdFactory $messageIdFactory
     ) {
     }
 
@@ -27,14 +35,52 @@ class EventConverter
         $type_name = $data['type_name'] ?? throw new \InvalidArgumentException('Missing type_name');
 
         return match ($type_name) {
-            'GroupChatCreated' => GroupChatCreated::fromArray($data, $this->validator),
-            'GroupChatRenamed' => GroupChatRenamed::fromArray($data, $this->validator),
-            'GroupChatDeleted' => GroupChatDeleted::fromArray($data, $this->validator),
-            'GroupChatMemberAdded' => GroupChatMemberAdded::fromArray($data, $this->validator),
-            'GroupChatMemberRemoved' => GroupChatMemberRemoved::fromArray($data, $this->validator),
-            'GroupChatMessagePosted' => GroupChatMessagePosted::fromArray($data, $this->validator),
-            'GroupChatMessageEdited' => GroupChatMessageEdited::fromArray($data, $this->validator),
-            'GroupChatMessageDeleted' => GroupChatMessageDeleted::fromArray($data, $this->validator),
+            'GroupChatCreated' => GroupChatCreated::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory,
+                $this->memberIdFactory,
+                $this->validator
+            ),
+            'GroupChatRenamed' => GroupChatRenamed::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory
+            ),
+            'GroupChatDeleted' => GroupChatDeleted::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory
+            ),
+            'GroupChatMemberAdded' => GroupChatMemberAdded::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory,
+                $this->memberIdFactory
+            ),
+            'GroupChatMemberRemoved' => GroupChatMemberRemoved::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory
+            ),
+            'GroupChatMessagePosted' => GroupChatMessagePosted::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory,
+                $this->messageIdFactory
+            ),
+            'GroupChatMessageEdited' => GroupChatMessageEdited::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory,
+                $this->messageIdFactory
+            ),
+            'GroupChatMessageDeleted' => GroupChatMessageDeleted::fromArrayWithFactories(
+                $data,
+                $this->groupChatIdFactory,
+                $this->userAccountIdFactory,
+                $this->messageIdFactory
+            ),
             default => throw new \InvalidArgumentException("Unknown event type: {$type_name}"),
         };
     }

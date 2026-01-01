@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePosted;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;

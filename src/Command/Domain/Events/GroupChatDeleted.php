@@ -72,6 +72,9 @@ final readonly class GroupChatDeleted implements GroupChatEvent
         ];
     }
 
+    /**
+     * @deprecated Use fromArrayWithFactories() instead. This method will be removed in future versions.
+     */
     public static function fromArray(array $data, UlidValidator $validator): self
     {
         return new self(
@@ -79,6 +82,20 @@ final readonly class GroupChatDeleted implements GroupChatEvent
             GroupChatId::fromArray($data['aggregate_id'], $validator),
             $data['seq_nr'],
             UserAccountId::fromArray($data['executor_id'], $validator),
+            $data['occurred_at']
+        );
+    }
+
+    public static function fromArrayWithFactories(
+        array $data,
+        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
+        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory $userAccountIdFactory
+    ): self {
+        return new self(
+            $data['id'],
+            $groupChatIdFactory->fromArray($data['aggregate_id']),
+            $data['seq_nr'],
+            $userAccountIdFactory->fromArray($data['executor_id']),
             $data['occurred_at']
         );
     }

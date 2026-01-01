@@ -42,11 +42,26 @@ final readonly class Member
         ];
     }
 
+    /**
+     * @deprecated Use fromArrayWithFactories() instead. This method will be removed in future versions.
+     */
     public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
     {
         return new self(
             MemberId::fromArray($data['id'], $validator),
             UserAccountId::fromArray($data['user_account_id'], $validator),
+            Role::from((int)$data['role'])
+        );
+    }
+
+    public static function fromArrayWithFactories(
+        array $data,
+        UserAccountIdFactory $userAccountIdFactory,
+        MemberIdFactory $memberIdFactory
+    ): self {
+        return new self(
+            $memberIdFactory->fromArray($data['id']),
+            $userAccountIdFactory->fromArray($data['user_account_id']),
             Role::from((int)$data['role'])
         );
     }
