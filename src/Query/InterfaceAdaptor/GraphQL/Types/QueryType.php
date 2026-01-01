@@ -29,11 +29,11 @@ class QueryType extends ObjectType
                     'description' => 'グループチャットを取得',
                     'args' => [
                         'groupChatId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'グループチャットID',
                         ],
                         'userAccountId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'ユーザーアカウントID',
                         ],
                     ],
@@ -45,7 +45,10 @@ class QueryType extends ObjectType
                     },
                 ],
                 'getGroupChats' => [
-                    'type' => Type::nonNull(Type::listOf(Type::nonNull($group_chat_type))),
+                    'type' => $group_chat_type
+                        |> Type::nonNull(...)
+                        |> Type::listOf(...)
+                        |> Type::nonNull(...),
                     'description' => 'グループチャット一覧を取得',
                     'args' => [
                         'userAccountId' => [
@@ -62,11 +65,11 @@ class QueryType extends ObjectType
                     'description' => 'メンバーを取得',
                     'args' => [
                         'groupChatId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'グループチャットID',
                         ],
                         'userAccountId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'ユーザーアカウントID',
                         ],
                     ],
@@ -78,15 +81,18 @@ class QueryType extends ObjectType
                     },
                 ],
                 'getMembers' => [
-                    'type' => Type::nonNull(Type::listOf(Type::nonNull($member_type))),
+                    'type' => $member_type
+                        |> Type::nonNull(...)
+                        |> Type::listOf(...)
+                        |> Type::nonNull(...),
                     'description' => 'メンバー一覧を取得',
                     'args' => [
                         'groupChatId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'グループチャットID',
                         ],
                         'userAccountId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'ユーザーアカウントID',
                         ],
                     ],
@@ -118,15 +124,18 @@ class QueryType extends ObjectType
                     },
                 ],
                 'getMessages' => [
-                    'type' => Type::nonNull(Type::listOf(Type::nonNull($message_type))),
+                    'type' => $message_type
+                        |> Type::nonNull(...)
+                        |> Type::listOf(...)
+                        |> Type::nonNull(...),
                     'description' => 'メッセージ一覧を取得',
                     'args' => [
                         'groupChatId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'グループチャットID',
                         ],
                         'userAccountId' => [
-                            'type' => Type::nonNull(Type::id()),
+                            'type' => Type::id() |> Type::nonNull(...),
                             'description' => 'ユーザーアカウントID',
                         ],
                     ],
