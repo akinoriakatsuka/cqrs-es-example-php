@@ -6,23 +6,28 @@ namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeleted;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatDeletedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
+    private RobinvdvleutenUlidGenerator $generator;
+    private UserAccountIdFactory $user_account_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
+        $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
 
         $event = GroupChatDeleted::create(
             $aggregate_id,
@@ -40,7 +45,7 @@ class GroupChatDeletedTest extends TestCase
     public function test_toArrayでシリアライズできる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
 
         $event = GroupChatDeleted::create(
             $aggregate_id,
@@ -61,7 +66,7 @@ class GroupChatDeletedTest extends TestCase
     public function test_fromArrayでデシリアライズできる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
 
         $original_event = GroupChatDeleted::create(
             $aggregate_id,
@@ -79,7 +84,7 @@ class GroupChatDeletedTest extends TestCase
     public function test_ラウンドトリップでデータが保持される(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
 
         $original_event = GroupChatDeleted::create(
             $aggregate_id,

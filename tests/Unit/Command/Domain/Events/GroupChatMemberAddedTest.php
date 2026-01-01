@@ -7,10 +7,9 @@ namespace Tests\Unit\Command\Domain\Events;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAdded;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Member;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Role;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
@@ -20,21 +19,23 @@ class GroupChatMemberAddedTest extends TestCase
     private RobinvdvleutenUlidValidator $validator;
     private RobinvdvleutenUlidGenerator $generator;
     private MemberIdFactory $member_id_factory;
+    private UserAccountIdFactory $user_account_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
         $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
+        $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $member_id = $this->member_id_factory->create();
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $event = GroupChatMemberAdded::create(
             $aggregate_id,
@@ -55,9 +56,9 @@ class GroupChatMemberAddedTest extends TestCase
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $member_id = $this->member_id_factory->create();
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $event = GroupChatMemberAdded::create(
             $aggregate_id,
@@ -81,9 +82,9 @@ class GroupChatMemberAddedTest extends TestCase
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $member_id = $this->member_id_factory->create();
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $original_event = GroupChatMemberAdded::create(
             $aggregate_id,
@@ -103,9 +104,9 @@ class GroupChatMemberAddedTest extends TestCase
     {
         $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
         $member_id = $this->member_id_factory->create();
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
         $member = new Member($member_id, $user_account_id, Role::MEMBER);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $original_event = GroupChatMemberAdded::create(
             $aggregate_id,
