@@ -7,7 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\Repository;
 use Akinoriakatsuka\CqrsEsExamplePhp\Query\Domain\ReadModel\MessageReadModel;
 use PDO;
 
-class MessageQueryRepository
+class MessageQueryRepository implements MessageQueryRepositoryInterface
 {
     public function __construct(
         private PDO $pdo
