@@ -7,7 +7,6 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatMessageDeleted implements GroupChatEvent
 {
@@ -81,14 +80,19 @@ final readonly class GroupChatMessageDeleted implements GroupChatEvent
         ];
     }
 
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
+
+    public static function fromArrayWithFactories(
+        array $data,
+        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
+        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory $userAccountIdFactory,
+        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory $messageIdFactory
+    ): self {
         return new self(
             $data['id'],
-            GroupChatId::fromArray($data['aggregate_id'], $validator),
-            MessageId::fromArray($data['message_id'], $validator),
+            $groupChatIdFactory->fromArray($data['aggregate_id']),
+            $messageIdFactory->fromArray($data['message_id']),
             $data['seq_nr'],
-            UserAccountId::fromArray($data['executor_id'], $validator),
+            $userAccountIdFactory->fromArray($data['executor_id']),
             $data['occurred_at']
         );
     }

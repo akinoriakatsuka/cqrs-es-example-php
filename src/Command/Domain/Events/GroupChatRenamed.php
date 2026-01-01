@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatRenamed implements GroupChatEvent
 {
@@ -82,14 +83,18 @@ final readonly class GroupChatRenamed implements GroupChatEvent
         ];
     }
 
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
+
+    public static function fromArrayWithFactories(
+        array $data,
+        GroupChatIdFactory $groupChatIdFactory,
+        UserAccountIdFactory $userAccountIdFactory
+    ): self {
         return new self(
             $data['id'],
-            GroupChatId::fromArray($data['aggregate_id'], $validator),
+            $groupChatIdFactory->fromArray($data['aggregate_id']),
             GroupChatName::fromArray($data['name']),
             $data['seq_nr'],
-            UserAccountId::fromArray($data['executor_id'], $validator),
+            $userAccountIdFactory->fromArray($data['executor_id']),
             $data['occurred_at']
         );
     }

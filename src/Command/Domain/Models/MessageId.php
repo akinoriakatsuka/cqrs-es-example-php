@@ -5,24 +5,19 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class MessageId
 {
+    private const TYPE_PREFIX = 'Message';
+
     private function __construct(
         private Ulid $id
     ) {
     }
 
-    public static function fromString(string $value, UlidValidator $validator): self
+    public static function from(Ulid $ulid): self
     {
-        return new self(Ulid::fromString($value, $validator));
-    }
-
-    public static function generate(UlidGenerator $generator): self
-    {
-        return new self(Ulid::generate($generator));
+        return new self($ulid);
     }
 
     public function equals(self $other): bool
@@ -35,9 +30,19 @@ final readonly class MessageId
         return $this->id->toString();
     }
 
+    public function asString(): string
+    {
+        return self::TYPE_PREFIX . '-' . $this->id->toString();
+    }
+
+    public function getTypeName(): string
+    {
+        return self::TYPE_PREFIX;
+    }
+
     public function __toString(): string
     {
-        return $this->id->toString();
+        return $this->asString();
     }
 
     public function toArray(): array
@@ -45,8 +50,4 @@ final readonly class MessageId
         return ['value' => $this->id->toString()];
     }
 
-    public static function fromArray(array $data, UlidValidator $validator): self
-    {
-        return self::fromString($data['value'], $validator);
-    }
 }

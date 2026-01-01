@@ -5,17 +5,24 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatEvent;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 use J5ik2o\EventStoreAdapterPhp\AggregateId;
 use J5ik2o\EventStoreAdapterPhp\Event;
 
 class GroupChatEventAdapter implements Event
 {
+    private GroupChatIdFactory $group_chat_id_factory;
+
     public function __construct(
         private GroupChatEvent $event,
-        private UlidValidator $validator
+        UlidValidator $validator
     ) {
+        $this->group_chat_id_factory = new GroupChatIdFactory(
+            new RobinvdvleutenUlidGenerator(),
+            $validator
+        );
     }
 
     public function getId(): string
@@ -31,7 +38,7 @@ class GroupChatEventAdapter implements Event
     public function getAggregateId(): AggregateId
     {
         $group_chat_id_str = $this->event->getAggregateId();
-        $group_chat_id = GroupChatId::fromString($group_chat_id_str, $this->validator);
+        $group_chat_id = $this->group_chat_id_factory->fromString($group_chat_id_str);
         return new GroupChatIdAdapter($group_chat_id);
     }
 

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models;
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
-
 final readonly class Messages
 {
     /**
@@ -21,10 +19,22 @@ final readonly class Messages
         return new self([]);
     }
 
-    public static function fromArray(array $data, UlidValidator $validator): self
+    /**
+     * @param array<Message> $messages
+     */
+    public static function fromMessages(array $messages): self
     {
+        return new self($messages);
+    }
+
+
+    public static function fromArrayWithFactories(
+        array $data,
+        UserAccountIdFactory $userAccountIdFactory,
+        MessageIdFactory $messageIdFactory
+    ): self {
         $messages = array_map(
-            fn ($message_data) => Message::fromArray($message_data, $validator),
+            fn ($message_data) => Message::fromArrayWithFactories($message_data, $userAccountIdFactory, $messageIdFactory),
             $data['values'] ?? []
         );
         return new self($messages);

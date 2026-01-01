@@ -28,10 +28,22 @@ final readonly class Members
         return new self([$member]);
     }
 
-    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
+    /**
+     * @param array<Member> $members
+     */
+    public static function fromMembers(array $members): self
     {
+        return new self($members);
+    }
+
+
+    public static function fromArrayWithFactories(
+        array $data,
+        UserAccountIdFactory $userAccountIdFactory,
+        MemberIdFactory $memberIdFactory
+    ): self {
         $members = array_map(
-            fn ($member_data) => Member::fromArray($member_data, $validator),
+            fn ($member_data) => Member::fromArrayWithFactories($member_data, $userAccountIdFactory, $memberIdFactory),
             $data['values']
         );
         return new self($members);

@@ -5,25 +5,32 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use PHPUnit\Framework\TestCase;
 
 class GroupChatMemberRemovedTest extends TestCase
 {
     private RobinvdvleutenUlidValidator $validator;
+    private RobinvdvleutenUlidGenerator $generator;
+    private GroupChatIdFactory $group_chat_id_factory;
+    private UserAccountIdFactory $user_account_id_factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
+        $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->group_chat_id_factory = new GroupChatIdFactory($this->generator, $this->validator);
+        $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
     }
 
     public function test_正常に生成できる(): void
     {
-        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $aggregate_id = $this->group_chat_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE0Z');
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $event = GroupChatMemberRemoved::create(
             $aggregate_id,
@@ -42,9 +49,9 @@ class GroupChatMemberRemovedTest extends TestCase
 
     public function test_toArrayでシリアライズできる(): void
     {
-        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $aggregate_id = $this->group_chat_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE0Z');
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $event = GroupChatMemberRemoved::create(
             $aggregate_id,
@@ -66,9 +73,9 @@ class GroupChatMemberRemovedTest extends TestCase
 
     public function test_fromArrayでデシリアライズできる(): void
     {
-        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $aggregate_id = $this->group_chat_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE0Z');
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $original_event = GroupChatMemberRemoved::create(
             $aggregate_id,
@@ -78,7 +85,11 @@ class GroupChatMemberRemovedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatMemberRemoved::fromArray($data, $this->validator);
+        $event = GroupChatMemberRemoved::fromArrayWithFactories(
+            $data,
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory
+        );
 
         $this->assertInstanceOf(GroupChatMemberRemoved::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -86,9 +97,9 @@ class GroupChatMemberRemovedTest extends TestCase
 
     public function test_ラウンドトリップでデータが保持される(): void
     {
-        $aggregate_id = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE0Z', $this->validator);
-        $user_account_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
-        $executor_id = UserAccountId::fromString('01H42K4ABWQ5V2XQEP3A48VE1B', $this->validator);
+        $aggregate_id = $this->group_chat_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE0Z');
+        $user_account_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
+        $executor_id = $this->user_account_id_factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1B');
 
         $original_event = GroupChatMemberRemoved::create(
             $aggregate_id,
@@ -98,7 +109,11 @@ class GroupChatMemberRemovedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatMemberRemoved::fromArray($array, $this->validator);
+        $restored_event = GroupChatMemberRemoved::fromArrayWithFactories(
+            $array,
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory
+        );
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());

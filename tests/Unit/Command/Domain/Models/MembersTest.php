@@ -159,7 +159,11 @@ class MembersTest extends TestCase
             ],
         ];
 
-        $members = Members::fromArray($data, $this->validator);
+        $members = Members::fromArrayWithFactories(
+            $data,
+            $this->user_account_id_factory,
+            $this->member_id_factory
+        );
 
         $this->assertTrue($members->isMember($admin_id));
         $this->assertTrue($members->isAdministrator($admin_id));
@@ -171,7 +175,11 @@ class MembersTest extends TestCase
         $original_members = Members::create($admin_id, $this->member_id_factory);
 
         $array = $original_members->toArray();
-        $restored_members = Members::fromArray($array, $this->validator);
+        $restored_members = Members::fromArrayWithFactories(
+            $array,
+            $this->user_account_id_factory,
+            $this->member_id_factory
+        );
 
         $this->assertTrue($restored_members->isMember($admin_id));
         $this->assertTrue($restored_members->isAdministrator($admin_id));

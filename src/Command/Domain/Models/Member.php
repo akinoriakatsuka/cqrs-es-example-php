@@ -42,11 +42,15 @@ final readonly class Member
         ];
     }
 
-    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
-    {
+
+    public static function fromArrayWithFactories(
+        array $data,
+        UserAccountIdFactory $userAccountIdFactory,
+        MemberIdFactory $memberIdFactory
+    ): self {
         return new self(
-            MemberId::fromArray($data['id'], $validator),
-            UserAccountId::fromArray($data['user_account_id'], $validator),
+            $memberIdFactory->fromArray($data['id']),
+            $userAccountIdFactory->fromArray($data['user_account_id']),
             Role::from((int)$data['role'])
         );
     }

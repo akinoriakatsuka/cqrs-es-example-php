@@ -4,9 +4,21 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreatedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatDeletedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberAddedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemovedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageDeletedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessageEditedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMessagePostedFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatRenamedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MembersFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessagesFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL\Schema;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
@@ -64,11 +76,69 @@ $user_account_id_factory = new UserAccountIdFactory($generator, $validator);
 $member_id_factory = new MemberIdFactory($generator, $validator);
 $message_id_factory = new MessageIdFactory($generator, $validator);
 
+// Modelファクトリーの初期化
+$message_factory = new MessageFactory($user_account_id_factory, $message_id_factory);
+$member_factory = new MemberFactory($user_account_id_factory, $member_id_factory);
+$members_factory = new MembersFactory($member_factory);
+$messages_factory = new MessagesFactory($message_factory);
+
+// Eventファクトリーの初期化
+$group_chat_created_factory = new GroupChatCreatedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $members_factory
+);
+$group_chat_deleted_factory = new GroupChatDeletedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory
+);
+$group_chat_renamed_factory = new GroupChatRenamedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory
+);
+$group_chat_member_added_factory = new GroupChatMemberAddedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $member_factory
+);
+$group_chat_member_removed_factory = new GroupChatMemberRemovedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory
+);
+$group_chat_message_posted_factory = new GroupChatMessagePostedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $message_factory
+);
+$group_chat_message_edited_factory = new GroupChatMessageEditedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $message_factory
+);
+$group_chat_message_deleted_factory = new GroupChatMessageDeletedFactory(
+    $group_chat_id_factory,
+    $user_account_id_factory,
+    $message_id_factory
+);
+
 // EventStoreの初期化
 $event_serializer = new EventSerializer();
-$event_converter = new EventConverter($validator);
+$event_converter = new EventConverter(
+    $group_chat_created_factory,
+    $group_chat_deleted_factory,
+    $group_chat_renamed_factory,
+    $group_chat_member_added_factory,
+    $group_chat_member_removed_factory,
+    $group_chat_message_posted_factory,
+    $group_chat_message_edited_factory,
+    $group_chat_message_deleted_factory
+);
 $snapshot_serializer = new SnapshotSerializer();
-$snapshot_converter = new SnapshotConverter($validator);
+$snapshot_converter = new SnapshotConverter(
+    $group_chat_id_factory,
+    $members_factory,
+    $messages_factory
+);
 
 // EventConverter/SnapshotConverterをcallableに変換
 $event_converter_callable = function(array $data) use ($event_converter, $validator) {

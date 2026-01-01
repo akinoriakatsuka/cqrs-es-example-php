@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidGenerator;
@@ -15,17 +16,19 @@ class GroupChatIdTest extends TestCase
 {
     private UlidValidator $validator;
     private UlidGenerator $generator;
+    private GroupChatIdFactory $factory;
 
     protected function setUp(): void
     {
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->generator = new RobinvdvleutenUlidGenerator();
+        $this->factory = new GroupChatIdFactory($this->generator, $this->validator);
     }
 
     public function test_fromString_ULID形式の文字列で生成できる(): void
     {
         $ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $id = GroupChatId::fromString($ulid, $this->validator);
+        $id = $this->factory->fromString($ulid);
 
         $this->assertInstanceOf(GroupChatId::class, $id);
         $this->assertEquals($ulid, $id->toString());
@@ -34,9 +37,9 @@ class GroupChatIdTest extends TestCase
     public function test_fromString_等価性判定が正しく動作する(): void
     {
         $ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $id1 = GroupChatId::fromString($ulid, $this->validator);
-        $id2 = GroupChatId::fromString($ulid, $this->validator);
-        $id3 = GroupChatId::fromString('01H42K4ABWQ5V2XQEP3A48VE1A', $this->validator);
+        $id1 = $this->factory->fromString($ulid);
+        $id2 = $this->factory->fromString($ulid);
+        $id3 = $this->factory->fromString('01H42K4ABWQ5V2XQEP3A48VE1A');
 
         $this->assertTrue($id1->equals($id2));
         $this->assertFalse($id1->equals($id3));
@@ -45,10 +48,11 @@ class GroupChatIdTest extends TestCase
     public function test_fromString_toStringで文字列に変換できる(): void
     {
         $ulid = '01H42K4ABWQ5V2XQEP3A48VE0Z';
-        $id = GroupChatId::fromString($ulid, $this->validator);
+        $id = $this->factory->fromString($ulid);
 
         $this->assertEquals($ulid, $id->toString());
-        $this->assertEquals($ulid, (string)$id);
+        $this->assertEquals('GroupChat-' . $ulid, (string)$id);
+        $this->assertEquals('GroupChat-' . $ulid, $id->asString());
     }
 
     public function test_fromString_無効なULID形式でエラーになる(): void
@@ -56,7 +60,7 @@ class GroupChatIdTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid ULID format');
 
-        GroupChatId::fromString('invalid-ulid', $this->validator);
+        $this->factory->fromString('invalid-ulid');
     }
 
     public function test_fromString_空文字でエラーになる(): void
@@ -64,12 +68,12 @@ class GroupChatIdTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('ULID cannot be empty');
 
-        GroupChatId::fromString('', $this->validator);
+        $this->factory->fromString('');
     }
 
     public function test_generate_ジェネレーターで生成できる(): void
     {
-        $id = GroupChatId::generate($this->generator);
+        $id = $this->factory->create();
 
         $this->assertInstanceOf(GroupChatId::class, $id);
         $this->assertNotEmpty($id->toString());
@@ -87,8 +91,9 @@ class GroupChatIdTest extends TestCase
                 return $this->ulid;
             }
         };
+        $custom_factory = new GroupChatIdFactory($generator, $this->validator);
 
-        $id = GroupChatId::generate($generator);
+        $id = $custom_factory->create();
 
         $this->assertEquals($custom_ulid, $id->toString());
     }
@@ -101,8 +106,9 @@ class GroupChatIdTest extends TestCase
                 return $value === 'custom-valid';
             }
         };
+        $custom_factory = new GroupChatIdFactory($this->generator, $validator);
 
-        $id = GroupChatId::fromString('custom-valid', $validator);
+        $id = $custom_factory->fromString('custom-valid');
 
         $this->assertEquals('CUSTOM-VALID', $id->toString());
     }
@@ -115,10 +121,11 @@ class GroupChatIdTest extends TestCase
                 return false;
             }
         };
+        $custom_factory = new GroupChatIdFactory($this->generator, $validator);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid ULID format');
 
-        GroupChatId::fromString('any-value', $validator);
+        $custom_factory->fromString('any-value');
     }
 }

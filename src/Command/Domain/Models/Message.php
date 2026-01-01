@@ -47,12 +47,16 @@ final readonly class Message
         ];
     }
 
-    public static function fromArray(array $data, \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator $validator): self
-    {
+
+    public static function fromArrayWithFactories(
+        array $data,
+        UserAccountIdFactory $userAccountIdFactory,
+        MessageIdFactory $messageIdFactory
+    ): self {
         return new self(
-            MessageId::fromArray($data['id'], $validator),
+            $messageIdFactory->fromArray($data['id']),
             $data['text'],
-            UserAccountId::fromArray($data['sender_id'], $validator)
+            $userAccountIdFactory->fromArray($data['sender_id'])
         );
     }
 }

@@ -104,7 +104,11 @@ class MemberTest extends TestCase
             'role' => 1, // Role::ADMINISTRATOR->value
         ];
 
-        $member = Member::fromArray($data, $this->validator);
+        $member = Member::fromArrayWithFactories(
+            $data,
+            $this->user_account_id_factory,
+            $this->member_id_factory
+        );
 
         $this->assertEquals($member_id->toString(), $member->getId()->toString());
         $this->assertEquals($user_account_id->toString(), $member->getUserAccountId()->toString());
@@ -118,7 +122,11 @@ class MemberTest extends TestCase
         $original_member = new Member($member_id, $user_account_id, Role::MEMBER);
 
         $array = $original_member->toArray();
-        $restored_member = Member::fromArray($array, $this->validator);
+        $restored_member = Member::fromArrayWithFactories(
+            $array,
+            $this->user_account_id_factory,
+            $this->member_id_factory
+        );
 
         $this->assertTrue($original_member->equals($restored_member));
         $this->assertEquals(
