@@ -79,21 +79,4 @@ final readonly class GroupChatMessageDeleted implements GroupChatEvent
             'occurred_at' => $this->occurred_at,
         ];
     }
-
-
-    public static function fromArrayWithFactories(
-        array $data,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory $userAccountIdFactory,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory $messageIdFactory
-    ): self {
-        return new self(
-            $data['id'],
-            $groupChatIdFactory->fromArray($data['aggregate_id']),
-            $messageIdFactory->fromArray($data['message_id']),
-            $data['seq_nr'],
-            $userAccountIdFactory->fromArray($data['executor_id']),
-            $data['occurred_at']
-        );
-    }
 }

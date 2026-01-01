@@ -41,17 +41,4 @@ final readonly class Member
             'role' => $this->role->value,
         ];
     }
-
-
-    public static function fromArrayWithFactories(
-        array $data,
-        UserAccountIdFactory $userAccountIdFactory,
-        MemberIdFactory $memberIdFactory
-    ): self {
-        return new self(
-            $memberIdFactory->fromArray($data['id']),
-            $userAccountIdFactory->fromArray($data['user_account_id']),
-            Role::from((int)$data['role'])
-        );
-    }
 }

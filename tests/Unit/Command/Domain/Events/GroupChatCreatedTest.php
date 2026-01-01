@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreated;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatCreatedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MembersFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
@@ -21,6 +24,7 @@ class GroupChatCreatedTest extends TestCase
     private GroupChatIdFactory $group_chat_id_factory;
     private MemberIdFactory $member_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private GroupChatCreatedFactory $group_chat_created_factory;
 
     protected function setUp(): void
     {
@@ -29,6 +33,13 @@ class GroupChatCreatedTest extends TestCase
         $this->group_chat_id_factory = new GroupChatIdFactory($this->generator, $this->validator);
         $this->member_id_factory = new MemberIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $member_factory = new MemberFactory($this->user_account_id_factory, $this->member_id_factory);
+        $members_factory = new MembersFactory($member_factory);
+        $this->group_chat_created_factory = new GroupChatCreatedFactory(
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory,
+            $members_factory
+        );
     }
 
     public function test_正常に生成できる(): void
@@ -94,13 +105,7 @@ class GroupChatCreatedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatCreated::fromArrayWithFactories(
-            $data,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory,
-            $this->member_id_factory,
-            $this->validator
-        );
+        $event = $this->group_chat_created_factory->fromArray($data);
 
         $this->assertInstanceOf(GroupChatCreated::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -122,13 +127,7 @@ class GroupChatCreatedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatCreated::fromArrayWithFactories(
-            $array,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory,
-            $this->member_id_factory,
-            $this->validator
-        );
+        $restored_event = $this->group_chat_created_factory->fromArray($array);
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());

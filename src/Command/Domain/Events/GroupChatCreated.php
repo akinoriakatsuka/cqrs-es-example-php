@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatName;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MemberIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Members;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\UlidValidator;
 
 final readonly class GroupChatCreated implements GroupChatEvent
 {
@@ -97,24 +93,5 @@ final readonly class GroupChatCreated implements GroupChatEvent
             'seq_nr' => $this->seq_nr,
             'occurred_at' => $this->occurred_at,
         ];
-    }
-
-
-    public static function fromArrayWithFactories(
-        array $data,
-        GroupChatIdFactory $groupChatIdFactory,
-        UserAccountIdFactory $userAccountIdFactory,
-        MemberIdFactory $memberIdFactory,
-        UlidValidator $validator
-    ): self {
-        return new self(
-            $data['id'],
-            $groupChatIdFactory->fromArray($data['aggregate_id']),
-            GroupChatName::fromArray($data['name']),
-            Members::fromArrayWithFactories($data['members'], $userAccountIdFactory, $memberIdFactory),
-            $data['seq_nr'],
-            $userAccountIdFactory->fromArray($data['executor_id']),
-            $data['occurred_at']
-        );
     }
 }

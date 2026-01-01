@@ -27,19 +27,6 @@ final readonly class Messages
         return new self($messages);
     }
 
-
-    public static function fromArrayWithFactories(
-        array $data,
-        UserAccountIdFactory $userAccountIdFactory,
-        MessageIdFactory $messageIdFactory
-    ): self {
-        $messages = array_map(
-            fn ($message_data) => Message::fromArrayWithFactories($message_data, $userAccountIdFactory, $messageIdFactory),
-            $data['values'] ?? []
-        );
-        return new self($messages);
-    }
-
     public function add(Message $message): self
     {
         return new self([...$this->messages, $message]);

@@ -6,6 +6,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatId;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountId;
+use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid;
 
 final readonly class GroupChatDeleted implements GroupChatEvent
 {
@@ -23,7 +24,7 @@ final readonly class GroupChatDeleted implements GroupChatEvent
         int $seq_nr,
         UserAccountId $executor_id
     ): self {
-        $ulid = \Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\Ulid::generate();
+        $ulid = Ulid::generate();
         $id = $ulid->toString();
         $occurred_at = (int)(microtime(true) * 1000);
         return new self($id, $aggregate_id, $seq_nr, $executor_id, $occurred_at);
@@ -69,20 +70,5 @@ final readonly class GroupChatDeleted implements GroupChatEvent
             'seq_nr' => $this->seq_nr,
             'occurred_at' => $this->occurred_at,
         ];
-    }
-
-
-    public static function fromArrayWithFactories(
-        array $data,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory $groupChatIdFactory,
-        \Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory $userAccountIdFactory
-    ): self {
-        return new self(
-            $data['id'],
-            $groupChatIdFactory->fromArray($data['aggregate_id']),
-            $data['seq_nr'],
-            $userAccountIdFactory->fromArray($data['executor_id']),
-            $data['occurred_at']
-        );
     }
 }

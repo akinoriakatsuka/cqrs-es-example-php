@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Events;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemoved;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\GroupChatMemberRemovedFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\GroupChatIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
@@ -17,6 +18,7 @@ class GroupChatMemberRemovedTest extends TestCase
     private RobinvdvleutenUlidGenerator $generator;
     private GroupChatIdFactory $group_chat_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private GroupChatMemberRemovedFactory $group_chat_member_removed_factory;
 
     protected function setUp(): void
     {
@@ -24,6 +26,10 @@ class GroupChatMemberRemovedTest extends TestCase
         $this->generator = new RobinvdvleutenUlidGenerator();
         $this->group_chat_id_factory = new GroupChatIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $this->group_chat_member_removed_factory = new GroupChatMemberRemovedFactory(
+            $this->group_chat_id_factory,
+            $this->user_account_id_factory
+        );
     }
 
     public function test_正常に生成できる(): void
@@ -85,11 +91,7 @@ class GroupChatMemberRemovedTest extends TestCase
         );
 
         $data = $original_event->toArray();
-        $event = GroupChatMemberRemoved::fromArrayWithFactories(
-            $data,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory
-        );
+        $event = $this->group_chat_member_removed_factory->fromArray($data);
 
         $this->assertInstanceOf(GroupChatMemberRemoved::class, $event);
         $this->assertEquals($aggregate_id->toString(), $event->getAggregateId());
@@ -109,11 +111,7 @@ class GroupChatMemberRemovedTest extends TestCase
         );
 
         $array = $original_event->toArray();
-        $restored_event = GroupChatMemberRemoved::fromArrayWithFactories(
-            $array,
-            $this->group_chat_id_factory,
-            $this->user_account_id_factory
-        );
+        $restored_event = $this->group_chat_member_removed_factory->fromArray($array);
 
         $this->assertEquals($original_event->getAggregateId(), $restored_event->getAggregateId());
         $this->assertEquals($original_event->getSeqNr(), $restored_event->getSeqNr());

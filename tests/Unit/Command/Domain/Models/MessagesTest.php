@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Tests\Unit\Command\Domain\Models;
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Message;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessageIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Messages;
+use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\MessagesFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\UserAccountIdFactory;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
 use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
@@ -18,6 +20,7 @@ class MessagesTest extends TestCase
     private RobinvdvleutenUlidValidator $validator;
     private MessageIdFactory $message_id_factory;
     private UserAccountIdFactory $user_account_id_factory;
+    private MessagesFactory $messages_factory;
 
     protected function setUp(): void
     {
@@ -25,6 +28,8 @@ class MessagesTest extends TestCase
         $this->validator = new RobinvdvleutenUlidValidator();
         $this->message_id_factory = new MessageIdFactory($this->generator, $this->validator);
         $this->user_account_id_factory = new UserAccountIdFactory($this->generator, $this->validator);
+        $message_factory = new MessageFactory($this->user_account_id_factory, $this->message_id_factory);
+        $this->messages_factory = new MessagesFactory($message_factory);
     }
 
     public function test_create_空のMessagesを作成できる(): void
@@ -173,11 +178,7 @@ class MessagesTest extends TestCase
             ],
         ];
 
-        $messages = Messages::fromArrayWithFactories(
-            $data,
-            $this->user_account_id_factory,
-            $this->message_id_factory
-        );
+        $messages = $this->messages_factory->fromArray($data);
 
         $found = $messages->findById($message_id);
         $this->assertNotNull($found);
@@ -188,11 +189,7 @@ class MessagesTest extends TestCase
     {
         $data = ['values' => []];
 
-        $messages = Messages::fromArrayWithFactories(
-            $data,
-            $this->user_account_id_factory,
-            $this->message_id_factory
-        );
+        $messages = $this->messages_factory->fromArray($data);
 
         $this->assertInstanceOf(Messages::class, $messages);
     }
