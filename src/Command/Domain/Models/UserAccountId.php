@@ -22,6 +22,9 @@ final readonly class UserAccountId
         return new self($ulid);
     }
 
+    /**
+     * @deprecated Use UserAccountIdFactory::fromString() instead. This method will be removed in future versions.
+     */
     public static function fromString(string $value, UlidValidator $validator): self
     {
         // プレフィックスが付いている場合は削除
@@ -31,6 +34,9 @@ final readonly class UserAccountId
         return new self(Ulid::fromString($value, $validator));
     }
 
+    /**
+     * @deprecated Use UserAccountIdFactory::create() instead. This method will be removed in future versions.
+     */
     public static function generate(UlidGenerator $generator): self
     {
         return new self(Ulid::generate($generator));
@@ -66,6 +72,9 @@ final readonly class UserAccountId
         return ['value' => $this->id->toString()];
     }
 
+    /**
+     * @deprecated Use UserAccountIdFactory::fromArray() instead. This method will be removed in future versions.
+     */
     public static function fromArray(array $data, UlidValidator $validator): self
     {
         return self::fromString($data['value'], $validator);
