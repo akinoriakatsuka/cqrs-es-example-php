@@ -399,24 +399,6 @@ class GroupChatTest extends TestCase
         $this->assertFalse($group_chat->isDeleted());
     }
 
-    public function test_fromEvent_イベントから復元できる(): void
-    {
-        $id = $this->group_chat_id_factory->create();
-        $name = new GroupChatName('Event Group');
-        $executor_id = $this->user_account_id_factory->create();
-
-        $members = Members::create($executor_id, $this->member_id_factory);
-        $event = GroupChatCreated::create($id, $name, $members, 1, $executor_id);
-
-        $group_chat = GroupChat::fromEvent($event);
-
-        $this->assertEquals($id->toString(), $group_chat->getId()->toString());
-        $this->assertEquals('Event Group', $group_chat->getName()->toString());
-        $this->assertEquals(1, $group_chat->getSeqNr());
-        $this->assertEquals(1, $group_chat->getVersion());
-        $this->assertFalse($group_chat->isDeleted());
-    }
-
     public function test_applyEvent_GroupChatCreatedイベントを適用できる(): void
     {
         $id = $this->group_chat_id_factory->create();

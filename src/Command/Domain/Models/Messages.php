@@ -92,12 +92,7 @@ final readonly class Messages
 
     public function findById(MessageId $message_id): ?Message
     {
-        foreach ($this->messages as $message) {
-            if ($message->getId()->equals($message_id)) {
-                return $message;
-            }
-        }
-        return null;
+        return array_find($this->messages, fn ($message) => $message->getId()->equals($message_id));
     }
 
     public function toArray(): array
