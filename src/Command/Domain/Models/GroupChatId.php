@@ -17,6 +17,11 @@ final readonly class GroupChatId
     ) {
     }
 
+    public static function from(Ulid $ulid): self
+    {
+        return new self($ulid);
+    }
+
     public static function fromString(string $value, UlidValidator $validator): self
     {
         // プレフィックスが付いている場合は削除
