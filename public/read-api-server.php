@@ -4,28 +4,30 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Query\InterfaceAdaptor\GraphQL\Schema;
+use DI\ContainerBuilder;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
+use PDO;
+use PDOException;
 
-// 環境変数を取得
-$db_host = getenv('DB_HOST') ?: 'localhost';
-$db_port = getenv('DB_PORT') ?: '3306';
-$db_database = getenv('DB_DATABASE') ?: 'ceer';
-$db_username = getenv('DB_USERNAME') ?: 'root';
-$db_password = getenv('DB_PASSWORD') ?: 'passwd';
+// DIコンテナの設定と構築
+$container_builder = new ContainerBuilder();
+$container_builder->useAutowiring(true);
+$container_builder->useAttributes(true);
 
-// PDO接続
-$dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $db_host, $db_port, $db_database);
+// 設定ファイルの読み込み
+$config_loader = require __DIR__ . '/../config/di-read-api.php';
+$config_loader($container_builder);
 
+// コンテナのビルド
+$container = $container_builder->build();
+
+// PDO接続のテスト
 try {
-    $pdo = new PDO($dsn, $db_username, $db_password, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
+    $pdo = $container->get(PDO::class);
 } catch (PDOException $e) {
     http_response_code(500);
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Database connection failed: ' . $e->getMessage()]);
     exit;
 }
@@ -34,10 +36,10 @@ try {
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
 
 // OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Content-Type: application/json');
     http_response_code(200);
     exit;
 }
@@ -47,21 +49,24 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 
 // Health check
 if ($request_uri === '/health' && $request_method === 'GET') {
+    header('Content-Type: application/json');
     echo json_encode(['status' => 'ok']);
     exit;
 }
 
 // GraphQL endpoint
 if ($request_uri === '/query' && $request_method === 'POST') {
-    $schema = Schema::build($pdo);
-
-    $raw_input = file_get_contents('php://input');
-    $input = json_decode($raw_input, true);
-
-    $query = $input['query'] ?? '';
-    $variables = $input['variables'] ?? null;
+    header('Content-Type: application/json');
 
     try {
+        $schema = $container->get('GraphQLSchema');
+
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+
+        $query = $input['query'] ?? '';
+        $variables = $input['variables'] ?? null;
+
         $result = GraphQL::executeQuery($schema, $query, null, null, $variables);
         $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
     } catch (\Throwable $e) {
@@ -81,6 +86,7 @@ if ($request_uri === '/query' && $request_method === 'POST') {
 
 // GraphQL Playground
 if ($request_uri === '/' && $request_method === 'GET') {
+    header('Content-Type: text/html; charset=utf-8');
     ?>
 <!DOCTYPE html>
 <html>
@@ -108,4 +114,5 @@ if ($request_uri === '/' && $request_method === 'GET') {
 
 // Not found
 http_response_code(404);
+header('Content-Type: application/json');
 echo json_encode(['error' => 'Not found']);

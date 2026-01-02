@@ -4,188 +4,30 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatCreatedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatDeletedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMemberAddedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMemberRemovedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMessageDeletedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMessageEditedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatMessagePostedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Events\Factory\GroupChatRenamedFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\GroupChatIdFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MemberFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MemberIdFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MembersFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MessageFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MessageIdFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\MessagesFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Domain\Models\Factory\UserAccountIdFactory;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\GraphQL\Schema;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\Processor\GroupChatCommandProcessor;
-use Akinoriakatsuka\CqrsEsExamplePhp\Command\InterfaceAdaptor\Repository\GroupChatRepository;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\DynamoDBEventStore;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\EventSerializer;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\EventConverter;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\GroupChatEventAdapter;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\SnapshotSerializer;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\EventStore\SnapshotConverter;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidValidator;
-use Akinoriakatsuka\CqrsEsExamplePhp\Infrastructure\Ulid\RobinvdvleutenUlidGenerator;
-use Aws\DynamoDb\DynamoDbClient;
-use J5ik2o\EventStoreAdapterPhp\EventStoreFactory;
+use DI\ContainerBuilder;
 use GraphQL\GraphQL;
 use GraphQL\Error\DebugFlag;
 
-// 環境変数を取得
-$aws_region = getenv('AWS_REGION') ?: 'ap-northeast-1';
-$dynamodb_endpoint_url = getenv('AWS_DYNAMODB_ENDPOINT_URL') ?: '';
-$dynamodb_access_key_id = getenv('AWS_DYNAMODB_ACCESS_KEY_ID') ?: '';
-$dynamodb_secret_key = getenv('AWS_DYNAMODB_SECRET_ACCESS_KEY') ?: '';
-$journal_table_name = getenv('PERSISTENCE_JOURNAL_TABLE_NAME') ?: 'journal';
-$snapshot_table_name = getenv('PERSISTENCE_SNAPSHOT_TABLE_NAME') ?: 'snapshot';
-$journal_aid_index_name = getenv('PERSISTENCE_JOURNAL_AID_INDEX_NAME') ?: 'journal-aid-index';
-$snapshot_aid_index_name = getenv('PERSISTENCE_SNAPSHOT_AID_INDEX_NAME') ?: 'snapshot-aid-index';
-$shard_count = (int)(getenv('PERSISTENCE_SHARD_COUNT') ?: 10);
+// DIコンテナの設定と構築
+$container_builder = new ContainerBuilder();
+$container_builder->useAutowiring(true);
+$container_builder->useAttributes(true);
 
-// DynamoDBクライアントの初期化
-$dynamodb_config = [
-    'region' => $aws_region,
-    'version' => 'latest',
-];
+// 設定ファイルの読み込み
+$config_loader = require __DIR__ . '/../config/di-write-api.php';
+$config_loader($container_builder);
 
-if ($dynamodb_endpoint_url !== '') {
-    $dynamodb_config['endpoint'] = $dynamodb_endpoint_url;
-}
-
-if ($dynamodb_access_key_id !== '' && $dynamodb_secret_key !== '') {
-    $dynamodb_config['credentials'] = [
-        'key' => $dynamodb_access_key_id,
-        'secret' => $dynamodb_secret_key,
-    ];
-}
-
-$dynamodb_client = new DynamoDbClient($dynamodb_config);
-
-// DIコンテナ（簡易版）
-$validator = new RobinvdvleutenUlidValidator();
-$generator = new RobinvdvleutenUlidGenerator();
-
-// IDファクトリーの初期化
-$group_chat_id_factory = new GroupChatIdFactory($generator, $validator);
-$user_account_id_factory = new UserAccountIdFactory($generator, $validator);
-$member_id_factory = new MemberIdFactory($generator, $validator);
-$message_id_factory = new MessageIdFactory($generator, $validator);
-
-// Modelファクトリーの初期化
-$message_factory = new MessageFactory($user_account_id_factory, $message_id_factory);
-$member_factory = new MemberFactory($user_account_id_factory, $member_id_factory);
-$members_factory = new MembersFactory($member_factory);
-$messages_factory = new MessagesFactory($message_factory);
-
-// Eventファクトリーの初期化
-$group_chat_created_factory = new GroupChatCreatedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory,
-    $members_factory
-);
-$group_chat_deleted_factory = new GroupChatDeletedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory
-);
-$group_chat_renamed_factory = new GroupChatRenamedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory
-);
-$group_chat_member_added_factory = new GroupChatMemberAddedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory,
-    $member_factory
-);
-$group_chat_member_removed_factory = new GroupChatMemberRemovedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory
-);
-$group_chat_message_posted_factory = new GroupChatMessagePostedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory,
-    $message_factory
-);
-$group_chat_message_edited_factory = new GroupChatMessageEditedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory,
-    $message_factory
-);
-$group_chat_message_deleted_factory = new GroupChatMessageDeletedFactory(
-    $group_chat_id_factory,
-    $user_account_id_factory,
-    $message_id_factory
-);
-
-// EventStoreの初期化
-$event_serializer = new EventSerializer();
-$event_converter = new EventConverter(
-    $group_chat_created_factory,
-    $group_chat_deleted_factory,
-    $group_chat_renamed_factory,
-    $group_chat_member_added_factory,
-    $group_chat_member_removed_factory,
-    $group_chat_message_posted_factory,
-    $group_chat_message_edited_factory,
-    $group_chat_message_deleted_factory
-);
-$snapshot_serializer = new SnapshotSerializer();
-$snapshot_converter = new SnapshotConverter(
-    $group_chat_id_factory,
-    $members_factory,
-    $messages_factory
-);
-
-// EventConverter/SnapshotConverterをcallableに変換
-$event_converter_callable = function(array $data) use ($event_converter, $validator) {
-    return new GroupChatEventAdapter(
-        $event_converter->convert($data),
-        $validator
-    );
-};
-
-$snapshot_converter_callable = function(array $data) use ($snapshot_converter) {
-    return $snapshot_converter->convert($data);
-};
-
-$j5_event_store = EventStoreFactory::create(
-    $dynamodb_client,
-    $journal_table_name,
-    $snapshot_table_name,
-    $journal_aid_index_name,
-    $snapshot_aid_index_name,
-    $shard_count,
-    $event_converter_callable,
-    $snapshot_converter_callable
-);
-
-// EventSerializerとSnapshotSerializerを設定
-$j5_event_store = $j5_event_store
-    ->withEventSerializer($event_serializer)
-    ->withSnapshotSerializer($snapshot_serializer);
-
-$event_store = new DynamoDBEventStore($j5_event_store, $validator);
-$repository = new GroupChatRepository($event_store);
-$processor = new GroupChatCommandProcessor(
-    $repository,
-    $group_chat_id_factory,
-    $user_account_id_factory,
-    $member_id_factory,
-    $message_id_factory
-);
+// コンテナのビルド
+$container = $container_builder->build();
 
 // CORS headers
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
 
 // OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header('Content-Type: application/json');
     http_response_code(200);
     exit;
 }
@@ -195,21 +37,24 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 
 // Health check
 if ($request_uri === '/health' && $request_method === 'GET') {
+    header('Content-Type: application/json');
     echo json_encode(['status' => 'ok']);
     exit;
 }
 
 // GraphQL endpoint
 if ($request_uri === '/query' && $request_method === 'POST') {
-    $schema = Schema::build($processor);
-
-    $raw_input = file_get_contents('php://input');
-    $input = json_decode($raw_input, true);
-
-    $query = $input['query'] ?? '';
-    $variables = $input['variables'] ?? null;
+    header('Content-Type: application/json');
 
     try {
+        $schema = $container->get('GraphQLSchema');
+
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+
+        $query = $input['query'] ?? '';
+        $variables = $input['variables'] ?? null;
+
         $result = GraphQL::executeQuery($schema, $query, null, null, $variables);
         $output = $result->toArray(DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE);
     } catch (\Throwable $e) {
@@ -227,18 +72,35 @@ if ($request_uri === '/query' && $request_method === 'POST') {
     exit;
 }
 
-// Root endpoint
+// GraphQL Playground
 if ($request_uri === '/' && $request_method === 'GET') {
-    echo json_encode([
-        'service' => 'write-api-server',
-        'endpoints' => [
-            'health' => '/health',
-            'graphql' => '/query'
-        ]
-    ]);
+    header('Content-Type: text/html; charset=utf-8');
+    ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>GraphQL Playground - Write API</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphql-playground-react/build/static/css/index.css" />
+    <link rel="shortcut icon" href="//cdn.jsdelivr.net/npm/graphql-playground-react/build/favicon.png" />
+    <script src="//cdn.jsdelivr.net/npm/graphql-playground-react/build/static/js/middleware.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        window.addEventListener('load', function (event) {
+            GraphQLPlayground.init(document.getElementById('root'), {
+                endpoint: '/query'
+            })
+        })
+    </script>
+</body>
+</html>
+    <?php
     exit;
 }
 
 // Not found
 http_response_code(404);
+header('Content-Type: application/json');
 echo json_encode(['error' => 'Not found']);

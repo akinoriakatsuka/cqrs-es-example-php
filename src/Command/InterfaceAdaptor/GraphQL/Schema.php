@@ -311,7 +311,40 @@ class Schema
             ],
         ]);
 
+        // Query型（GraphQL仕様で必須のため、最小限の実装を提供）
+        $query_type = new ObjectType([
+            'name' => 'Query',
+            'fields' => [
+                'health' => [
+                    'type' => Type::nonNull(Type::string()),
+                    'description' => 'Health check endpoint for Write API',
+                    'resolve' => function () {
+                        return 'OK';
+                    },
+                ],
+                'apiInfo' => [
+                    'type' => new ObjectType([
+                        'name' => 'ApiInfo',
+                        'fields' => [
+                            'name' => Type::nonNull(Type::string()),
+                            'type' => Type::nonNull(Type::string()),
+                            'description' => Type::nonNull(Type::string()),
+                        ],
+                    ]),
+                    'description' => 'API information',
+                    'resolve' => function () {
+                        return [
+                            'name' => 'CQRS/ES Example Write API',
+                            'type' => 'Command/Write',
+                            'description' => 'This API handles commands (mutations) only. For queries, please use the Read API.',
+                        ];
+                    },
+                ],
+            ],
+        ]);
+
         return new GraphQLSchema([
+            'query' => $query_type,
             'mutation' => $mutation_type,
         ]);
     }
