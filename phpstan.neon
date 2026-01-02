@@ -5,6 +5,9 @@ parameters:
     level: 5
     paths:
         - src
+        - public
+        - config
+        - bin
         - tests
     scanFiles:
         - vendor/autoload.php
