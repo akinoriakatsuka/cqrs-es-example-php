@@ -60,12 +60,5 @@
     "allow-plugins": {
       "cweagans/composer-patches": true
     }
-  },
-  "extra": {
-    "patches": {
-      "j5ik2o/event-store-adapter-php": {
-        "Fix payload type to Binary for Go compatibility": "patches/event-store-adapter-php-binary-payload.patch"
-      }
-    }
   }
 }
