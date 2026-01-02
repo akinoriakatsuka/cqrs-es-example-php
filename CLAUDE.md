@@ -19,13 +19,11 @@
 make docker-compose-build
 make docker-compose-up
 
+# コンテナ停止
 make docker-compose-down
 
 # アプリケーションコンテナ内でのコマンド実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app [コマンド]
+docker compose exec app [コマンド]
 ```
 
 ## 開発規約
@@ -47,22 +45,13 @@ make lint
 
 ```bash
 # 全テスト実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app composer test
+docker compose exec app composer test
 
 # カバレッジ付きテスト
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app composer test:coverage
+docker compose exec app composer test:coverage
 
 # 特定のテストファイル実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app vendor/bin/phpunit tests/Path/To/TestFile.php --testdox
+docker compose exec app vendor/bin/phpunit tests/Path/To/TestFile.php --testdox
 ```
 
 ### 命名規則
