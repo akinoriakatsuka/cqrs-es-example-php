@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Docker
+docker/
+docker-compose.yml
+.dockerignore
+
+# IDE
+.idea/
+.vscode/
+
+# Dependencies (will be installed during build)
+vendor/
+
+# Test coverage
+coverage/
+.phpunit.result.cache
+
+# Environment files
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# CI/CD
+.github/
+
+# Tools
+tools/docker-compose/
+tools/e2e-test/
+
+# Logs
+*.log
