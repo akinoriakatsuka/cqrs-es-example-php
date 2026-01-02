@@ -3,28 +3,29 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap.php';
 
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\CheckpointRepository;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\DynamoDbStreamsClient;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatCreatedEventHandler;
-use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatRenamedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatDeletedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMemberAddedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMemberRemovedEventHandler;
-use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
-use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessageEditedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessageDeletedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessageEditedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
+use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatRenamedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\GroupChatDaoImpl;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\StreamProcessor;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\DynamoDbStreams\DynamoDbStreamsClient as AwsStreamsClient;
 use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 use Monolog\Logger;
 
 // ロガー初期化
 $logger = new Logger('rmu');
-$logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
+$logger->pushHandler(new StreamHandler('php://stdout', Level::Debug));
 
 $logger->info('PHP Read Model Updater (DynamoDB Streams) starting...');
 
@@ -101,7 +102,7 @@ try {
 } catch (Exception $e) {
     $logger->error('Fatal error', [
         'message' => $e->getMessage(),
-        'trace' => $e->getTraceAsString()
+        'trace' => $e->getTraceAsString(),
     ]);
     exit(1);
 }
