@@ -15,17 +15,18 @@
   ],
   "require": {
     "php": "^8.5",
+    "ext-pdo": "*",
     "aws/aws-sdk-php": "^3.0",
     "cweagans/composer-patches": "^1.7",
     "j5ik2o/event-store-adapter-php": "^1.0",
     "monolog/monolog": "^3.9",
+    "php-di/php-di": "^7.1",
     "psr/log": "^3.0",
     "robinvdvleuten/ulid": "^5.0",
     "slim/psr7": "^1.6",
     "slim/slim": "^4.0",
     "vlucas/phpdotenv": "^5.6",
-    "webonyx/graphql-php": "^15.0",
-    "ext-pdo": "*"
+    "webonyx/graphql-php": "^15.0"
   },
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.0",
