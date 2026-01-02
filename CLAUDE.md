@@ -5,6 +5,7 @@
 ## プロジェクト概要
 
 - **参照実装**: https://github.com/j5ik2o/cqrs-es-example-go のPHP版
+- **他言語実装例**: https://github.com/j5ik2o/cqrs-es-example
 - **アーキテクチャ**: CQRS + Event Sourcing
 - **主要技術**: PHP 8.2+, GraphQL, DynamoDB, Docker
 
@@ -172,5 +173,6 @@ composer phpstan     # 静的解析
 
 ## 参考リンク
 
-- [Go版リファレンス実装](https://github.com/j5ik2o/cqrs-es-example-go)
-- [Event Store Adapter PHP](https://github.com/j5ik2o/event-store-adapter-php)
+- [CQRS/ES Example プロジェクト](https://github.com/j5ik2o/cqrs-es-example) - 他言語での実装例
+- [Go版リファレンス実装](https://github.com/j5ik2o/cqrs-es-example-go) - 本プロジェクトの参照実装
+- [Event Store Adapter PHP](https://github.com/j5ik2o/event-store-adapter-php) - PHPイベントストアアダプター
