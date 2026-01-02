@@ -84,10 +84,7 @@ make docker-compose-up
 
 ```bash
 # アプリケーションコンテナ内でコマンド実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app [コマンド]
+docker compose exec app [コマンド]
 ```
 
 ### テスト
@@ -100,10 +97,7 @@ make test
 make test-coverage
 
 # 特定のテストファイル実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app vendor/bin/phpunit tests/Path/To/TestFile.php
+docker compose exec app vendor/bin/phpunit tests/Path/To/TestFile.php
 ```
 
 ### コード品質

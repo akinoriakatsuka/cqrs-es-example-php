@@ -40,8 +40,12 @@ PHP実装によるCQRS（Command Query Responsibility Segregation）とイベン
 │       └── InterfaceAdaptor/
 │           └── Resolver/       # GraphQL Query Resolver
 ├── tests/                      # テストコード
+├── docker/                     # Docker設定ファイル
+│   ├── app/                   # アプリケーションコンテナ
+│   ├── php-fpm/               # PHP-FPMコンテナ
+│   ├── rmu/                   # Read Model Updaterコンテナ
+│   └── nginx/                 # Nginx設定
 ├── tools/                      # 開発ツール
-│   ├── docker-compose/         # Docker設定
 │   └── e2e-test/              # E2Eテストツール
 └── docs/                       # ドキュメント
 ```
@@ -84,10 +88,7 @@ make docker-compose-up
 
 ```bash
 # アプリケーションコンテナ内でコマンド実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app [コマンド]
+docker compose exec app [コマンド]
 ```
 
 ### テスト
@@ -100,10 +101,7 @@ make test
 make test-coverage
 
 # 特定のテストファイル実行
-docker compose \
-    -f tools/docker-compose/docker-compose-databases.yml \
-    -f tools/docker-compose/docker-compose-applications.yml \
-    exec app vendor/bin/phpunit tests/Path/To/TestFile.php
+docker compose exec app vendor/bin/phpunit tests/Path/To/TestFile.php
 ```
 
 ### コード品質

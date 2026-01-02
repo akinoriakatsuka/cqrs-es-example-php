@@ -18,8 +18,8 @@ COPY ../.. .
 
 RUN chown -R www-data:www-data /var/www/html
 
-# CI/CD用のセットアップスクリプトを実行可能にする
-RUN chmod +x scripts/init-dynamodb.php bin/read-model-updater-streams.php
+# Read Model Updaterスクリプトを実行可能にする
+RUN chmod +x bin/read-model-updater-streams.php
 
 # CI環境でのDynamoDBテーブル初期化
 # 実際のCI環境では環境変数でDynamoDB接続情報を設定
