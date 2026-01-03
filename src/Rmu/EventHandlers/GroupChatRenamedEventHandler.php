@@ -7,7 +7,7 @@ namespace Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\GroupChatDao;
 use Psr\Log\LoggerInterface;
 
-class GroupChatRenamedEventHandler
+final readonly class GroupChatRenamedEventHandler
 {
     public function __construct(
         private GroupChatDao $dao,

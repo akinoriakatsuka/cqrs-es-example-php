@@ -12,7 +12,7 @@ use Aws\DynamoDbStreams\DynamoDbStreamsClient as AwsStreamsClient;
  *
  * Go版のlocalRmu.goのstreamDriver関数に相当
  */
-class DynamoDbStreamsClient
+final readonly class DynamoDbStreamsClient
 {
     public function __construct(
         private DynamoDbClient $dynamoDbClient,

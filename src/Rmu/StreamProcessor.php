@@ -13,14 +13,16 @@ use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessageEditedEve
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatMessagePostedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\EventHandlers\GroupChatRenamedEventHandler;
 use Akinoriakatsuka\CqrsEsExamplePhp\Rmu\Models\Checkpoint;
+use Exception;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 /**
  * DynamoDB Streamsからイベントを読み取り、Read Modelを更新
  */
-class StreamProcessor
+final readonly class StreamProcessor
 {
-    private const POLL_INTERVAL_MS = 100; // ポーリング間隔(ミリ秒)
+    private const int POLL_INTERVAL_MS = 100; // ポーリング間隔(ミリ秒)
 
     public function __construct(
         private DynamoDbStreamsClient $streamsClient,
@@ -48,7 +50,7 @@ class StreamProcessor
         $streamArn = $this->streamsClient->getStreamArn();
         if ($streamArn === null) {
             $this->logger->error('StreamProcessor: Stream ARN not found');
-            throw new \RuntimeException('Stream ARN not found');
+            throw new RuntimeException('Stream ARN not found');
         }
 
         $this->logger->info('StreamProcessor: Stream ARN found', ['arn' => $streamArn]);
@@ -182,7 +184,7 @@ class StreamProcessor
         // イベントを処理
         try {
             $this->handleEvent($typeName, $payload);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('StreamProcessor: Failed to handle event', [
                 'type' => $typeName,
                 'error' => $e->getMessage(),

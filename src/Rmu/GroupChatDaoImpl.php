@@ -9,7 +9,7 @@ use PDO;
 /**
  * グループチャット読み取りモデルDAO（実装）
  */
-class GroupChatDaoImpl implements GroupChatDao
+final readonly class GroupChatDaoImpl implements GroupChatDao
 {
     public function __construct(private PDO $pdo)
     {

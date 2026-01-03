@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 /**
  * GroupChatCreatedイベントハンドラ
  */
-class GroupChatCreatedEventHandler
+final readonly class GroupChatCreatedEventHandler
 {
     public function __construct(
         private GroupChatDao $dao,
@@ -23,7 +23,6 @@ class GroupChatCreatedEventHandler
      *
      * @param array $event イベントデータ (payload JSONをデコードしたもの)
      * @return void
-     * @throws \Exception
      */
     public function handle(array $event): void
     {

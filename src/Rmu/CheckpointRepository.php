@@ -10,7 +10,7 @@ use PDO;
 /**
  * チェックポイント (Shard処理位置) を管理
  */
-class CheckpointRepository
+final readonly class CheckpointRepository
 {
     public function __construct(private PDO $pdo)
     {
