@@ -34,11 +34,21 @@ PHP実装によるCQRS（Command Query Responsibility Segregation）とイベン
 │   │   │   └── UserAccount/    # ユーザーアカウント集約
 │   │   ├── InterfaceAdaptor/   # インターフェースアダプター
 │   │   │   ├── Repository/     # リポジトリ実装
-│   │   │   └── Resolver/       # GraphQL Mutation Resolver
+│   │   │   └── GraphQL/        # GraphQL Mutation Resolver
 │   │   └── Processor/          # コマンドプロセッサー
-│   └── Query/                  # クエリ側（読み取り）※実装予定
-│       └── InterfaceAdaptor/
-│           └── Resolver/       # GraphQL Query Resolver
+│   ├── Query/                  # クエリ側（読み取り）
+│   │   ├── Domain/             # ReadModel定義
+│   │   └── InterfaceAdaptor/   # インターフェースアダプター
+│   │       ├── Repository/     # Query Repository実装
+│   │       └── GraphQL/        # GraphQL Query Resolver
+│   └── Rmu/                    # Read Model Updater
+│       ├── EventHandlers/      # イベントハンドラー
+│       └── DAO/                # データアクセスオブジェクト
+├── public/                     # APIエンドポイント
+│   ├── read-api-server.php    # Query側GraphQL APIサーバー
+│   └── write-api-server.php   # Command側GraphQL APIサーバー
+├── bin/                        # CLIツール
+│   └── read-model-updater-streams.php  # RMUプロセス
 ├── tests/                      # テストコード
 ├── docker/                     # Docker設定ファイル
 │   ├── app/                   # アプリケーションコンテナ
@@ -79,6 +89,29 @@ make docker-compose-up
 # GraphQLエンドポイントのテスト
 ./tools/e2e-test/verify-group-chat.sh
 ```
+
+## APIエンドポイント
+
+プロジェクトには2つのGraphQL APIエンドポイントがあります：
+
+### Write API (Command側)
+- **URL**: `http://localhost:18080`
+- **GraphQL Endpoint**: `http://localhost:18080/query`
+- **GraphQL Playground**: `http://localhost:18080/`
+- **実装**: `public/write-api-server.php`
+- **役割**: データの作成・更新・削除（Mutation）
+
+### Read API (Query側)
+- **URL**: `http://localhost:18000`
+- **GraphQL Endpoint**: `http://localhost:18000/query`
+- **GraphQL Playground**: `http://localhost:18000/`
+- **実装**: `public/read-api-server.php`
+- **役割**: データの読み取り（Query）
+
+### Read Model Updater (RMU)
+- **実装**: `bin/read-model-updater-streams.php`
+- **役割**: DynamoDB Streamsからイベントを読み取り、MySQLのReadModelを更新
+- **起動**: Dockerコンテナ `rmu` で自動起動
 
 ## 開発
 
@@ -124,7 +157,8 @@ make lint
 本プロジェクトでは、コマンド（書き込み）とクエリ（読み取り）の責務を明確に分離しています：
 
 - **Command側**: データの変更を担当。イベントソーシングにより全ての変更をイベントとして記録
-- **Query側**: データの読み取りを担当。最適化された読み取り専用モデルを使用（実装予定）
+- **Query側**: データの読み取りを担当。最適化された読み取り専用モデル（ReadModel）を使用
+- **RMU (Read Model Updater)**: DynamoDB StreamsからイベントをポーリングしてReadModelを更新
 
 ### Event Sourcing
 
@@ -133,12 +167,14 @@ make lint
 - イミュータブル（不変）
 - 順序付けられている
 - 集約の完全な状態を再構築可能
+- DynamoDB Streamsを通じてRMUに配信される
 
 ### Domain-Driven Design (DDD)
 
 - **集約 (Aggregate)**: GroupChat, UserAccount
 - **値オブジェクト (Value Object)**: GroupChatId, UserAccountId, MemberId
-- **ドメインイベント**: GroupChatCreated, MemberAdded, etc.
+- **ドメインイベント**: GroupChatCreated, MemberAdded, MessagePosted, etc.
+- **ReadModel**: GroupChatReadModel, MemberReadModel, MessageReadModel
 
 ## Contributing
 
