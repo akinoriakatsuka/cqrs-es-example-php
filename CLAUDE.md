@@ -108,19 +108,41 @@ public function testMethodNameProvider(): array {
 ### ディレクトリ構造
 
 ```
-src/
-├── Command/              # Command側（書き込み）
-│   ├── Domain/          # ドメインロジック
-│   ├── InterfaceAdaptor/ # GraphQL Mutation、Repository実装
-│   └── Processor/       # コマンド処理
-└── Query/               # Query側（読み取り）※今後実装予定
-    └── InterfaceAdaptor/ # GraphQL Query
+.
+├── src/
+│   ├── Command/              # Command側（書き込み）
+│   │   ├── Domain/          # ドメインロジック
+│   │   ├── InterfaceAdaptor/ # GraphQL Mutation、Repository実装
+│   │   └── Processor/       # コマンド処理
+│   ├── Query/               # Query側（読み取り）
+│   │   ├── Domain/          # ReadModel定義
+│   │   └── InterfaceAdaptor/ # GraphQL Query、Repository実装
+│   └── Rmu/                 # Read Model Updater（イベントハンドラー、DAO）
+├── public/                  # APIエンドポイント
+│   ├── read-api-server.php  # Query側GraphQL APIサーバー
+│   └── write-api-server.php # Command側GraphQL APIサーバー
+└── bin/                     # CLIツール
+    └── read-model-updater-streams.php # RMUプロセス
 ```
+
+### エンドポイント
+
+プロジェクトには2つのGraphQL APIエンドポイントがあります：
+
+- **Write API** (`http://localhost:18080`): Command側（Mutation）
+  - エンドポイント: `/query`
+  - GraphQL Playground: `/`
+  - 実装: `public/write-api-server.php`
+
+- **Read API** (`http://localhost:18000`): Query側（Query）
+  - エンドポイント: `/query`
+  - GraphQL Playground: `/`
+  - 実装: `public/read-api-server.php`
 
 ### GraphQL実装
 
-- **Command側**: MutationResolverのみ実装
-- **Query側**: QueryResolverを実装予定（別途Query側の実装が必要）
+- **Command側**: MutationResolverを実装
+- **Query側**: QueryResolverを実装済み
 
 ```php
 // Command側のMutationResolver例
@@ -129,13 +151,35 @@ public function createGroupChat(mixed $root_value, array $args): array {
     if (!is_string($args['name'])) {
         throw new \InvalidArgumentException('Name must be a string');
     }
-    
+
     // ドメインロジック実行
     $event = $this->command_processor->createGroupChat($name, $executor_id);
-    
+
     return $result;
 }
+
+// Query側のQueryResolver例
+public function getGroupChats(mixed $root_value, array $args): array {
+    // リポジトリから読み取り専用データを取得
+    return $this->group_chat_query_repository->findAll();
+}
 ```
+
+### Read Model Updater (RMU)
+
+RMUはDynamoDB Streamsからイベントを読み取り、Query側のReadModelを更新するプロセスです。
+
+- **実装**: `bin/read-model-updater-streams.php`
+- **動作**: DynamoDB StreamsからイベントをポーリングしてMySQLのReadModelを更新
+- **イベントハンドラー**:
+  - GroupChatCreatedEventHandler
+  - GroupChatRenamedEventHandler
+  - GroupChatDeletedEventHandler
+  - GroupChatMemberAddedEventHandler
+  - GroupChatMemberRemovedEventHandler
+  - GroupChatMessagePostedEventHandler
+  - GroupChatMessageEditedEventHandler
+  - GroupChatMessageDeletedEventHandler
 
 ## プルリクエスト作成時の注意事項
 
