@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.369.21",
+            "version": "3.369.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "7076af00534135cbbf6cc19eb2521124a3549f0d"
+                "reference": "fe83cbc3adb5ed384179ac6d63531aadde0198e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7076af00534135cbbf6cc19eb2521124a3549f0d",
-                "reference": "7076af00534135cbbf6cc19eb2521124a3549f0d",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/fe83cbc3adb5ed384179ac6d63531aadde0198e3",
+                "reference": "fe83cbc3adb5ed384179ac6d63531aadde0198e3",
                 "shasum": ""
             },
             "require": {
@@ -153,9 +153,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.21"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.369.22"
             },
-            "time": "2026-01-27T19:14:48+00:00"
+            "time": "2026-01-28T19:19:00+00:00"
         },
         {
             "name": "cweagans/composer-patches",
@@ -6042,16 +6042,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v8.0.3",
+            "version": "v8.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "0cbbd88ec836f8757641c651bb995335846abb78"
+                "reference": "b5f3aa6762e33fd95efbaa2ec4f4bc9fdd16d674"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/0cbbd88ec836f8757641c651bb995335846abb78",
-                "reference": "0cbbd88ec836f8757641c651bb995335846abb78",
+                "url": "https://api.github.com/repos/symfony/process/zipball/b5f3aa6762e33fd95efbaa2ec4f4bc9fdd16d674",
+                "reference": "b5f3aa6762e33fd95efbaa2ec4f4bc9fdd16d674",
                 "shasum": ""
             },
             "require": {
@@ -6083,7 +6083,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v8.0.3"
+                "source": "https://github.com/symfony/process/tree/v8.0.5"
             },
             "funding": [
                 {
@@ -6103,7 +6103,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-19T10:01:18+00:00"
+            "time": "2026-01-26T15:08:38+00:00"
         },
         {
             "name": "symfony/service-contracts",
